@@ -1,0 +1,1117 @@
+{
+ "_about": "Each made part as the OpenSCAD pipeline exported it (cad/stl/<name>.stl at commit 27662be), measured with solidcraft-cli 0.40.0 eval. parts.py checks the native parts against these numbers. Meshes are faceted, so round parts are up to about 1 % smaller here than the native ones.",
+ "parts": {
+  "base_plate": {
+   "volume_mm3": 666539.2,
+   "bbox_min": [
+    -30.0,
+    -115.0,
+    -53.0
+   ],
+   "bbox_max": [
+    202.2,
+    110.0,
+    -35.0
+   ],
+   "com": [
+    94.318,
+    -3.315,
+    -44.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "belt_guard_a": {
+   "volume_mm3": 201173.7,
+   "bbox_min": [
+    148.0,
+    130.0,
+    0.0
+   ],
+   "bbox_max": [
+    341.0,
+    252.0,
+    68.0
+   ],
+   "com": [
+    248.8,
+    190.302,
+    29.28
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "belt_guard_b": {
+   "volume_mm3": 156931.9,
+   "bbox_min": [
+    325.0,
+    130.0,
+    0.0
+   ],
+   "bbox_max": [
+    485.0,
+    246.608,
+    68.0
+   ],
+   "com": [
+    406.65,
+    185.156,
+    30.477
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "blade_v0": {
+   "volume_mm3": 15304.9,
+   "bbox_min": [
+    -27.811,
+    -29.445,
+    0.0
+   ],
+   "bbox_max": [
+    34.0,
+    31.407,
+    8.0
+   ],
+   "com": [
+    0.0,
+    0.0,
+    4.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "blade_v1": {
+   "volume_mm3": 15304.9,
+   "bbox_min": [
+    -27.811,
+    -29.445,
+    0.0
+   ],
+   "bbox_max": [
+    34.0,
+    31.407,
+    8.0
+   ],
+   "com": [
+    0.0,
+    0.0,
+    4.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "blade_v2": {
+   "volume_mm3": 15304.9,
+   "bbox_min": [
+    -27.811,
+    -29.445,
+    0.0
+   ],
+   "bbox_max": [
+    34.0,
+    31.407,
+    8.0
+   ],
+   "com": [
+    0.0,
+    0.0,
+    4.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "blade_v3": {
+   "volume_mm3": 15304.9,
+   "bbox_min": [
+    -27.811,
+    -29.445,
+    0.0
+   ],
+   "bbox_max": [
+    34.0,
+    31.407,
+    8.0
+   ],
+   "com": [
+    0.0,
+    0.0,
+    4.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "cabinet": {
+   "volume_mm3": 5647173.8,
+   "bbox_min": [
+    -30.0,
+    -110.0,
+    -368.0
+   ],
+   "bbox_max": [
+    162.2,
+    110.0,
+    -53.0
+   ],
+   "com": [
+    66.091,
+    0.711,
+    -236.507
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "collar_sleeve_drive": {
+   "volume_mm3": 6170.0,
+   "bbox_min": [
+    -23.0,
+    -23.0,
+    0.0
+   ],
+   "bbox_max": [
+    23.0,
+    23.0,
+    11.0
+   ],
+   "com": [
+    -0.0,
+    -0.0,
+    3.335
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "collar_sleeve_free": {
+   "volume_mm3": 6597.7,
+   "bbox_min": [
+    -23.0,
+    -23.0,
+    0.0
+   ],
+   "bbox_max": [
+    23.0,
+    23.0,
+    13.0
+   ],
+   "com": [
+    -0.0,
+    0.0,
+    3.896
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "comb_A": {
+   "volume_mm3": 23267.2,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    132.2,
+    25.0,
+    10.0
+   ],
+   "com": [
+    67.595,
+    10.425,
+    5.009
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "comb_B": {
+   "volume_mm3": 23244.2,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    132.2,
+    25.0,
+    10.0
+   ],
+   "com": [
+    64.61,
+    14.584,
+    5.009
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "dg_lower": {
+   "volume_mm3": 149564.7,
+   "bbox_min": [
+    -131.3,
+    -45.684,
+    0.0
+   ],
+   "bbox_max": [
+    -40.8,
+    102.805,
+    127.805
+   ],
+   "com": [
+    -79.759,
+    29.558,
+    62.494
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "dg_upper": {
+   "volume_mm3": 196146.4,
+   "bbox_min": [
+    -134.4,
+    -93.013,
+    0.0
+   ],
+   "bbox_max": [
+    -30.0,
+    85.0,
+    137.598
+   ],
+   "com": [
+    -83.304,
+    -13.04,
+    73.738
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "drawer_act_pad": {
+   "volume_mm3": 19684.4,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    35.0,
+    32.0,
+    19.0
+   ],
+   "com": [
+    17.651,
+    16.0,
+    9.588
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "drawer_handle": {
+   "volume_mm3": 64386.3,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    110.0,
+    40.0,
+    34.0
+   ],
+   "com": [
+    55.0,
+    26.403,
+    12.813
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "drawer_pad": {
+   "volume_mm3": 28403.5,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    92.0,
+    32.0,
+    10.0
+   ],
+   "com": [
+    46.0,
+    16.0,
+    4.95
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "drive_deck": {
+   "volume_mm3": 2372839.6,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    471.0,
+    282.65,
+    18.0
+   ],
+   "com": [
+    234.965,
+    141.288,
+    9.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "end_cap": {
+   "volume_mm3": 6192.7,
+   "bbox_min": [
+    -15.0,
+    -15.0,
+    0.0
+   ],
+   "bbox_max": [
+    15.0,
+    15.0,
+    10.0
+   ],
+   "com": [
+    -0.0,
+    -0.0,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "end_spacer_B": {
+   "volume_mm3": 10601.9,
+   "bbox_min": [
+    -25.0,
+    -25.0,
+    0.0
+   ],
+   "bbox_max": [
+    25.0,
+    25.0,
+    8.2
+   ],
+   "com": [
+    -0.0,
+    -0.0,
+    4.1
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "free_end_cover": {
+   "volume_mm3": 61161.5,
+   "bbox_min": [
+    -35.0,
+    -85.0,
+    0.0
+   ],
+   "bbox_max": [
+    35.0,
+    85.0,
+    36.0
+   ],
+   "com": [
+    -0.0,
+    -0.0,
+    12.08
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "gb_rail": {
+   "volume_mm3": 91324.3,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    192.0,
+    50.0,
+    10.0
+   ],
+   "com": [
+    96.0,
+    25.487,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "gb_spacer": {
+   "volume_mm3": 8371.1,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    18.0,
+    50.0,
+    10.0
+   ],
+   "com": [
+    9.0,
+    25.0,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "gear_A": {
+   "volume_mm3": 88949.2,
+   "bbox_min": [
+    -31.5,
+    -31.5,
+    0.0
+   ],
+   "bbox_max": [
+    31.5,
+    31.5,
+    39.2
+   ],
+   "com": [
+    0.0,
+    -0.167,
+    19.6
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "gear_B": {
+   "volume_mm3": 88949.2,
+   "bbox_min": [
+    -31.44,
+    -31.44,
+    0.0
+   ],
+   "bbox_max": [
+    31.44,
+    31.44,
+    39.2
+   ],
+   "com": [
+    -0.0,
+    -0.167,
+    19.6
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "gear_layer": {
+   "volume_mm3": 26446.6,
+   "bbox_min": [
+    -32.0,
+    -32.0,
+    0.0
+   ],
+   "bbox_max": [
+    32.0,
+    32.0,
+    9.8
+   ],
+   "com": [
+    0.0,
+    -0.141,
+    4.9
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "gear_mandrel": {
+   "volume_mm3": 55974.7,
+   "bbox_min": [
+    -15.0,
+    -15.0,
+    0.0
+   ],
+   "bbox_max": [
+    15.0,
+    15.0,
+    111.0
+   ],
+   "com": [
+    -0.0,
+    -0.225,
+    44.12
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "gear_spacer": {
+   "volume_mm3": 4617.0,
+   "bbox_min": [
+    -18.0,
+    -18.0,
+    0.0
+   ],
+   "bbox_max": [
+    18.0,
+    18.0,
+    8.8
+   ],
+   "com": [
+    -0.0,
+    0.0,
+    4.4
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "grid_cleats": {
+   "volume_mm3": 474738.6,
+   "bbox_min": [
+    -12.0,
+    -91.0,
+    -193.9
+   ],
+   "bbox_max": [
+    144.2,
+    92.0,
+    -150.0
+   ],
+   "com": [
+    66.1,
+    0.379,
+    -171.95
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "grid_mesh": {
+   "volume_mm3": 7633.8,
+   "bbox_min": [
+    -11.1,
+    -89.9,
+    -173.9
+   ],
+   "bbox_max": [
+    143.3,
+    89.9,
+    -170.0
+   ],
+   "com": [
+    66.1,
+    0.0,
+    -171.959
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "hopper_collar": {
+   "volume_mm3": null,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    168.2,
+    164.0,
+    70.0
+   ],
+   "com": null,
+   "closed": false,
+   "mesh_bodies": 1
+  },
+  "hopper_funnel": {
+   "volume_mm3": 530626.1,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    197.0,
+    204.0,
+    200.0
+   ],
+   "com": [
+    112.802,
+    96.376,
+    104.498
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "hopper_lid": {
+   "volume_mm3": 136068.8,
+   "bbox_min": [
+    0.0,
+    -9.0,
+    0.0
+   ],
+   "bbox_max": [
+    246.5,
+    200.0,
+    16.0
+   ],
+   "com": [
+    114.698,
+    92.319,
+    2.147
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "hopper_lid_pad": {
+   "volume_mm3": 18833.8,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    48.5,
+    32.0,
+    12.5
+   ],
+   "com": [
+    24.592,
+    16.0,
+    6.232
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "leg_angle": {
+   "volume_mm3": 12369.7,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    44.0,
+    40.0,
+    40.0
+   ],
+   "com": [
+    22.0,
+    11.431,
+    11.431
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "output_shaft": {
+   "volume_mm3": 69713.9,
+   "bbox_min": [
+    0.0,
+    -12.5,
+    -12.5
+   ],
+   "bbox_max": [
+    149.3,
+    12.5,
+    12.5
+   ],
+   "com": [
+    74.735,
+    0.0,
+    -0.507
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "plate_cap": {
+   "volume_mm3": 85795.7,
+   "bbox_min": [
+    -85.0,
+    -35.0,
+    0.0
+   ],
+   "bbox_max": [
+    85.0,
+    35.0,
+    10.0
+   ],
+   "com": [
+    0.0,
+    -0.314,
+    5.051
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "plate_inner": {
+   "volume_mm3": 89391.2,
+   "bbox_min": [
+    -85.0,
+    -35.0,
+    0.0
+   ],
+   "bbox_max": [
+    85.0,
+    35.0,
+    10.0
+   ],
+   "com": [
+    -0.0,
+    0.008,
+    5.086
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "plate_outer": {
+   "volume_mm3": 86590.3,
+   "bbox_min": [
+    -85.0,
+    -35.0,
+    0.0
+   ],
+   "bbox_max": [
+    85.0,
+    35.0,
+    10.0
+   ],
+   "com": [
+    -0.0,
+    0.101,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "shaft_A": {
+   "volume_mm3": 138353.2,
+   "bbox_min": [
+    0.0,
+    -14.463,
+    -12.525
+   ],
+   "bbox_max": [
+    277.6,
+    14.463,
+    12.525
+   ],
+   "com": [
+    141.842,
+    0.0,
+    -0.136
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "shaft_B": {
+   "volume_mm3": 127997.3,
+   "bbox_min": [
+    0.0,
+    -14.463,
+    -12.525
+   ],
+   "bbox_max": [
+    255.2,
+    14.463,
+    12.525
+   ],
+   "com": [
+    129.761,
+    0.0,
+    -0.096
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "skirt_A": {
+   "volume_mm3": 21623.4,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    132.2,
+    30.0,
+    12.0
+   ],
+   "com": [
+    66.1,
+    17.27,
+    3.304
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "skirt_B": {
+   "volume_mm3": 21623.4,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    132.2,
+    30.0,
+    12.0
+   ],
+   "com": [
+    66.1,
+    17.27,
+    3.304
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "sleeve_drive": {
+   "volume_mm3": 2245.6,
+   "bbox_min": [
+    -15.0,
+    -15.0,
+    0.0
+   ],
+   "bbox_max": [
+    15.0,
+    15.0,
+    10.5
+   ],
+   "com": [
+    0.0,
+    -0.0,
+    5.25
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "sleeve_free_A": {
+   "volume_mm3": 2245.6,
+   "bbox_min": [
+    -15.0,
+    -15.0,
+    0.0
+   ],
+   "bbox_max": [
+    15.0,
+    15.0,
+    10.5
+   ],
+   "com": [
+    0.0,
+    -0.0,
+    5.25
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "sleeve_free_B": {
+   "volume_mm3": 2288.4,
+   "bbox_min": [
+    -15.0,
+    -15.0,
+    0.0
+   ],
+   "bbox_max": [
+    15.0,
+    15.0,
+    10.7
+   ],
+   "com": [
+    0.0,
+    -0.0,
+    5.35
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "spacer": {
+   "volume_mm3": 10860.4,
+   "bbox_min": [
+    -25.0,
+    -25.0,
+    0.0
+   ],
+   "bbox_max": [
+    25.0,
+    25.0,
+    8.4
+   ],
+   "com": [
+    -0.0,
+    0.0,
+    4.2
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "stop_collar": {
+   "volume_mm3": null,
+   "bbox_min": [
+    -17.5,
+    -17.5,
+    0.0
+   ],
+   "bbox_max": [
+    17.5,
+    17.5,
+    5.0
+   ],
+   "com": null,
+   "closed": false,
+   "mesh_bodies": 1
+  },
+  "tens_base": {
+   "volume_mm3": 14284.3,
+   "bbox_min": [
+    -0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    42.0,
+    40.0,
+    10.0
+   ],
+   "com": [
+    22.057,
+    20.0,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "tens_upright": {
+   "volume_mm3": 94676.4,
+   "bbox_min": [
+    -0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    110.592,
+    218.0,
+    10.0
+   ],
+   "com": [
+    78.971,
+    136.521,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "test_lever": {
+   "volume_mm3": 263020.5,
+   "bbox_min": [
+    0.0,
+    -25.0,
+    0.0
+   ],
+   "bbox_max": [
+    540.0,
+    25.0,
+    10.0
+   ],
+   "com": [
+    274.727,
+    0.047,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "tl_lever": {
+   "volume_mm3": 293468.3,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    600.0,
+    50.0,
+    10.0
+   ],
+   "com": [
+    304.415,
+    25.0,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "tl_lug": {
+   "volume_mm3": 15965.3,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    43.6,
+    20.0,
+    20.0
+   ],
+   "com": [
+    21.8,
+    10.0,
+    10.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "tl_stub": {
+   "volume_mm3": 78897.2,
+   "bbox_min": [
+    0.0,
+    -15.0,
+    -15.0
+   ],
+   "bbox_max": [
+    147.0,
+    15.0,
+    15.0
+   ],
+   "com": [
+    78.555,
+    0.0,
+    -0.216
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "upper_front": {
+   "volume_mm3": 489289.8,
+   "bbox_min": [
+    -30.0,
+    -110.0,
+    -195.0
+   ],
+   "bbox_max": [
+    162.2,
+    -92.0,
+    -53.0
+   ],
+   "com": [
+    66.1,
+    -101.0,
+    -124.121
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  },
+  "wall": {
+   "volume_mm3": 64613.3,
+   "bbox_min": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "bbox_max": [
+    132.2,
+    50.0,
+    10.0
+   ],
+   "com": [
+    66.1,
+    25.146,
+    5.0
+   ],
+   "closed": true,
+   "mesh_bodies": 1
+  }
+ }
+}

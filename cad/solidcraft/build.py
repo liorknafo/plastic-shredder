@@ -1,92 +1,150 @@
 #!/usr/bin/env python3
-"""build.py -- step 2: write the SolidCraft script (build/shredder_solidcraft.json, copied next to this file) and run it -> cad/shredder_assembly.sc.
+"""build.py -- builds the native SolidCraft assembly cad/shredder_assembly.sc from design/params.py.
 
-Run export_parts.py first (the Makefile target `solidcraft` does both).  Everything is derived from the current design:
-  build/*.3mf (one per component), build/axes.json (shaft axes, lid hinge, gearbox output axis, worm / motor axes).
+Every body is native SolidCraft geometry made by the model modules (model/*.py: the parts, one module per part
+family); nothing is imported as a mesh.
 
-Joint sign conventions = cad/assembly.scad: Shaft A turns -angle about +x, Shaft B +angle (so a positive "Shaft A" value is the assembly's `angle`);
-lid: positive = opens (hinge_rot(a) rotates by -a about +x); drawer: positive = pulled out (travel along -y).
+    python3 build.py            write build/shredder_assembly.json (the command script), run it with solidcraft-cli,
+                                save cad/shredder_assembly.sc and compare every group of bodies with reference.json
+    python3 build.py --no-run   only write the script
+    python3 build.py --out F    save the design as F instead (a trial build)
+    python3 build.py --cache    keep the evaluated model in the file: it then opens in 2 s instead of 40 s, and is
+                                26 MB instead of 0.4 MB (SolidCraft adds the cache by itself when you save from the app)
+    python3 build.py --check    exit with an error when a group does not match reference.json
+    python3 build.py --freeze   make what was built the new reference.json (after a deliberate change of the design)
+
+reference.json holds each group of the old OpenSCAD mesh assembly, measured: the comparison is the proof that the
+native model is the same machine.  It stays valid until a parameter changes; then freeze the new numbers.
+
+Needs SolidCraft 0.40 (`solidcraft-cli` on PATH, or SOLIDCRAFT_CLI).  Standard library only.
+
+Joint sign conventions: Shaft A turns -angle about +x, Shaft B +angle (so a positive "Shaft A" value is the assembly's
+`angle`); lid: positive = opens; drawer: positive = pulled out (travel along -y).
 """
-import json, os, shutil, subprocess, sys
+import json
+import os
+import subprocess
+import sys
+import time
 
+sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
 CAD = os.path.dirname(HERE)
 BUILD = os.path.join(HERE, "build")
-sys.path.insert(0, HERE)
-import manifest
-from export_parts import comp_file
+sys.path[:0] = [HERE, os.path.join(HERE, "model")]
+from scq import Script                       # noqa: E402
+from check import CLI, compare, freeze, reference    # noqa: E402
+import assembly                              # noqa: E402
+import common as c                           # noqa: E402
+import drive_geom as g                       # noqa: E402
 
-CLI = os.environ.get("SOLIDCRAFT_CLI", "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli")
 OUT_SC = os.path.join(CAD, "shredder_assembly.sc")
+LID_MAX = 100.0                              # deg: the free range of the lid
+DRAWER_MAX = 180.0                           # mm
+WORM_RATIO = 50.0                            # worm turns per output turn
+A_T, TL_T = 15, 30                           # tooth counts: a chain's ratio is the teeth, not the pitch circles
+assert abs(c.CHAIN_RATIO - TL_T / A_T) < 1e-9 and abs(c.GEARBOX_PULLEY_D / c.MOTOR_PULLEY_D - 2.0) < 1e-9
 
-ax = json.load(open(os.path.join(BUILD, "axes.json")))
-XM_, XL = -1, 1                                   # direction helpers
 
-# ---- design numbers (mm, deg) read from the design via axes.json, plus the ones the task fixes
-LID_MAX = 100.0                                   # deg, see README: the free range checked with motion.interference
-DRAWER_MAX = 180.0                                # mm
-CHAIN = 30 / 15                                   # TL sprocket 30T drives sprocket A 15T
-WORM = 50.0                                       # worm turns per output turn
-BELT = 2.0                                        # motor pulley turns per gearbox-pulley turn (68 / 34)
-A_T, TL_T = 15, 30                                # tooth counts (the chain link's "radii": a chain's ratio is the teeth, not the pitch circles)
-PUL_G, PUL_M = ax["gearbox_pulley_d"], ax["motor_pulley_d"]
-assert abs(ax["chain_ratio"] - CHAIN) < 1e-9 and abs(PUL_G / PUL_M - BELT) < 1e-9
+def main():
+    out_sc = os.path.abspath(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv else OUT_SC
+    s = Script(folders=True)                 # one timeline folder per body
+    names = {}                               # group -> its bodies
+    comps = [comp for comp, _ in assembly.COMPONENTS]
 
-cmds = []
-def add(command, **params):
-    cmds.append({"command": command, "params": params})
+    # ---- components and their bodies
+    for comp, bodies in assembly.COMPONENTS:
+        s.step("component.create", name=comp, parent="root", activate=True)
+        for b in bodies:
+            names[b.name] = s.build(b.node(), b.name, color=b.color, opacity=b.opacity)
+        s.step("component.activate", component="root")
+    n_model = len(s.steps)
 
-# ---- components
-for comp, _ in manifest.COMPONENTS:
-    add("file.insert_mesh", path=os.path.relpath(comp_file(comp), BUILD), name=comp)
-occ = lambda comp: comp + ":1"
-add("occurrence.ground", occurrence=occ("Frame"), grounded=True)
+    def occ(comp):
+        return comp + ":1"
 
-# ---- opacity of the see-through bodies (the 3MF colour keeps the colour, not the alpha)
-for comp, bodies in manifest.COMPONENTS:
-    for b in bodies:
-        if b[3] < 1:
-            add("appearance.assign", bodies=[b[0]], color=b[2], opacity=b[3])
+    def joint(jtype, name, b, point, z, x, limits=None):
+        if "Frame" not in comps or b not in comps:
+            print(f"  (joint {name!r} left out: component missing)")
+            return False
+        p = dict(type=jtype, name=name, a=occ("Frame"), b=occ(b), at={"point": point, "z": z, "x": x})
+        if limits:
+            p["limits"] = limits
+        s.step("joint.as_built", **p)
+        return True
 
-def origin(point, z, x):
-    return {"point": point, "z": z, "x": x}
+    if "Frame" in comps:
+        s.step("occurrence.ground", occurrence=occ("Frame"), grounded=True)
 
-def joint(jtype, name, a, b, at, limits=None):
-    p = dict(type=jtype, name=name, a=occ(a), b=occ(b), at=at)
-    if limits:
-        p["limits"] = limits
-    add("joint.as_built", **p)
+    # ---- joints.  Shaft A turns -angle about +x  =>  joint axis -x, so that +value = the assembly's angle.
+    xc = c.chamber_L / 2
+    ja = joint("revolute", "Shaft A", "Rotor A", [0, c.shaft_y("A"), 0], [-1, 0, 0], [0, 1, 0])
+    jb = joint("revolute", "Shaft B", "Rotor B", [0, c.shaft_y("B"), 0], [1, 0, 0], [0, 1, 0])
+    jo = joint("revolute", "Output shaft", "Torque limiter + output shaft", [0, g.YA, g.ZO], [-1, 0, 0], [0, 1, 0])
+    jw = joint("revolute", "Worm", "Worm + gearbox pulley", [g.XG, g.GB_Y0, g.ZW], [0, -1, 0], [1, 0, 0])
+    jm = joint("revolute", "Motor", "Motor shaft + pulley", [g.XM, g.GB_Y0, g.ZM], [0, -1, 0], [1, 0, 0])
+    if "Lid" in comps:
+        import hopper
+        joint("revolute", "Lid hinge", "Lid", [xc, hopper.PIN_Y, hopper.PIN_Z], [-1, 0, 0], [0, 1, 0], [[0, LID_MAX]])
+    joint("slider", "Drawer slide", "Drawer", [xc, -92, -250], [0, -1, 0], [1, 0, 0], [[0, DRAWER_MAX]])
 
-yA, yB = ax["shaft_y_A"], ax["shaft_y_B"]
-# Shaft A turns -angle about +x  =>  joint axis -x, so that +value = the assembly's angle; B turns +angle about +x.
-joint("revolute", "Shaft A", "Frame", "Rotor A", origin([0, yA, 0], [-1, 0, 0], [0, 1, 0]))
-joint("revolute", "Shaft B", "Frame", "Rotor B", origin([0, yB, 0], [1, 0, 0], [0, 1, 0]))
-joint("revolute", "Output shaft", "Frame", "Torque limiter + output shaft", origin([0, ax["out_y"], ax["out_z"]], [-1, 0, 0], [0, 1, 0]))
-joint("revolute", "Worm", "Frame", "Worm + gearbox pulley", origin([ax["worm_x"], ax["worm_y0"], ax["worm_z"]], [0, -1, 0], [1, 0, 0]))
-joint("revolute", "Motor", "Frame", "Motor shaft + pulley", origin([ax["motor_x"], ax["worm_y0"], ax["motor_z"]], [0, -1, 0], [1, 0, 0]))
-joint("revolute", "Lid hinge", "Frame", "Lid", origin([ax["lid_x_mid"], ax["lid_pin_y"], ax["lid_pin_z"]], [-1, 0, 0], [0, 1, 0]), [[0, LID_MAX]])
-joint("slider", "Drawer slide", "Frame", "Drawer", origin([ax["lid_x_mid"], -92, -250], [0, -1, 0], [1, 0, 0]), [[0, DRAWER_MAX]])
+    # ---- links.  A link is one-way (driver a -> driven b), so they all start at Shaft A, the one joint to drag:
+    #      Shaft A -> Shaft B (gear), Shaft A -> Output shaft (chain), Output shaft -> Worm (worm gear), Worm -> Motor (belt).
+    #      internal: true = both turn the same way in joint-value terms (A's axis is -x, B's +x, so equal values =
+    #      counter-rotation in the world).
+    if ja and jb:
+        s.step("joint.gear", a="Shaft A", b="Shaft B", ra=c.GEAR_z, rb=c.GEAR_z, internal=True, name="Gear A-B")
+    if ja and jo:
+        s.step("joint.gear", a="Shaft A", b="Output shaft", ra=A_T, rb=TL_T, internal=True, name="Chain 2:1")
+    if jo and jw:
+        s.step("joint.motion_link", a="Output shaft", b="Worm", ratio=WORM_RATIO)
+    if jw and jm:
+        s.step("joint.gear", a="Worm", b="Motor", ra=c.GEARBOX_PULLEY_D / 2, rb=c.MOTOR_PULLEY_D / 2, internal=True, name="Belt 2:1")
 
-# ---- links.  A link is one-way (driver a -> driven b: the driven joint can no longer be driven by hand), so they all start at Shaft A, the one joint to drag:
-#      Shaft A -> Shaft B (gear), Shaft A -> Output shaft (chain), Output shaft -> Worm (worm gear), Worm -> Motor (belt).
-#      internal: true = both turn the same way in joint-value terms (A's axis is -x, B's +x, so equal values = counter-rotation in the world).
-add("joint.gear", a="Shaft A", b="Shaft B", ra=ax["gear_z"], rb=ax["gear_z"], internal=True, name="Gear A-B")           # m1.5 z40 / z40 (made gears, cad/gear.scad), 1:1
-add("joint.gear", a="Shaft A", b="Output shaft", ra=A_T, rb=TL_T, internal=True, name="Chain 2:1")           # sprocket A 15T <- TL 30T: A turns 2x the TL, same direction
-add("joint.motion_link", a="Output shaft", b="Worm", ratio=WORM)                                                       # worm 50:1: the worm turns 50x the output shaft
-add("joint.gear", a="Worm", b="Motor", ra=PUL_G / 2, rb=PUL_M / 2, internal=True, name="Belt 2:1")                     # belt: motor pulley (34) turns 2x the gearbox pulley (68), same direction
+    # ---- motion studies
+    if ja:
+        s.step("motion.study", name="Shafts one turn", steps=120, keys=[{"joint": "Shaft A", "points": [[0, 0], [120, 360]]}])
+    if "Drawer" in comps:
+        s.step("motion.study", name="Drawer out", steps=90, keys=[{"joint": "Drawer slide", "points": [[0, 0], [90, DRAWER_MAX]]}])
+    if "Lid" in comps:
+        s.step("motion.study", name="Lid open", steps=100, keys=[{"joint": "Lid hinge", "points": [[0, 0], [100, LID_MAX]]}])
+    s.step("document.metadata.set", values={
+        "project": "plastic-shredder",
+        "description": "Twin-shaft shredder for 3D-print waste: native SolidCraft assembly built from design/params.py"})
 
-# ---- motion studies
-add("motion.study", name="Shafts one turn", steps=120, keys=[{"joint": "Shaft A", "points": [[0, 0], [120, 360]]}])
-add("motion.study", name="Drawer out", steps=90, keys=[{"joint": "Drawer slide", "points": [[0, 0], [90, DRAWER_MAX]]}])
-add("motion.study", name="Lid open", steps=100, keys=[{"joint": "Lid hinge", "points": [[0, 0], [100, LID_MAX]]}])
+    s.step("file.save_as", path=out_sc, cache="--cache" in sys.argv)
+    os.makedirs(BUILD, exist_ok=True)
+    script = os.path.join(BUILD, "shredder_assembly.json")
+    json.dump(s.steps, open(script, "w"))
+    json.dump(names, open(os.path.join(BUILD, "groups.json"), "w"), indent=1)
+    n_bodies = sum(len(v) for v in names.values())
+    print(f"{len(comps)} components, {len(names)} groups, {n_bodies} bodies; {n_model} modelling steps, "
+          f"{len(s.steps) - n_model - 1} assembly steps -> {os.path.relpath(script, HERE)}")
+    if "--no-run" in sys.argv:
+        return
 
-script = os.path.join(BUILD, "shredder_solidcraft.json")
-json.dump(cmds, open(script, "w"), indent=1)
-shutil.copy(script, os.path.join(HERE, "shredder_solidcraft.json"))
-
-if "--no-run" not in sys.argv:
-    r = subprocess.run([CLI, "run", script, "--results", "--save", OUT_SC], cwd=BUILD, capture_output=True, text=True)
+    t0 = time.time()
+    r = subprocess.run([CLI, "run", script, "--quiet"], cwd=BUILD, capture_output=True, text=True)
     open(os.path.join(BUILD, "run.log"), "w").write(r.stdout + r.stderr)
     if r.returncode != 0:
         sys.exit(f"solidcraft-cli failed ({r.returncode}); see build/run.log\n{r.stderr[-2000:]}")
-    print("wrote", os.path.relpath(OUT_SC, CAD))
+    print(f"wrote {os.path.relpath(out_sc, CAD)} in {time.time() - t0:.0f} s")
+
+    # ---- the saved design against the old mesh assembly, group by group
+    out = os.path.join(BUILD, "eval.json")
+    r = subprocess.run([CLI, "eval", out_sc, "--json-out", out], capture_output=True, text=True)
+    if r.returncode != 0:
+        sys.exit(f"solidcraft-cli eval failed ({r.returncode})\n{r.stderr[-2000:]}")
+    got = {b["name"]: b for b in json.load(open(out))["bodies"]}
+    if "--freeze" in sys.argv:
+        freeze(os.path.join(HERE, "reference.json"), "bodies", list(names), names, got,
+               "Each group of bodies of cad/shredder_assembly.sc as build.py --freeze measured it (solidcraft-cli eval): "
+               "total volume, bounding box, centre of mass.  build.py and check.py compare what they build with these numbers.")
+        return
+    bad = compare(list(names), names, got, reference())
+    print(f"{len(names)} groups, {len(got)} bodies; {bad} differ from reference.json")
+    sys.exit(1 if bad and "--check" in sys.argv else 0)
+
+
+if __name__ == "__main__":
+    main()

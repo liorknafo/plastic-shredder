@@ -1,2 +1,6 @@
 cad/logs/
 cad/solidcraft/build/
+# SolidCraft keeps the previous version of a design when it saves over it, and a lock while it is open.
+*.sc.bak
+.~*.lock
+__pycache__/

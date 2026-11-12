@@ -4,7 +4,7 @@ import json, os, subprocess, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CAD = os.path.dirname(HERE)
-CLI = os.environ.get("SOLIDCRAFT_CLI", "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli")
+CLI = os.environ.get("SOLIDCRAFT_CLI", "solidcraft-cli")
 SC = os.path.join(CAD, "shredder_assembly.sc")
 PNG = os.path.join(CAD, "png")
 os.makedirs(PNG, exist_ok=True)

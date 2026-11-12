@@ -1,5 +1,3 @@
-999
-DXF from OpenSCAD
   0
 SECTION
   2
@@ -7,9 +5,25 @@ HEADER
   9
 $ACADVER
   1
-AC1006
+AC1015
   9
-$INSBASE
+$DWGCODEPAGE
+  3
+ANSI_1252
+  9
+$HANDSEED
+  5
+41
+  9
+$INSUNITS
+ 70
+4
+  9
+$MEASUREMENT
+ 70
+1
+  9
+$EXTMIN
  10
 0.0
  20
@@ -17,29 +31,19 @@ $INSBASE
  30
 0.0
   9
-$EXTMIN
- 10
-0
- 20
-0
-  9
 $EXTMAX
  10
-192
+192.0
  20
-50
-  9
-$LINMIN
- 10
-0
- 20
-0
-  9
-$LINMAX
- 10
-192
- 20
-50
+50.0
+ 30
+0.0
+  0
+ENDSEC
+  0
+SECTION
+  2
+CLASSES
   0
 ENDSEC
   0
@@ -49,15 +53,167 @@ TABLES
   0
 TABLE
   2
-LTYPE
+VPORT
+  5
+23
+330
+0
+100
+AcDbSymbolTable
  70
 1
   0
-LTYPE
+VPORT
+  5
+24
+330
+23
+100
+AcDbSymbolTableRecord
+100
+AcDbViewportTableRecord
   2
-CONTINUOUS
+*Active
  70
-64
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+1.0
+ 21
+1.0
+ 12
+96.0
+ 22
+25.0
+ 13
+0.0
+ 23
+0.0
+ 14
+10.0
+ 24
+10.0
+ 15
+10.0
+ 25
+10.0
+ 16
+0.0
+ 26
+0.0
+ 36
+1.0
+ 17
+0.0
+ 27
+0.0
+ 37
+0.0
+ 40
+140.8
+ 41
+1.5
+ 42
+50.0
+ 43
+0.0
+ 44
+0.0
+ 50
+0.0
+ 51
+0.0
+ 71
+0
+ 72
+1000
+ 73
+1
+ 74
+3
+ 75
+0
+ 76
+0
+ 77
+0
+ 78
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LTYPE
+  5
+25
+330
+0
+100
+AcDbSymbolTable
+ 70
+4
+  0
+LTYPE
+  5
+26
+330
+25
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByBlock
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+27
+330
+25
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByLayer
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+28
+330
+25
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+Continuous
+ 70
+0
   3
 Solid line
  72
@@ -65,33 +221,271 @@ Solid line
  73
 0
  40
-0.000000
+0.0
+  0
+LTYPE
+  5
+29
+330
+25
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+DASHED
+ 70
+0
+  3
+Dashed __ __ __ __ __ __ __ __ __ __
+ 72
+65
+ 73
+2
+ 40
+19.05
+ 49
+12.7
+ 74
+0
+ 49
+-6.35
+ 74
+0
   0
 ENDTAB
   0
 TABLE
   2
 LAYER
+  5
+2A
+330
+0
+100
+AcDbSymbolTable
  70
-6
+3
   0
 LAYER
+  5
+2B
+330
+2A
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
   2
 0
  70
-64
+0
  62
 7
   6
-CONTINUOUS
+Continuous
+  0
+LAYER
+  5
+2C
+330
+2A
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+CUT
+ 70
+0
+ 62
+4
+  6
+Continuous
+  0
+LAYER
+  5
+2D
+330
+2A
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+OUTLINE
+ 70
+0
+ 62
+7
+  6
+Continuous
   0
 ENDTAB
   0
 TABLE
   2
 STYLE
+  5
+2E
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+STYLE
+  5
+2F
+330
+2E
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+  2
+Standard
  70
 0
+ 40
+0.0
+ 41
+1.0
+ 50
+0.0
+ 71
+0
+ 42
+2.5
+  3
+txt
+  4
+
+  0
+ENDTAB
+  0
+TABLE
+  2
+VIEW
+  5
+30
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+UCS
+  5
+31
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+APPID
+  5
+32
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+APPID
+  5
+33
+330
+32
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+ACAD
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+DIMSTYLE
+  5
+34
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+100
+AcDbDimStyleTable
+  0
+DIMSTYLE
+105
+35
+330
+34
+100
+AcDbSymbolTableRecord
+100
+AcDbDimStyleTableRecord
+  2
+Standard
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+BLOCK_RECORD
+  5
+36
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+BLOCK_RECORD
+  5
+20
+330
+36
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Model_Space
+  0
+BLOCK_RECORD
+  5
+21
+330
+36
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Paper_Space
   0
 ENDTAB
   0
@@ -101,6 +495,86 @@ SECTION
   2
 BLOCKS
   0
+BLOCK
+  5
+37
+330
+20
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Model_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Model_Space
+  1
+
+  0
+ENDBLK
+  5
+38
+330
+20
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+39
+330
+21
+100
+AcDbEntity
+ 67
+1
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Paper_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Paper_Space
+  1
+
+  0
+ENDBLK
+  5
+3A
+330
+21
+100
+AcDbEntity
+ 67
+1
+  8
+0
+100
+AcDbBlockEnd
+  0
 ENDSEC
   0
 SECTION
@@ -108,480 +582,194 @@ SECTION
 ENTITIES
   0
 LWPOLYLINE
+  5
+3B
+330
+20
 100
 AcDbEntity
   8
-0
+OUTLINE
 100
 AcDbPolyline
  90
 4
  70
-1
+129
  10
-192
+0.0
  20
-50
+50.0
  10
-0
+0.0
  20
-50
+0.0
  10
-0
+192.0
  20
-0
+0.0
  10
-192
+192.0
  20
-0
+50.0
   0
 LWPOLYLINE
+  5
+3C
+330
+20
 100
 AcDbEntity
   8
-0
+CUT
 100
 AcDbPolyline
  90
-24
+4
  70
-1
+129
  10
-8.83531
+28.0
  20
-20.6533
+16.5
  10
-7.75
+40.0
  20
-21.1029
+16.5
+ 42
+-1.0
  10
-6.81802
+40.0
  20
-21.818
+7.5
  10
-6.10289
+28.0
  20
-22.75
+7.5
+ 42
+-1.0
+  0
+LWPOLYLINE
+  5
+3D
+330
+20
+100
+AcDbEntity
+  8
+CUT
+100
+AcDbPolyline
+ 90
+4
+ 70
+129
  10
-5.65333
+152.0
  20
-23.8353
+16.5
+ 10
+164.0
+ 20
+16.5
+ 42
+-1.0
+ 10
+164.0
+ 20
+7.5
+ 10
+152.0
+ 20
+7.5
+ 42
+-1.0
+  0
+LWPOLYLINE
+  5
+3E
+330
+20
+100
+AcDbEntity
+  8
+CUT
+100
+AcDbPolyline
+ 90
+2
+ 70
+129
  10
 5.5
  20
-25
- 10
-5.65333
- 20
-26.1647
- 10
-6.10289
- 20
-27.25
- 10
-6.81802
- 20
-28.182
- 10
-7.75
- 20
-28.8971
- 10
-8.83531
- 20
-29.3467
- 10
-10
- 20
-29.5
- 10
-11.1647
- 20
-29.3467
- 10
-12.25
- 20
-28.8971
- 10
-13.182
- 20
-28.182
- 10
-13.8971
- 20
-27.25
- 10
-14.3467
- 20
-26.1647
+25.0
+ 42
+-1.0
  10
 14.5
  20
-25
- 10
-14.3467
- 20
-23.8353
- 10
-13.8971
- 20
-22.75
- 10
-13.182
- 20
-21.818
- 10
-12.25
- 20
-21.1029
- 10
-11.1647
- 20
-20.6533
- 10
-10
- 20
-20.5
+25.0
+ 42
+-1.0
   0
 LWPOLYLINE
+  5
+3F
+330
+20
 100
 AcDbEntity
   8
-0
+CUT
 100
 AcDbPolyline
  90
-24
+2
  70
-1
- 10
-180.835
- 20
-20.6533
- 10
-179.75
- 20
-21.1029
- 10
-178.818
- 20
-21.818
- 10
-178.103
- 20
-22.75
- 10
-177.653
- 20
-23.8353
- 10
-177.5
- 20
-25
- 10
-177.653
- 20
-26.1647
- 10
-178.103
- 20
-27.25
- 10
-178.818
- 20
-28.182
- 10
-179.75
- 20
-28.8971
- 10
-180.835
- 20
-29.3467
- 10
-182
- 20
-29.5
- 10
-183.165
- 20
-29.3467
- 10
-184.25
- 20
-28.8971
- 10
-185.182
- 20
-28.182
- 10
-185.897
- 20
-27.25
- 10
-186.347
- 20
-26.1647
+129
  10
 186.5
  20
-25
+25.0
+ 42
+-1.0
  10
-186.347
+177.5
  20
-23.8353
- 10
-185.897
- 20
-22.75
- 10
-185.182
- 20
-21.818
- 10
-184.25
- 20
-21.1029
- 10
-183.165
- 20
-20.6533
- 10
-182
- 20
-20.5
+25.0
+ 42
+-1.0
   0
-LWPOLYLINE
-100
-AcDbEntity
-  8
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  5
+22
+330
 0
 100
-AcDbPolyline
- 90
-26
- 70
+AcDbDictionary
+281
 1
- 10
-28
- 20
-7.5
- 10
-26.8353
- 20
-7.65333
- 10
-25.75
- 20
-8.10289
- 10
-24.818
- 20
-8.81802
- 10
-24.1029
- 20
-9.75
- 10
-23.6533
- 20
-10.8353
- 10
-23.5
- 20
-12
- 10
-23.6533
- 20
-13.1647
- 10
-24.1029
- 20
-14.25
- 10
-24.818
- 20
-15.182
- 10
-25.75
- 20
-15.8971
- 10
-26.8353
- 20
-16.3467
- 10
-28
- 20
-16.5
- 10
+  3
+ACAD_GROUP
+350
 40
- 20
-16.5
- 10
-41.1647
- 20
-16.3467
- 10
-42.25
- 20
-15.8971
- 10
-43.182
- 20
-15.182
- 10
-43.8971
- 20
-14.25
- 10
-44.3467
- 20
-13.1647
- 10
-44.5
- 20
-12
- 10
-44.3467
- 20
-10.8353
- 10
-43.8971
- 20
-9.75
- 10
-43.182
- 20
-8.81802
- 10
-42.25
- 20
-8.10289
- 10
-41.1647
- 20
-7.65333
- 10
-40
- 20
-7.5
   0
-LWPOLYLINE
+DICTIONARY
+  5
+40
+330
+22
 100
-AcDbEntity
-  8
-0
-100
-AcDbPolyline
- 90
-26
- 70
+AcDbDictionary
+281
 1
- 10
-152
- 20
-7.5
- 10
-150.835
- 20
-7.65333
- 10
-149.75
- 20
-8.10289
- 10
-148.818
- 20
-8.81802
- 10
-148.103
- 20
-9.75
- 10
-147.653
- 20
-10.8353
- 10
-147.5
- 20
-12
- 10
-147.653
- 20
-13.1647
- 10
-148.103
- 20
-14.25
- 10
-148.818
- 20
-15.182
- 10
-149.75
- 20
-15.8971
- 10
-150.835
- 20
-16.3467
- 10
-152
- 20
-16.5
- 10
-164
- 20
-16.5
- 10
-165.165
- 20
-16.3467
- 10
-166.25
- 20
-15.8971
- 10
-167.182
- 20
-15.182
- 10
-167.897
- 20
-14.25
- 10
-168.347
- 20
-13.1647
- 10
-168.5
- 20
-12
- 10
-168.347
- 20
-10.8353
- 10
-167.897
- 20
-9.75
- 10
-167.182
- 20
-8.81802
- 10
-166.25
- 20
-8.10289
- 10
-165.165
- 20
-7.65333
- 10
-164
- 20
-7.5
   0
 ENDSEC
   0
