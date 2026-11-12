@@ -1,0 +1,1303 @@
+{
+ "_about": "Each body of the OpenSCAD mesh assembly (cad/shredder_assembly.sc at commit 27662be, SolidCraft 0.30), measured with solidcraft-cli 0.40.0 eval. The native bodies are checked against these numbers (check.py). Meshes are faceted, so round bodies are up to about 1 % smaller here than the native ones.",
+ "bodies": {
+  "Bearings NA4905": {
+   "volume_mm3": 39323.0,
+   "area_mm2": 33005.8,
+   "bbox_min": [
+    -26.99,
+    -50.99,
+    -20.99
+   ],
+   "bbox_max": [
+    159.19,
+    50.99,
+    20.99
+   ],
+   "com": [
+    66.1,
+    0.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 6144
+  },
+  "Bearing rollers": {
+   "volume_mm3": 20968.5,
+   "area_mm2": 16550.2,
+   "bbox_min": [
+    -26.99,
+    -47.99,
+    -17.99
+   ],
+   "bbox_max": [
+    159.19,
+    47.99,
+    17.99
+   ],
+   "com": [
+    66.1,
+    -0.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 3072
+  },
+  "Seals": {
+   "volume_mm3": 18869.4,
+   "area_mm2": 11720.9,
+   "bbox_min": [
+    -6.99,
+    -50.99,
+    -20.99
+   ],
+   "bbox_max": [
+    139.19,
+    50.99,
+    20.99
+   ],
+   "com": [
+    66.1,
+    0.0,
+    0.0
+   ],
+   "closed": true,
+   "mesh_faces": 3072
+  },
+  "Thrust bearings": {
+   "volume_mm3": 16316.9,
+   "area_mm2": 12049.9,
+   "bbox_min": [
+    -33.99,
+    -53.49,
+    -23.49
+   ],
+   "bbox_max": [
+    168.19,
+    53.49,
+    23.49
+   ],
+   "com": [
+    67.1,
+    -0.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 3072
+  },
+  "Crinkle washers": {
+   "volume_mm3": 1921.5,
+   "area_mm2": 2799.1,
+   "bbox_min": [
+    162.21,
+    -49.49,
+    -19.49
+   ],
+   "bbox_max": [
+    164.19,
+    49.49,
+    19.49
+   ],
+   "com": [
+    163.2,
+    0.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 1536
+  },
+  "End plates (free end)": {
+   "volume_mm3": 261777.2,
+   "area_mm2": 53811.4,
+   "bbox_min": [
+    132.2,
+    -85.0,
+    -35.0
+   ],
+   "bbox_max": [
+    162.2,
+    85.0,
+    35.0
+   ],
+   "com": [
+    147.109,
+    -0.0,
+    -0.067
+   ],
+   "closed": true,
+   "mesh_faces": 23900
+  },
+  "End plates (drive end)": {
+   "volume_mm3": 261777.2,
+   "area_mm2": 53811.4,
+   "bbox_min": [
+    -30.0,
+    -85.0,
+    -35.0
+   ],
+   "bbox_max": [
+    0.0,
+    85.0,
+    35.0
+   ],
+   "com": [
+    -14.909,
+    0.0,
+    -0.067
+   ],
+   "closed": true,
+   "mesh_faces": 23900
+  },
+  "Combs": {
+   "volume_mm3": 46511.5,
+   "area_mm2": 21602.2,
+   "bbox_min": [
+    0.0,
+    -80.5,
+    -5.0
+   ],
+   "bbox_max": [
+    132.2,
+    80.5,
+    5.0
+   ],
+   "com": [
+    66.103,
+    -0.03,
+    0.009
+   ],
+   "closed": true,
+   "mesh_faces": 3366
+  },
+  "Chamber walls": {
+   "volume_mm3": 129226.7,
+   "area_mm2": 36573.4,
+   "bbox_min": [
+    0.0,
+    -76.0,
+    5.0
+   ],
+   "bbox_max": [
+    132.2,
+    76.0,
+    55.0
+   ],
+   "com": [
+    66.1,
+    0.0,
+    30.146
+   ],
+   "closed": true,
+   "mesh_faces": 2328
+  },
+  "Hopper collar + funnel": {
+   "volume_mm3": null,
+   "area_mm2": 384555.4,
+   "bbox_min": [
+    -28.9,
+    -95.0,
+    35.0
+   ],
+   "bbox_max": [
+    168.1,
+    109.0,
+    305.0
+   ],
+   "com": null,
+   "closed": false,
+   "mesh_faces": 8950
+  },
+  "Lid guard-lock switch + screws": {
+   "volume_mm3": 175297.8,
+   "area_mm2": 24941.3,
+   "bbox_min": [
+    161.1,
+    -21.0,
+    186.5
+   ],
+   "bbox_max": [
+    209.1,
+    21.0,
+    298.5
+   ],
+   "com": [
+    187.104,
+    -0.0,
+    241.607
+   ],
+   "closed": true,
+   "mesh_faces": 572
+  },
+  "Side skirts": {
+   "volume_mm3": 43246.7,
+   "area_mm2": 23018.7,
+   "bbox_min": [
+    0.0,
+    -85.0,
+    -35.0
+   ],
+   "bbox_max": [
+    132.2,
+    85.0,
+    -5.0
+   ],
+   "com": [
+    66.1,
+    -0.0,
+    -17.73
+   ],
+   "closed": true,
+   "mesh_faces": 840
+  },
+  "Drive-end guard + free-end cover": {
+   "volume_mm3": 406872.8,
+   "area_mm2": 273422.1,
+   "bbox_min": [
+    -134.4,
+    -102.805,
+    -222.805
+   ],
+   "bbox_max": [
+    198.2,
+    85.0,
+    42.598
+   ],
+   "com": [
+    -43.281,
+    -17.152,
+    -68.144
+   ],
+   "closed": true,
+   "mesh_faces": 12562
+  },
+  "Base plate": {
+   "volume_mm3": 666539.2,
+   "area_mm2": 105788.2,
+   "bbox_min": [
+    -30.0,
+    -115.0,
+    -53.0
+   ],
+   "bbox_max": [
+    202.2,
+    110.0,
+    -35.0
+   ],
+   "com": [
+    94.318,
+    -3.315,
+    -44.0
+   ],
+   "closed": true,
+   "mesh_faces": 2008
+  },
+  "Cabinet (sides, back, floor)": {
+   "volume_mm3": 3681596.5,
+   "area_mm2": 445780.4,
+   "bbox_min": [
+    -30.0,
+    -92.0,
+    -368.0
+   ],
+   "bbox_max": [
+    162.2,
+    110.0,
+    -53.0
+   ],
+   "com": [
+    66.092,
+    29.87,
+    -231.531
+   ],
+   "closed": true,
+   "mesh_faces": 4408
+  },
+  "Fixed upper front panel": {
+   "volume_mm3": 489289.8,
+   "area_mm2": 68537.6,
+   "bbox_min": [
+    -30.0,
+    -110.0,
+    -195.0
+   ],
+   "bbox_max": [
+    162.2,
+    -92.0,
+    -53.0
+   ],
+   "com": [
+    66.1,
+    -101.0,
+    -124.121
+   ],
+   "closed": true,
+   "mesh_faces": 732
+  },
+  "Drawer switch pad": {
+   "volume_mm3": 28403.5,
+   "area_mm2": 8896.3,
+   "bbox_min": [
+    162.2,
+    -71.0,
+    -316.0
+   ],
+   "bbox_max": [
+    172.2,
+    21.0,
+    -284.0
+   ],
+   "com": [
+    167.15,
+    -25.0,
+    -300.0
+   ],
+   "closed": true,
+   "mesh_faces": 564
+  },
+  "Drawer switch + screws, front panel screws": {
+   "volume_mm3": 84465.8,
+   "area_mm2": 20763.4,
+   "bbox_min": [
+    -24.5,
+    -113.0,
+    -315.0
+   ],
+   "bbox_max": [
+    205.2,
+    20.0,
+    -32.0
+   ],
+   "com": [
+    179.943,
+    -28.574,
+    -287.013
+   ],
+   "closed": true,
+   "mesh_faces": 1948
+  },
+  "Safety grid mesh": {
+   "volume_mm3": 7633.9,
+   "area_mm2": 15607.2,
+   "bbox_min": [
+    -11.1,
+    -89.9,
+    -173.9
+   ],
+   "bbox_max": [
+    143.3,
+    89.9,
+    -170.0
+   ],
+   "com": [
+    66.1,
+    0.0,
+    -171.959
+   ],
+   "closed": true,
+   "mesh_faces": 2468
+  },
+  "Grid cleats": {
+   "volume_mm3": 474738.6,
+   "area_mm2": 101156.6,
+   "bbox_min": [
+    -12.0,
+    -91.0,
+    -193.9
+   ],
+   "bbox_max": [
+    144.2,
+    92.0,
+    -150.0
+   ],
+   "com": [
+    66.1,
+    0.379,
+    -171.95
+   ],
+   "closed": true,
+   "mesh_faces": 2272
+  },
+  "Grid screws": {
+   "volume_mm3": 18868.2,
+   "area_mm2": 20239.3,
+   "bbox_min": [
+    -33.0,
+    -85.0,
+    -192.9
+   ],
+   "bbox_max": [
+    165.2,
+    113.0,
+    -151.0
+   ],
+   "com": [
+    66.1,
+    17.512,
+    -171.95
+   ],
+   "closed": true,
+   "mesh_faces": 3672
+  },
+  "Worm gearbox NRV063": {
+   "volume_mm3": 1118644.7,
+   "area_mm2": 86794.4,
+   "bbox_min": [
+    -225.8,
+    -80.0,
+    -263.0
+   ],
+   "bbox_max": [
+    -85.8,
+    20.0,
+    -110.0
+   ],
+   "com": [
+    -155.8,
+    -30.0,
+    -191.048
+   ],
+   "closed": true,
+   "mesh_faces": 688
+  },
+  "Gearbox + rail + tensioner bolts": {
+   "volume_mm3": 53520.4,
+   "area_mm2": 34139.8,
+   "bbox_min": [
+    -253.8,
+    -76.0,
+    -314.6
+   ],
+   "bbox_max": [
+    -57.8,
+    86.65,
+    -65.0
+   ],
+   "com": [
+    -135.246,
+    0.866,
+    -259.485
+   ],
+   "closed": true,
+   "mesh_faces": 7316
+  },
+  "Gearbox rails": {
+   "volume_mm3": 216132.8,
+   "area_mm2": 51433.0,
+   "bbox_min": [
+    -251.8,
+    -80.0,
+    -283.0
+   ],
+   "bbox_max": [
+    -59.8,
+    20.0,
+    -263.0
+   ],
+   "com": [
+    -155.8,
+    -30.0,
+    -269.549
+   ],
+   "closed": true,
+   "mesh_faces": 1094
+  },
+  "Chain idler sprocket": {
+   "volume_mm3": 25721.1,
+   "area_mm2": 9454.1,
+   "bbox_min": [
+    -108.4,
+    -39.584,
+    -108.642
+   ],
+   "bbox_max": [
+    -91.21,
+    27.7,
+    -41.358
+   ],
+   "com": [
+    -104.559,
+    -5.942,
+    -75.0
+   ],
+   "closed": true,
+   "mesh_faces": 656
+  },
+  "Chain tensioner": {
+   "volume_mm3": 108960.6,
+   "area_mm2": 31261.1,
+   "bbox_min": [
+    -123.2,
+    -30.942,
+    -283.0
+   ],
+   "bbox_max": [
+    -81.2,
+    84.65,
+    -55.0
+   ],
+   "com": [
+    -88.159,
+    50.208,
+    -155.032
+   ],
+   "closed": true,
+   "mesh_faces": 576
+  },
+  "Chain #40": {
+   "volume_mm3": 129333.2,
+   "area_mm2": 35747.7,
+   "bbox_min": [
+    -113.8,
+    -96.802,
+    -216.802
+   ],
+   "bbox_max": [
+    -95.8,
+    36.802,
+    36.595
+   ],
+   "com": [
+    -104.8,
+    -28.833,
+    -95.972
+   ],
+   "closed": true,
+   "mesh_faces": 792
+  },
+  "Motor": {
+   "volume_mm3": 1971652.0,
+   "area_mm2": 121077.5,
+   "bbox_min": [
+    -480.8,
+    -80.0,
+    -283.0
+   ],
+   "bbox_max": [
+    -330.8,
+    80.0,
+    -153.0
+   ],
+   "com": [
+    -405.8,
+    -0.0,
+    -218.44
+   ],
+   "closed": true,
+   "mesh_faces": 264
+  },
+  "V-belt": {
+   "volume_mm3": 26141.6,
+   "area_mm2": 21460.8,
+   "bbox_min": [
+    -425.8,
+    -107.5,
+    -250.0
+   ],
+   "bbox_max": [
+    -118.8,
+    -94.5,
+    -176.0
+   ],
+   "com": [
+    -268.128,
+    -101.0,
+    -213.0
+   ],
+   "closed": true,
+   "mesh_faces": 528
+  },
+  "Belt guard": {
+   "volume_mm3": 358105.7,
+   "area_mm2": 232900.2,
+   "bbox_min": [
+    -440.8,
+    -148.0,
+    -283.0
+   ],
+   "bbox_max": [
+    -103.8,
+    -80.0,
+    -161.0
+   ],
+   "com": [
+    -273.774,
+    -109.805,
+    -224.953
+   ],
+   "closed": true,
+   "mesh_faces": 3572
+  },
+  "Belt guard hardware": {
+   "volume_mm3": 5425.2,
+   "area_mm2": 5138.4,
+   "bbox_min": [
+    -413.55,
+    -144.75,
+    -299.0
+   ],
+   "bbox_max": [
+    -158.05,
+    -131.0,
+    -185.25
+   ],
+   "com": [
+    -289.456,
+    -139.857,
+    -275.883
+   ],
+   "closed": true,
+   "mesh_faces": 1716
+  },
+  "Drive deck + legs": {
+   "volume_mm3": 2868646.7,
+   "area_mm2": 371913.0,
+   "bbox_min": [
+    -510.8,
+    -160.0,
+    -368.0
+   ],
+   "bbox_max": [
+    -39.8,
+    122.65,
+    -283.0
+   ],
+   "com": [
+    -275.743,
+    -18.705,
+    -299.357
+   ],
+   "closed": true,
+   "mesh_faces": 6094
+  },
+  "Leg angles": {
+   "volume_mm3": 98957.6,
+   "area_mm2": 60767.6,
+   "bbox_min": [
+    -505.3,
+    -155.01,
+    -367.99
+   ],
+   "bbox_max": [
+    -45.3,
+    117.66,
+    -301.01
+   ],
+   "com": [
+    -275.3,
+    -18.675,
+    -334.5
+   ],
+   "closed": true,
+   "mesh_faces": 3408
+  },
+  "Deck + leg bolts": {
+   "volume_mm3": 109884.3,
+   "area_mm2": 70860.4,
+   "bbox_min": [
+    -515.13,
+    -147.01,
+    -355.99
+   ],
+   "bbox_max": [
+    -35.47,
+    109.66,
+    -275.69
+   ],
+   "com": [
+    -275.3,
+    -18.675,
+    -323.645
+   ],
+   "closed": true,
+   "mesh_faces": 13600
+  },
+  "Floor anchors": {
+   "volume_mm3": 12231.0,
+   "area_mm2": 7676.8,
+   "bbox_min": [
+    -446.79,
+    -111.5,
+    -374.0
+   ],
+   "bbox_max": [
+    -103.81,
+    74.15,
+    -357.08
+   ],
+   "com": [
+    -275.3,
+    -18.675,
+    -363.452
+   ],
+   "closed": true,
+   "mesh_faces": 1824
+  },
+  "Shaft A": {
+   "volume_mm3": 138353.0,
+   "area_mm2": 25740.1,
+   "bbox_min": [
+    -106.9,
+    -44.463,
+    -12.525
+   ],
+   "bbox_max": [
+    170.7,
+    -15.537,
+    12.525
+   ],
+   "com": [
+    34.942,
+    -30.0,
+    -0.136
+   ],
+   "closed": true,
+   "mesh_faces": 1624
+  },
+  "Blades A": {
+   "volume_mm3": 122439.0,
+   "area_mm2": 50586.6,
+   "bbox_min": [
+    0.5,
+    -64.0,
+    -34.0
+   ],
+   "bbox_max": [
+    123.3,
+    4.0,
+    34.0
+   ],
+   "com": [
+    61.9,
+    -30.0,
+    0.0
+   ],
+   "closed": true,
+   "mesh_faces": 24776
+  },
+  "Spacers A": {
+   "volume_mm3": 86883.4,
+   "area_mm2": 37403.9,
+   "bbox_min": [
+    8.5,
+    -55.0,
+    -25.0
+   ],
+   "bbox_max": [
+    131.7,
+    -5.0,
+    25.0
+   ],
+   "com": [
+    70.1,
+    -30.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 6144
+  },
+  "Clamp + collared sleeves A": {
+   "volume_mm3": 21865.9,
+   "area_mm2": 16443.3,
+   "bbox_min": [
+    -85.99,
+    -53.0,
+    -23.0
+   ],
+   "bbox_max": [
+    172.2,
+    -7.0,
+    23.0
+   ],
+   "com": [
+    37.386,
+    -30.0,
+    0.0
+   ],
+   "closed": true,
+   "mesh_faces": 5160
+  },
+  "Gear m1.5 z40 A": {
+   "volume_mm3": 88876.2,
+   "area_mm2": 23283.6,
+   "bbox_min": [
+    -77.19,
+    -61.5,
+    -31.5
+   ],
+   "bbox_max": [
+    -38.01,
+    1.5,
+    31.5
+   ],
+   "com": [
+    -57.6,
+    -30.0,
+    -0.167
+   ],
+   "closed": true,
+   "mesh_faces": 4588
+  },
+  "Sprocket 15T A": {
+   "volume_mm3": 32626.3,
+   "area_mm2": 11256.0,
+   "bbox_min": [
+    -108.39,
+    -63.632,
+    -33.632
+   ],
+   "bbox_max": [
+    -86.01,
+    3.632,
+    33.632
+   ],
+   "com": [
+    -101.144,
+    -30.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 1514
+  },
+  "End screws A": {
+   "volume_mm3": 19710.8,
+   "area_mm2": 7953.4,
+   "bbox_min": [
+    -128.41,
+    -45.0,
+    -15.0
+   ],
+   "bbox_max": [
+    192.21,
+    -15.0,
+    15.0
+   ],
+   "com": [
+    31.9,
+    -30.0,
+    0.0
+   ],
+   "closed": true,
+   "mesh_faces": 1784
+  },
+  "Shaft B": {
+   "volume_mm3": 127997.1,
+   "area_mm2": 23844.4,
+   "bbox_min": [
+    -84.5,
+    15.537,
+    -12.525
+   ],
+   "bbox_max": [
+    170.7,
+    44.463,
+    12.525
+   ],
+   "com": [
+    45.261,
+    30.0,
+    -0.096
+   ],
+   "closed": true,
+   "mesh_faces": 1608
+  },
+  "Blades B": {
+   "volume_mm3": 122439.0,
+   "area_mm2": 50586.6,
+   "bbox_min": [
+    8.7,
+    -4.0,
+    -34.0
+   ],
+   "bbox_max": [
+    131.5,
+    64.0,
+    34.0
+   ],
+   "com": [
+    70.1,
+    30.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 24776
+  },
+  "Spacers B": {
+   "volume_mm3": 86624.9,
+   "area_mm2": 37354.1,
+   "bbox_min": [
+    0.5,
+    5.0,
+    -25.0
+   ],
+   "bbox_max": [
+    123.5,
+    55.0,
+    25.0
+   ],
+   "com": [
+    62.084,
+    30.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 6144
+  },
+  "Clamp + collared sleeves B": {
+   "volume_mm3": 21908.7,
+   "area_mm2": 16477.8,
+   "bbox_min": [
+    -85.99,
+    7.0,
+    -23.0
+   ],
+   "bbox_max": [
+    172.2,
+    53.0,
+    23.0
+   ],
+   "com": [
+    37.57,
+    30.0,
+    0.0
+   ],
+   "closed": true,
+   "mesh_faces": 5160
+  },
+  "Gear m1.5 z40 B": {
+   "volume_mm3": 88876.2,
+   "area_mm2": 23283.6,
+   "bbox_min": [
+    -77.19,
+    -1.44,
+    -31.44
+   ],
+   "bbox_max": [
+    -38.01,
+    61.44,
+    31.44
+   ],
+   "com": [
+    -57.6,
+    30.0,
+    -0.167
+   ],
+   "closed": true,
+   "mesh_faces": 4588
+  },
+  "End screws B": {
+   "volume_mm3": 19710.8,
+   "area_mm2": 7953.4,
+   "bbox_min": [
+    -106.01,
+    15.0,
+    -15.0
+   ],
+   "bbox_max": [
+    192.21,
+    45.0,
+    15.0
+   ],
+   "com": [
+    43.1,
+    30.0,
+    -0.0
+   ],
+   "closed": true,
+   "mesh_faces": 1784
+  },
+  "Lid + actuator pad": {
+   "volume_mm3": 154902.6,
+   "area_mm2": 96310.3,
+   "bbox_min": [
+    -48.9,
+    -100.0,
+    292.0
+   ],
+   "bbox_max": [
+    197.6,
+    109.0,
+    356.5
+   ],
+   "com": [
+    78.872,
+    6.747,
+    309.104
+   ],
+   "closed": true,
+   "mesh_faces": 968
+  },
+  "Lid screws (pad, actuator)": {
+   "volume_mm3": 1772.6,
+   "area_mm2": 1679.4,
+   "bbox_min": [
+    169.85,
+    -12.5,
+    302.2
+   ],
+   "bbox_max": [
+    198.1,
+    12.5,
+    350.75
+   ],
+   "com": [
+    183.283,
+    0.0,
+    325.218
+   ],
+   "closed": true,
+   "mesh_faces": 688
+  },
+  "Lid actuator key": {
+   "volume_mm3": 14415.4,
+   "area_mm2": 5254.9,
+   "bbox_min": [
+    179.6,
+    -10.0,
+    286.5
+   ],
+   "bbox_max": [
+    194.6,
+    10.0,
+    354.5
+   ],
+   "com": [
+    187.1,
+    0.0,
+    328.387
+   ],
+   "closed": true,
+   "mesh_faces": 228
+  },
+  "Drawer front + bin": {
+   "volume_mm3": 1476287.6,
+   "area_mm2": 256735.7,
+   "bbox_min": [
+    -30.0,
+    -110.0,
+    -368.0
+   ],
+   "bbox_max": [
+    162.2,
+    68.0,
+    -196.0
+   ],
+   "com": [
+    66.088,
+    -38.297,
+    -286.164
+   ],
+   "closed": true,
+   "mesh_faces": 486
+  },
+  "Handle + actuator pad": {
+   "volume_mm3": 84070.7,
+   "area_mm2": 25356.6,
+   "bbox_min": [
+    11.1,
+    -144.0,
+    -316.0
+   ],
+   "bbox_max": [
+    181.2,
+    -75.0,
+    -230.0
+   ],
+   "com": [
+    90.846,
+    -115.68,
+    -256.803
+   ],
+   "closed": true,
+   "mesh_faces": 828
+  },
+  "Handle + actuator screws": {
+   "volume_mm3": 1470.1,
+   "area_mm2": 1593.7,
+   "bbox_min": [
+    27.6,
+    -114.0,
+    -303.5
+   ],
+   "bbox_max": [
+    196.2,
+    -79.5,
+    -246.5
+   ],
+   "com": [
+    123.642,
+    -96.311,
+    -273.739
+   ],
+   "closed": true,
+   "mesh_faces": 688
+  },
+  "Drawer actuator key": {
+   "volume_mm3": 5922.6,
+   "area_mm2": 2975.4,
+   "bbox_min": [
+    181.2,
+    -108.0,
+    -307.5
+   ],
+   "bbox_max": [
+    193.2,
+    -58.0,
+    -292.5
+   ],
+   "com": [
+    187.2,
+    -89.201,
+    -300.0
+   ],
+   "closed": true,
+   "mesh_faces": 228
+  },
+  "Output shaft 4140": {
+   "volume_mm3": 69713.8,
+   "area_mm2": 13614.8,
+   "bbox_min": [
+    -196.1,
+    -42.5,
+    -162.5
+   ],
+   "bbox_max": [
+    -46.8,
+    -17.5,
+    -137.5
+   ],
+   "com": [
+    -121.365,
+    -30.0,
+    -150.507
+   ],
+   "closed": true,
+   "mesh_faces": 1084
+  },
+  "Torque limiter TL350": {
+   "volume_mm3": 399388.4,
+   "area_mm2": 112381.3,
+   "bbox_min": [
+    -116.79,
+    -93.839,
+    -213.839
+   ],
+   "bbox_max": [
+    -54.81,
+    33.839,
+    -86.161
+   ],
+   "com": [
+    -87.946,
+    -30.0,
+    -150.0
+   ],
+   "closed": true,
+   "mesh_faces": 6144
+  },
+  "Circlip, spacer, stop collar": {
+   "volume_mm3": 4281.4,
+   "area_mm2": 4349.5,
+   "bbox_min": [
+    -192.99,
+    -47.99,
+    -167.99
+   ],
+   "bbox_max": [
+    -49.81,
+    -12.01,
+    -132.01
+   ],
+   "com": [
+    -88.906,
+    -30.0,
+    -150.0
+   ],
+   "closed": true,
+   "mesh_faces": 2304
+  },
+  "Worm": {
+   "volume_mm3": 50889.5,
+   "area_mm2": 11302.0,
+   "bbox_min": [
+    -165.3,
+    -120.0,
+    -222.5
+   ],
+   "bbox_max": [
+    -146.3,
+    60.0,
+    -203.5
+   ],
+   "com": [
+    -155.8,
+    -30.0,
+    -213.0
+   ],
+   "closed": true,
+   "mesh_faces": 188
+  },
+  "Gearbox pulley": {
+   "volume_mm3": 86843.9,
+   "area_mm2": 13791.4,
+   "bbox_min": [
+    -189.8,
+    -114.0,
+    -247.0
+   ],
+   "bbox_max": [
+    -121.8,
+    -88.0,
+    -179.0
+   ],
+   "com": [
+    -155.8,
+    -101.0,
+    -213.0
+   ],
+   "closed": true,
+   "mesh_faces": 448
+  },
+  "Motor shaft": {
+   "volume_mm3": 4398.2,
+   "area_mm2": 1694.8,
+   "bbox_min": [
+    -411.8,
+    -114.0,
+    -219.0
+   ],
+   "bbox_max": [
+    -399.8,
+    -75.0,
+    -207.0
+   ],
+   "com": [
+    -405.8,
+    -94.5,
+    -213.0
+   ],
+   "closed": true,
+   "mesh_faces": 188
+  },
+  "Motor pulley": {
+   "volume_mm3": 20586.8,
+   "area_mm2": 5347.3,
+   "bbox_min": [
+    -422.8,
+    -114.0,
+    -230.0
+   ],
+   "bbox_max": [
+    -388.8,
+    -88.0,
+    -196.0
+   ],
+   "com": [
+    -405.8,
+    -101.0,
+    -213.0
+   ],
+   "closed": true,
+   "mesh_faces": 448
+  }
+ }
+}

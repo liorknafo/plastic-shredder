@@ -1,0 +1,2 @@
+# SolidCraft designs are zip containers: never diff, merge or convert line endings.
+*.sc binary
