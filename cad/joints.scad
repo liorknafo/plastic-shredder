@@ -7,8 +7,7 @@
 //   guard_hole_yz()    4 x M5: drive-end guard wings / free-end cover  <->  cap layers (tapped)   (plate.scad, guards.scad)
 //   gb_foot_pts()      4 x M8: gearbox foot flange  <->  sub-plate (tapped)                       (drive.scad, drive_geom.scad)
 //   SUBBOLT_PTS        4 x M8: sub-plate  <->  drive deck                                         (drive.scad)
-//   TENS_BOLT_PTS      4 x M8: tensioner base plate  <->  drive deck                              (drive.scad)
-// The other joints (cabinet hang screws, belt-guard feet, deck legs, handle, interlock pads, guard seam ears ...) have both ends in ONE file and
+// The other joints (cabinet hang screws, coupling-guard feet, deck legs, handle, interlock pads, guard seam ears ...) have both ends in ONE file and
 // their functions live there (hang_screw_xy, bg_foot_screw_uw, dg_ear_pts, ...); checks.scad C16 covers all of them.
 include <drive_geom.scad>
 

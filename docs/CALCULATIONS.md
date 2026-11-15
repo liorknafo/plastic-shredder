@@ -10,7 +10,7 @@ Design torques at shaft A (input, both shafts together): operating **45 N·m**, 
 
 | Item | Value | Note |
 |---|---|---|
-| Shaft centre distance C | 60.0 mm | = pitch Ø of the made m1.5 z40 gears |
+| Shaft centre distance C | 60.0 mm | = pitch Ø of the made m4 z15 gears |
 | Blade Ø / root Ø / thickness | 68 / 50 / 8.0 mm | 3 hooked teeth, hook 10° |
 | Blade overlap | 8.0 mm | 2·R_tip − C |
 | Tip to the other shaft's spacer | 1.0 mm | radial |
@@ -19,7 +19,7 @@ Design torques at shaft A (input, both shafts together): operating **45 N·m**, 
 | Stack A / B | 131.20 / 131.00 mm | B starts with a 8.20 end spacer |
 | Chamber (inner faces) | 132.2 x 132 mm | x by y |
 | Bearing span | 169.2 mm | centre to centre |
-| Shaft A / B length | 277.6 / 255.2 mm | from the bought 4140 bar, turned to Ø30 |
+| Shaft A / B length | 366.2 / 279.2 mm | from the bought 4140 bar, turned to Ø30 |
 | Hex | AF 25.05 (AC 28.93); bore AF 25.1 | bore finished to the shaft, 0.03-0.08 clearance |
 
 
@@ -37,89 +37,93 @@ Model: a tooth shears a strip as wide as the blade out of a solid wall of thickn
 
 Torques in N·m at shaft A. **Rating at 45 N·m:** solid sections up to about 1.3 mm (PC) to 2.1 mm (ABS / ASA) per bite. Thicker solid lumps stall the drive (the torque limiter slips) and must be cut smaller first.
 
-## 3. Drive: your motor, V-belt, worm gearbox, torque limiter and chain
+## 3. Drive: your motor, jaw coupling, worm gearbox, pin coupling and torque limiter
 
 | Motor case | W | Motor N·m | Shaft A N·m (rated) | Shaft A N·m (motor max) |
 |---|---|---|---|---|
-| likely real output | 250 | 1.68 | 46 | 102 |
-| nameplate (upper bound) | 375 | 2.52 | 70 | 153 |
+| likely real output | 250 | 1.68 | 50 | 111 |
+| nameplate (upper bound) | 375 | 2.52 | 76 | 166 |
 
 Motor 375 W / 220 V / 1.7 A / 1420 rpm, 1-phase 4-pole, S2 30 min. 1.7 A x 220 V is only 374 VA of input, so the real shaft output is probably 200-250 W; 250 W is used.
-Drive: V-belt 2:1 → NRV063-VS worm gearbox, i = 50, Ø19 input shaft, Ø25 hollow output → TL350-2 friction torque limiter with #40 30T sprocket (Amazon), bore 25 → #40 (ANSI 40, 1/2 in) roller chain → 15T sprocket on shaft A (2:1 speed-up). Overall 50:1, η ≈ 0.55 (assumed), **shaft speed 28.4 rpm**.
-At its likely rating the motor gives about **46 N·m** at shaft A; the 45 N·m design torque keeps it at ~97% load (S2 30 min). The torque limiter is set to 55 N·m at shaft A; the motor's maximum (~102 N·m) is above that, so on a jam the limiter slips before the motor stalls.
+Drive: motor → jaw coupling → NRV063-VS worm gearbox, i = 50, Ø19 input shaft, Ø25 hollow output, its output **coaxial with shaft A** → a pin flange with 4 dowel pins → the 30T sprocket plate of the TL350-2 friction torque limiter with #40 30T sprocket (Amazon), bore 25 **on shaft A** (4 holes drilled in it; the teeth carry nothing). Overall 50:1, η ≈ 0.60 (assumed), **shaft speed 28.4 rpm**. No belt and no chain (2026-11-15): the gearbox carries the shafts' torque.
+At its likely rating the motor gives about **50 N·m** at shaft A; the 45 N·m design torque keeps it at ~89% load (S2 30 min). The torque limiter is set to 55 N·m at shaft A; the motor's maximum (~111 N·m) is above that, so on a jam the limiter slips before the motor stalls.
 
-**Torque limiting.** At stall the motor and worm could push up to ~153 N·m into shaft A. The **friction torque limiter** on the gearbox output slips instead: it is set to **110 N·m at the limiter** (= 55 N·m at shaft A through the 2:1 chain). Friction scatter of +15% means shaft A can see at most **T_LIMIT = 63.2 N·m** quasi-statically. The TL350-2 range is 34-149 N·m. OK
-Setting it (DESIGN.md §6.3), on the bench with a chain whip: 110 N·m / 0.5 m = **220 N (22.4 kg)** at the end of a 500 mm lever.
-Gearbox output torque at slip ≤ 126 N·m vs. ~150 N·m rated (OK). Chain pull at slip 2082 N on a #40 chain (breaking ~14 kN).
+**Torque limiting.** At stall the motor and worm could push up to ~166 N·m into shaft A. The **friction torque limiter** on shaft A slips instead: it is set to **55 N·m**. Friction scatter of +15% means shaft A can see at most **T_LIMIT = 63.2 N·m** quasi-statically. The TL350-2 range is 34-149 N·m. OK
+Setting it (DESIGN.md §6.3), on the bench with a chain whip: 55 N·m / 0.5 m = **110 N (11.2 kg)** at the end of a 500 mm lever.
+Gearbox output torque at slip ≤ 63 N·m vs. ~150 N·m rated (OK).
 Duty: S2 30 min: about 30 minutes of running, then let it cool.
 
-### 3a. Gearbox output shaft, gearbox side load and the drive deck's hold-down
+### 3a. Pin coupling, gearbox output shaft and the drive deck's hold-down
 
 | Item | Value | Note |
 |---|---|---|
-| Chain pull at the limiter limit | 2082 N + 100 N slack side | 126 N·m on the 30T sprocket |
-| Overhang, housing face → chain plane | 15 mm | the TL sits flange-first against the housing; its sprocket is inside the friction pack |
-| Output shaft (Ø25, keyways, made from the 4140 bar) | σvM·Kf 110 MPa | SF 3.8 on yield OK |
-| Same, operating (fatigue) | Goodman SF 3.9 | OK |
-| Gearbox output radial load | 2182 N at 15 mm | vs ~3000 N assumed permissible for size 063 (catalogues 3-4.5 kN at mid-hub); OK |
-| Uplift on the gearbox / deck | 2182 N | through 2 slotted rails (4 x M8 through-bolts, Ø24 washers under the ply) into the leg frame; legs anchored with 8 x M8 (2 per leg): 546 N per anchor if only 2 legs carry it OK |
+| Pin load, 2 of 4 pins carrying | 626 N each | 63.2 N·m (the most the limiter passes) on PCD 101 |
+| Pin bending (cantilever from the flange face) | 174 MPa at 14 mm | Ø8 hardened dowel, 1000 MPa used: OK |
+| Pin on the sprocket plate's hole | 11 MPa | 7.2 mm plate: OK |
+| Pin pressed in the 6061 disc | 52 MPa | 12 deep: OK |
+| Pin flange key (8 x 7 x 18) | hub 85 MPa, shaft 70 MPa | OK OK |
+| Output shaft (Ø25, keyways, 4140) | σvM·Kf 51 MPa (torsion only) | SF 8.1 on yield OK |
+| Same, operating (fatigue) | Goodman SF 18.0 | OK |
+| Gearbox output radial load | 0 (torque only) | the pins slide in their holes: no chain pull, no overhung load |
+| Uplift on one row of gearbox feet | 832 N | the reaction torque over the 76 mm foot spacing; rails (4 x M8 through-bolts, Ø24 washers under the ply) -> leg frame; legs anchored with 8 x M8 (2 per leg): 208 N per anchor if only 2 legs carry it OK |
 
-The drive deck is bolted down: the chain pulls the gearbox UP with the tight-side tension. Use M8 concrete anchors into a floor, or M8 lag screws/through-bolts into a solid bench (each ≥ 2 kN pull-out). The permissible radial load of YOUR gearbox's output must be ≥ 2182 N at 15 mm from the housing face: check its catalogue (value FR2) before buying.
+The pins pass through Ø8.5 holes (0.25 mm play each side) and slide freely along them, so the coupling takes a little misalignment without a radial load. Line the gearbox up with shaft A to within that play: shim the feet and slide them in the rail slots until the 4 pins enter the 4 holes by hand at every position of a full turn, with a dial indicator on the flange's rim reading under ±0.2 mm. The pins are only loaded when the motor runs: a steady torque, not a rotating bending stress.
+The drive deck is bolted down: when the shafts are loaded the gearbox's reaction torque tries to roll it about the output axis. Use M8 concrete anchors into a floor, or M8 lag screws/through-bolts into a solid bench (each ≥ 2 kN pull-out).
 
 ### 3b. Hard jam: the torque spike from the parts downstream of the limiter
 
-If something hard (a screw, a nut) stops the blades instantly, the limiter slips, but the parts after it (blades, spacers, shafts, gears, sprocket, chain, the limiter's own sprocket) must still be stopped by the jam. With a rigid jam and only the shaft's torsion as a spring (both pessimistic), the extra torque is ΔT = ω·√(J·k):
+If something hard (a screw, a nut) stops the blades instantly, the limiter slips, but the parts after it (blades, spacers, shafts, gears, and the limiter's own hub, flange, pressure plate, springs and nut) must still be stopped by the jam. The limiter is ON SHAFT A, so its own sprocket plate, the pins, the pin flange, the gearbox and the motor are all on its driving side. With a rigid jam and only the shaft's torsion as a spring (both pessimistic), the extra torque is ΔT = ω·√(J·k):
 | Item | Value | Note |
 |---|---|---|
-| Inertia after the limiter J | 36.2 x10⁻⁴ kg·m² | blades 13.2, spacers 5.7, shafts 1.7, gears 7.6, sprocket 1.2, chain 3.0, TL sprocket 3.8 |
-| Torsional stiffness k | 59,101 N·m/rad | hex AF 25.05 over 62 mm: the shortest path from a torque input (B's gear) to a blade |
+| Inertia after the limiter J | 47.1 x10⁻⁴ kg·m² | blades 13.2, spacers 5.7, shafts 2.2, gears 6.8, TL350 on A (all but its sprocket) 19.1 |
+| Torsional stiffness k | 63,829 N·m/rad | hex AF 25.05 over 58 mm: the shortest path from a torque input (B's gear) to a blade |
 | Shaft speed ω | 2.97 rad/s | 28.4 rpm |
-| Spike ΔT | **43 N·m** |  |
-| Peak = T_LIMIT + ΔT | **107 N·m** | checked below with SF ≥ 1.2 on yield and bearing s0 ≥ 1.0 |
+| Spike ΔT | **52 N·m** |  |
+| Peak = T_LIMIT + ΔT | **115 N·m** | checked below with SF ≥ 1.2 on yield and bearing s0 ≥ 1.0 |
 
-Without the limiter on the output side, the worm and the gearbox pulley would add 50-150 N·m more (their inertia is multiplied by the gear ratio squared), which is why the limiter sits after the gearbox and not at the belt.
+Why the limiter is on shaft A and not on the gearbox: there, the pin flange and the TL's sprocket would be after it and add to the spike. Before the gearbox, the worm would add far more (its inertia is multiplied by the ratio squared).
 
 ## 4. Shafts
 
-Beam model: simply supported at the bearing centres (x = -18 and 150.7); point loads from the jam (scanned along the whole chamber AND all round each shaft every 15°, acting at the blade root radius 25 mm), the gear (x = -57.6) and, on A, the chain pull at the sprocket (x = -104.8, down toward the gearbox). Separating force 30 % of the jam force. **Torque sharing between the shafts is not assumed:** every case is run with all the torque on A, all on B, and split evenly. The M10 clamp adds 4 kN of tension (8 MPa in Ø25), included as a static stress and as a fatigue mean stress. Keyways Kf 1.6 bending / 1.3 torsion. Sections: hex AF 25.05 (Zb 1636, Zt 2955 mm³), Ø25 (Zb 1534, Zt 3068), Ø25 with keyway (Zb 1252, Zt 2786).
+Beam model: a continuous beam on THREE bearings: the outboard bearing (x = -98), the drive-end bearing (x = -18.5) and the free-end bearing (x = 150.7), uniform Ø25 stiffness for the redundant reaction. The drive bearing's seat is taken 0.04 mm off the line through the other two (each seat ±0.02 from its DRO position): forcing the shaft into it takes 664 N and bends it by up to 35.9 N·m, which is added to every section's bending moment and every bearing load (conservative). point loads from the jam (scanned along the whole chamber AND all round each shaft every 15°, acting at the blade root radius 25 mm) and the gear (x = -53.0); on A the drive torque enters at the TL350's sprocket plate (x = -185.0) through the pin coupling, with no radial force. Separating force 30 % of the jam force. **Torque sharing between the shafts is not assumed:** every case is run with all the torque on A, all on B, and split evenly. The M10 clamp adds 4 kN of tension (8 MPa in Ø25), included as a static stress and as a fatigue mean stress. Keyways Kf 1.6 bending / 1.3 torsion. Sections: hex AF 25.05 (Zb 1636, Zt 2955 mm³), Ø25 (Zb 1534, Zt 3068), Ø25 with keyway (Zb 1252, Zt 2786).
 
 
 ### 4a. Design shafts: 4140 annealed, 1.25 in bar (Amazon)
 
 | Case | Shaft | Worst section | σb MPa | τ MPa | σ clamp MPa | SF |  |
 |---|---|---|---|---|---|---|---|
-| Operating, all on A | A | keyway @ x=-40 | 77 | 16 | 9 | 1.55 on Goodman (Se 209) | OK |
-| Operating, all on B | A | keyway @ x=-58 | 55 | 16 | 9 | 2.08 on Goodman (Se 209) | OK |
-| Operating, all on B | B | hex @ x=47 | 69 | 15 | 7 | 2.70 on Goodman (Se 209) | OK |
-| Operating, split evenly | A | keyway @ x=-40 | 66 | 8 | 9 | 1.86 on Goodman (Se 209) | OK |
-| Operating, split evenly | B | hex @ x=47 | 34 | 8 | 7 | 5.33 on Goodman (Se 209) | OK |
-| Jam, all on A | A | keyway @ x=-40 | 108 | 23 | 9 | 2.21 on yield | OK |
-| Jam, all on B | A | keyway @ x=-58 | 78 | 23 | 9 | 2.91 on yield | OK |
-| Jam, all on B | B | hex @ x=47 | 97 | 21 | 7 | 3.76 on yield | OK |
-| Jam, split evenly | A | keyway @ x=-40 | 93 | 11 | 9 | 2.61 on yield | OK |
-| Jam, split evenly | B | hex @ x=47 | 48 | 11 | 7 | 7.08 on yield | OK |
+| Operating, all on A | A | keyway @ x=-38 | 47 | 16 | 9 | 2.41 on Goodman (Se 209) | OK |
+| Operating, all on B | A | keyway @ x=-54 | 37 | 16 | 9 | 2.95 on Goodman (Se 209) | OK |
+| Operating, all on B | B | keyway @ x=-53 | 56 | 16 | 9 | 2.04 on Goodman (Se 209) | OK |
+| Operating, split evenly | A | keyway @ x=-54 | 36 | 16 | 9 | 3.04 on Goodman (Se 209) | OK |
+| Operating, split evenly | B | keyway @ x=-39 | 39 | 8 | 9 | 3.05 on Goodman (Se 209) | OK |
+| Jam, all on A | A | keyway @ x=-38 | 57 | 23 | 9 | 3.70 on yield | OK |
+| Jam, all on B | A | keyway @ x=-54 | 45 | 23 | 9 | 4.33 on yield | OK |
+| Jam, all on B | B | keyway @ x=-53 | 73 | 23 | 9 | 3.07 on yield | OK |
+| Jam, split evenly | A | keyway @ x=-54 | 43 | 23 | 9 | 4.44 on yield | OK |
+| Jam, split evenly | B | keyway @ x=-39 | 46 | 11 | 9 | 4.84 on yield | OK |
 
 
 ### 4b. Torque allowed by each shaft steel
 
 | Shaft steel | Sy | Su | max operating N·m (Goodman 1.5) | max jam limit N·m (yield 1.5) |  |
 |---|---|---|---|---|---|
-| 42CrMo4 QT (4140 pre-hard), bought | 650 | 900 | 59 | 150 |  |
-| C45 normalised, bought | 305 | 580 | 42 | 69 |  |
-| your mild-steel bar (S235) | 235 | 360 | 29 | 52 |  |
-| 4140 annealed, 1.25 in bar (Amazon) | 415 | 655 | 47 | 95 | design choice |
+| 42CrMo4 QT (4140 pre-hard), bought | 650 | 900 | 90 | 246 |  |
+| C45 normalised, bought | 305 | 580 | 60 | 105 |  |
+| your mild-steel bar (S235) | 235 | 360 | 36 | 77 |  |
+| 4140 annealed, 1.25 in bar (Amazon) | 415 | 655 | 67 | 150 | design choice |
 
 The design torques (45 operating / 63 limit) are inside these limits for 4140 annealed, 1.25 in bar (Amazon). Your mild-steel bars would pass these two rows only just, and fail the hard-jam peak below, which is why the shafts are made from the bought 4140 bar.
 
-### 4c. Hard-jam peak 107 N·m (section 3b), SF ≥ 1.2 on yield
+### 4c. Hard-jam peak 115 N·m (section 3b), SF ≥ 1.2 on yield
 
 | Case | Shaft | Worst section | σb MPa | τ MPa | SF on yield |  |
 |---|---|---|---|---|---|---|
-| Peak, all on A | A | keyway @ x=-40 | 181 | 38 | 1.33 | OK |
-| Peak, all on B | A | keyway @ x=-58 | 131 | 38 | 1.77 | OK |
-| Peak, all on B | B | hex @ x=47 | 163 | 36 | 2.29 | OK |
-| Peak, split evenly | A | keyway @ x=-40 | 156 | 19 | 1.58 | OK |
-| Peak, split evenly | B | hex @ x=47 | 81 | 18 | 4.41 | OK |
+| Peak, all on A | A | keyway @ x=-38 | 86 | 41 | 2.40 | OK |
+| Peak, all on B | A | keyway @ x=-54 | 69 | 41 | 2.74 | OK |
+| Peak, all on B | B | keyway @ x=-53 | 119 | 41 | 1.89 | OK |
+| Peak, split evenly | A | keyway @ x=-54 | 66 | 41 | 2.82 | OK |
+| Peak, split evenly | B | keyway @ x=-53 | 67 | 21 | 3.31 | OK |
 
 Mid-span deflection with the full jam force 2530 N on one shaft: 0.051 mm (radial; the tip-to-spacer gap is 1.0 mm). Twist of the hex over the blade stack at the jam limit: 0.13°.
 
@@ -127,10 +131,10 @@ Mid-span deflection with the full jam force 2530 N on one shaft: 0.051 mm (radia
 
 | Key | L mm | τ key MPa | p shaft MPa | p hub MPa | shaft SF≥1.5 | hub SF≥1.2 |
 |---|---|---|---|---|---|---|
-| Sprocket on A (mild-steel hub) | 18 | 58 | 116 | 155 | OK | OK |
-| Gear (A and B), 4 layers, no hub | 35 | 30 | 61 | 162 | OK | OK |
+| TL350 hub on A (bought, keyed bore 25) | 56 | 21 | 41 | 55 | OK | OK |
+| Gear (A and B), bought, hub + teeth | 44 | 26 | 52 | 70 | OK | OK |
 
-The made gear's keyway is cut on the CNC4030 with a Ø3 end mill, so its bottom corners have R1.5. **The 8 x 7 key must have its two top edges (the ones in the gear keyway) chamfered 1.5 x 45° or more** (file or mill them; the key is bought bar or cut from your flat), otherwise it sits on the corner radius and is not seated. The chamfer leaves 1.5 mm of flank, which the gear row uses as bearing height. All four layers of a gear are keyed one by one, so they share the load. Keys checked at the hard-jam peak 107 N·m. The torque limiter's own key (on the gearbox output shaft you turn from the Ø30 bar) carries 126 N·m at most.
+The gears' keyways are broached (8 mm, the same broach as the pin flange) through the re-bored Ø25: the key runs the whole bore, hub and teeth. Keys checked at the hard-jam peak 115 N·m. The pin flange's key (on the output shaft) carries 63 N·m at most (§3a).
 
 ## 5. Blades
 
@@ -143,74 +147,100 @@ Hex contact: the bore flank is 14.49 mm; the Ø3.2 corner reliefs leave 11.29 mm
 | Check | Value | Limit / margin |  |
 |---|---|---|---|
 | Bore collapse torque (whole flank at yield) vs jam limit 63 | 180 N·m | SF 2.84 | OK |
-| Same, vs the hard-jam peak 107 | 180 N·m | SF 1.68 | OK |
+| Same, vs the hard-jam peak 115 | 180 N·m | SF 1.57 | OK |
 | Tooth root bending, jam force at the tip | 23 MPa | root ~25 mm | OK |
 | Thinnest ring (relief to gullet bottom) | 8.9 mm |  | OK |
 
 The shaft side of the same contact (4140 annealed, 1.25 in bar (Amazon)) sees the same pressure on its corners and is checked by the same test. Mild-steel blades are soft (~130 HB): fine for plastic, but the edges will round over. Optional: case-harden the finished blades (Kasenit-type powder) after all machining.
 
-## 6. Gears (MADE by you: module 1.5, z = 40, 4 layers of 9.8 mm, case-hardened)
+## 6. Gears (bought: module 4, z = 15, face 30, C45 (45#) steel, teeth induction-hardened (HRC 45-55), bought)
 
 | Item | Value | Note |
 |---|---|---|
-| Module / teeth / pressure angle | 1.5 / 40 / 20° | module 1.5 #3 (35-54 teeth) of your set (Amazon B09TB7FPFF, HSS, 20 deg, #1-#8) |
-| Pitch Ø / outside Ø | 60.0 / 63.0 mm | pitch Ø = C = 60: 1:1, no profile shift |
-| Root Ø: standard / as cut | 56.25 / 56.05 mm | whole depth standard 2.25 m = 3.375; **cut 3.475 deep** (0.10 deeper on both gears) |
-| Base Ø | 56.38 mm | the root circle is below it: the flank is a radial line down to the root |
-| Face width | 39.2 mm | 4 layers of 9.80 (faced from the 10 mm flat); no hub. A 8.8 mm Ø36 spacer sleeve (Ø55 bar) follows it: gear + sleeve = 48 = the old 30 + 18 hub, so sprocket, chain plane, gearbox and shafts stay put |
-| Tooth thickness on the pitch circle | 2.2834 mm | standard 2.3562; 2·0.10·tan20° = 0.0728 thinner |
-| **Backlash of the pair** (circumferential) | **0.1456 mm** | = 2 thinnings of 2·0.10·tan20° each; normal 0.1368; 0.278° of play between the shafts (±0.139° about the mesh) |
-| Transverse contact ratio | 1.71 | two to one pairs of teeth share the load |
-| Indexing | 9° per tooth | rotary table of ratio R: **turns = R/40** (90:1 -> 2.25, 80:1 -> 2, 72:1 -> 1.8, 60:1 -> 1.5, 40:1 -> 1; the handwheel turns through 810° per tooth on a 90:1) |
+| Module / teeth / pressure angle | 4 / 15 / 20° | bought spur gear, hardened teeth; re-bored Ø25 H7, 8 mm keyway broached (like the pin flange) |
+| Pitch Ø / outside Ø / root Ø | 60 / 68 / 50 mm | pitch Ø = C = 60: 1:1 |
+| Face / hub | 30 mm / Ø45 x 18 (APPROX) | hub outboard; teeth next to the drive collar |
+| Mounting | between the drive bearing (x = -18.5) and the outboard bearing (x = -98): 79.5 mm apart | straddled, not overhung (review 7) |
+| Backlash of the pair (as modelled) | 0.146 mm | measure yours on the 60.00 centre distance: 0.05-0.30 is fine |
+| Transverse contact ratio | 1.48 | ≥ 1.2 |
 
-The backlash comes only from the extra cutting depth: a form cutter plunged 0.10 deeper cuts each space wider by 2·0.10·tan20° = 0.0728 mm at the pitch circle, so each tooth is 0.0728 mm thinner, and two such teeth leave 0.1456 mm. (The brief's '2·0.10·tan20°·2 ≈ 0.07 mm' is only the first factor, 0.0728 per gear; the pair has twice that, 0.146 mm. The OpenSCAD mesh check C31off confirms it: the model gears turn ±0.135° against each other without touching and collide at ±0.145°, the predicted ±0.139°.)
-Worst-case minimum backlash: cutting depth ±0.03 on each gear (read the Z DRO), centre distance −0.02 (bearing seats 60.00 ±0.02), bore play 0.08 (the bore is finished 0.03-0.08 over the shaft, so each gear sits up to half of that off its axis: together 0.08): 0.146 − 2·tan20°·(2·0.03 + 0.02 + 0.08) = **0.029 mm** (OK). Too much depth is therefore not forgiving: do not cut deeper than 3.505.
+Minimum backlash with the bearing seats −0.02 and the gears' bore play 0.08: 0.146 − 2·tan20°·(0.02 + 0.08) = 0.073 mm (OK); a bought pair usually has more.
+**Face load factor (how unevenly the load spreads across the face).** Review 7 asked for it from the actual mounting, not assumed. ISO 6336-1 method C: F_βx = 1.33·f_sh + f_ma, F_βy = F_βx − y_β (running-in, y_β = 0.15·F_βx ≤ 6 µm), K_Hβ = 1 + c_γ·F_βy/(2·F/b) (≤ 2) else 2·√(c_γ·F_βy/(2·F/b)), K_Fβ = K_Hβ^N with N = 0.72 (b/h = 3.33), c_γ = 20 N/(mm·µm).
+| Item | Value | Note |
+|---|---|---|
+| f_sh: the shafts' bending at the gears (3-bearing beam, all torque through the gears, worst jam place) | 1.6 / 2.2 / 4.0 µm | at 45 / 63 / 115 N·m |
+| f_Hβ of a grade-9 gear (ISO 1328-1, d 60, b 30): ASSUMED for a cheap bought gear | 24.0 µm | grade 5 value x √2 per grade |
+| bearing seats ±0.02 over 79.5 mm, both shafts (RSS) | 10.7 µm | the outboard plate is lined up by the shafts at assembly (DESIGN.md §7.2) |
+| f_ma = √(f_Hβ² + seats²) | 26.3 µm |  |
+| K_Hβ / K_Fβ at the operating torque | 4.39 / 2.90 | F_βy 24.1 µm |
+| K_Hβ / K_Fβ at the jam limit | 3.76 / 2.59 |  |
+| K_Hβ / K_Fβ at the hard-jam peak | 2.91 / 2.15 | F_βy 26.9 µm |
 
-**Bending (Lewis).** σ = Ft / (b·m·Y) / k_thin, b = 39.2 mm (all 4 layers share the load: they are cut together, keyed one by one, and clamped), m = 1.5, Y = 0.389 for z = 40, 20° full-depth teeth (Shigley's Mechanical Engineering Design, Lewis form-factor table: z = 38 → 0.384, z = 43 → 0.397, interpolated), k_thin = (s_cut/s_std)² = 0.939 for the thinned teeth. Material: your mild steel flat, Sy 235; the thin hardened case is ignored. All the torque is taken through the gears (conservative: the gears only pass shaft B's share).
-| Case | Ft | Lewis σ | Margin |  |
+These factors are high (a 2-3 times overload at one end of the face) because a cheap gear's helix error and ±0.02 mm seats are large next to the few µm the teeth deflect under load. They are taken as they are: no crowning, no contact-pattern correction is assumed.
+**Bending (Lewis).** σ = K_Fβ·Ft / (b·m·Y), b = 30, m = 4, Y = 0.29 for z = 15 (Shigley's Lewis form factor, load at the tip). Material: the CORE of C45 (Sy 305, Su 580); the hardened tooth surface is ignored. All the torque is taken through the gears.
+| Case | Ft | σ | Margin |  |
 |---|---|---|---|---|
-| Jam, all torque through the gears | 2108 N | 98 MPa | SF 2.39 on yield | OK |
-| Hard-jam peak 107 N·m | 3558 N | 166 MPa | SF 1.42 on yield | OK |
-| Operating 45 N·m | 1500 N | 70 MPa | SF 2.06 vs 144 MPa tooth fatigue | OK |
+| Jam limit, all through the gears | 2108 N | 157 MPa | SF 1.94 on yield | OK |
+| Hard-jam peak 115 N·m | 3827 N | 237 MPa | SF 1.29 on yield | OK |
+| Operating 45 N·m | 1500 N | 125 MPa | SF 1.68 vs 210 MPa tooth fatigue | OK |
 
-Tooth fatigue allowable 144 MPa: Se = 154 MPa (Marin-corrected 0.5·Su, Su 360), pulsating load, Goodman, root stress concentration Kf = 1.5. Required: yield SF ≥ 1.5 at the jam limit, ≥ 1.2 at the hard-jam peak, Goodman ≥ 1.5 at the operating torque. With only 3 layers (29.4 mm) the peak SF would be 1.06, below 1.2: that is why there are 4.
+Tooth fatigue allowable 210 MPa: Se = 216 MPa (Marin-corrected 0.5·Su of the core), pulsating load, Goodman, Kf = 1.5. Required: yield SF ≥ 1.5 at the jam limit, ≥ 1.2 at the hard-jam peak, Goodman ≥ 1.5 at the operating torque. The same check with bought m3 z20 gears (Y 0.322) gives a hard-jam SF of about 1.0: that is why m4 z15.
+| Item | Value |  |
+|---|---|---|
+| Z_L (base oil 220 mm²/s) / Z_v (v 0.089 m/s) / Z_R (Rz 10 µm) | 1.031 / 0.893 / 0.838 | ISO 6336-2 method B |
+| σH, all 45 N·m through the gears (K_Hβ 4.39) | 1282 MPa |  |
+| **Pitting life at that load** (σHP = σH,lim·Z_NT·Z_L·Z_v·Z_R = σH) | **5.66e+05 cycles = 332 h of cutting** | ≥ 200 h OK |
+| SH at the machine's 1e+06 turns, same load (information) | 0.94 |  |
+| B's average share (22.5 N·m, information): SH at 1e+06 | 1.12 |  |
 
-| Case | σH MPa | σH,lim 1000 / σH |  | Unhardened S235 |
-|---|---|---|---|---|
-| Operating 45 N·m | **535** | 1.87 | OK | 1.78 x 300: the soft gear would pit (information only) |
-| Jam limit 63 N·m (information) | 634 | 1.58 |  | 2.11 x 300 |
-| Hard-jam peak 107 N·m (information) | 824 | 1.21 |  | 2.75 x 300 |
+**Contact stress (pitting):** σH = ZE·ZH·√(K_Hβ·Ft/(b·d)·(u+1)/u), ZE 189.8, ZH 2.495, u 1. σH,lim = 0.740·HV + 602 = 982 MPa (ISO 6336-5, flame / induction-hardened, quality ML, at the **minimum hardness of the buying spec, HRC 50 = 513 HV**). Lubrication: **grease with a base oil of at least ISO VG 220**; flanks hobbed, not ground (Rz 10 µm assumed). **The rating is conservative:** all of the motor's operating torque through the gears, all the time. On that basis the gears are good for **332 hours of cutting**, less than the 587 h basis of the shafts and bearings, so **the gears are a wear part**: 2 spares are on the buying list. In service the gears pass only shaft B's share of the torque and the motor seldom runs at its limit, so the real life is longer. Look at the flanks every 20 running hours (DESIGN.md §8.3); replace both gears when pits spread. Unhardened gears would fail at any face width: the contact stress at d = 60 is above ~600 MPa even at K = 1.
+**Hard-jam peak (115 N·m), contact:** a few events, so the check is that the hardened layer does not yield (no dents), not pitting. With the face load concentrated (K_Hβ 2.91): line load 394 N/mm, Hertz half-width 0.149 mm, peak pressure p0 = 1680 MPa, maximum shear 0.30·p0 = 504 MPa at 0.12 mm depth, well inside the case of at least 0.5 mm that the buying spec requires (OK: ≥ 2.5 x that depth). Shear yield of the HRC 50 layer ≈ 0.577 x 0.85 x 3.45·HV = 868 MPa: SF 1.72 (OK).
+Pitch-line speed 0.089 m/s (dynamic factor ~1; grease the gears).
 
-**Contact stress (pitting), ISO 6336 simplified:** σH = ZE·ZH·√(Ft/(b·d1)·(u+1)/u), ZE = 189.8 √MPa (steel on steel), ZH = 2.495 (20°, spur, no profile shift), u = 1 (1:1), b = 39.2, d1 = 60; the tooth force is taken at the pitch circle with all torque through the gears. **Unhardened S235 does not pass for a long life:** σH 535 MPa against about 300 MPa (my estimate of the ISO 6336-5 order of magnitude for ~130 HV normalised low-carbon steel, not a table value), so the teeth would pit. **The design therefore REQUIRES the finished gears to be case-hardened after cutting** (Kasenit-type pack carburising and quench, DESIGN.md §5.7; low-carbon steel is what it is for). Allowable for the check: σH,lim = **1000 MPa** with SF ≥ 1.2. That is my CONSERVATIVE ASSUMPTION for a thin pack-carburised case, about two thirds of the 1300-1650 MPa that ISO 6336-5 gives for properly carburised gears (a pack case is thin, shallow-graded and not process-controlled). It is not a measured value: if the hardened teeth feel only file-soft, the check does not hold.
-Case depth: the Hertz half-width is 0.048 mm at 45 N·m and 0.074 mm at the hard-jam peak; the maximum shear is at 0.78·a (= 0.06 mm deep at the peak). A case of **≥ 0.3 mm** (5 x that depth) is enough; pack carburising a few hours at ~900 °C gives a few tenths of a mm; the thin tooth (2.3 mm at the pitch circle, 1.1 mm at the tip) is case-hardened all through at the tip, which is fine for these loads. Quench as the powder's instruction says, then temper at ~180 °C for an hour to take the brittleness out.
-Pitch-line speed 0.089 m/s (dynamic factor ~1; grease). Both gears are the same part: a layer is cut once (DXF `cad/dxf/gear_layer.dxf`), the teeth are cut with the SAME setup on both gears; only the start of the indexing differs by half a tooth for gear B (4.5° = 1.125 handwheel turns on a 90:1 table, R/80) if you want the two shafts' keyways in the same position as in the CAD. Any other keyway position also works: shaft B can be turned until its gear meshes before the key goes in (the blades of A and B run in different slots, so their relative angle does not matter).
+## 7. Bearings (NA4905 needle roller bearing with inner ring x 6: drive end, free end, outboard plate; both shafts)
 
-## 7. Bearings (NA4905 needle roller bearing with inner ring x 4)
+| Case | Shaft | R drive-end N | R free-end N | R outboard N | max N |
+|---|---|---|---|---|---|
+| Operating, all on A | A | 2743 | 838 | 1038 | 2743 |
+| Operating, all on B | A | 1712 | 710 | 1259 | 1712 |
+| Operating, all on B | B | 3786 | 793 | 892 | 3786 |
+| Operating, split evenly | A | 2227 | 728 | 775 | 2227 |
+| Operating, split evenly | B | 2225 | 728 | 778 | 2225 |
+| Jam, all on A | A | 3586 | 909 | 1190 | 3586 |
+| Jam, all on B | A | 2137 | 729 | 1500 | 2137 |
+| Jam, all on B | B | 5052 | 845 | 984 | 5052 |
+| Jam, split evenly | A | 2861 | 754 | 820 | 2861 |
+| Jam, split evenly | B | 2858 | 754 | 824 | 2858 |
 
-| Case | Shaft | R drive-end N | R free-end N | max N |
-|---|---|---|---|---|
-| Operating, all on A | A | 3887 | 535 | 3887 |
-| Operating, all on B | A | 771 | 424 | 771 |
-| Operating, all on B | B | 3622 | 156 | 3622 |
-| Operating, split evenly | A | 2175 | 474 | 2175 |
-| Operating, split evenly | B | 1811 | 78 | 1811 |
-| Jam, all on A | A | 5464 | 752 | 5464 |
-| Jam, all on B | A | 1084 | 596 | 1084 |
-| Jam, all on B | B | 5090 | 219 | 5090 |
-| Jam, split evenly | A | 3058 | 667 | 3058 |
-| Jam, split evenly | B | 2545 | 110 | 2545 |
+Static: s0 = C0/P = 20500/5052 = **4.06** at the limit torque, with C0 the lowest rating among the Amazon listings (branded NA4905 parts are rated 30.7-34.5 kN). OK
+At the hard-jam peak (115 N·m): worst load 8630 N, s0 = **2.38** (OK).
+Life at the worst operating load (3786 N, all torque on one shaft, bite at the worst place) and 28.4 rpm: L10 = 143,957 h. OK
+Axial: needle bearings carry no axial load and let the inner ring slide, so each shaft is located lengthwise by a AXK3047 + 2 x AS3047 thrust needle bearing at the drive end (round the collared sleeve, on the cap face), kept loaded by 3 crinkle (wave) washer 30x39x0.5s at the free end that push the shaft toward +x. The only axial forces are friction and the spring, far below the thrust bearing's rating, and the stacks cannot wander. Oil seals (TC 30x42x7 nitrile oil seal) in the inner plate layers keep shred dust out of the bearings. The outboard bearings sit inside the drive-end guard: grease them, no seal.
 
-Static: s0 = C0/P = 20500/5464 = **3.75** at the limit torque, with C0 the lowest rating among the Amazon listings (branded NA4905 parts are rated 30.7-34.5 kN). OK
-At the hard-jam peak (107 N·m): worst load 9220 N, s0 = **2.22** (OK).
-Life at the worst operating load (3887 N, all torque on one shaft, bite at the worst place) and 28.4 rpm: L10 = 133,025 h. OK
-Axial: needle bearings carry no axial load and let the inner ring slide, so each shaft is located lengthwise by a AXK3047 + 2 x AS3047 thrust needle bearing at the drive end (round the collared sleeve, on the cap face), kept loaded by 3 crinkle (wave) washer 30x39x0.5s at the free end that push the shaft toward +x. The only axial forces are friction and the spring, far below the thrust bearing's rating, and the stacks cannot wander. Oil seals (TC 30x42x7 nitrile oil seal) in the inner plate layers keep shred dust out of the bearings.
+### 7b. The outboard bearing plate: standoffs, tie screws, friction joint
+
+| Item | Value |  |
+|---|---|---|
+| Plate force at the limit / at the peak (the two outboard bearings, vector sum) | 736 / 1336 N | jam scanned along the chamber and round each shaft, every torque share |
+| Twist about the shaft direction at the limit / at the peak | 69 / 126 N·m | the gear forces push one bearing up and the other down |
+| Most-loaded pillar: half the force + its share of the twist (rigid plate) | 798 / 1448 N | pillars 15 (y) x 60 (z) x 58, centred at |y| = 80.5 |
+| Tie preload, M8 12.9 at 35 N·m: nominal / min / max | 21.9 / 14.8 / 27.3 kN | k = 0.2; ±25 % torque-wrench scatter; min also − 10 % settling of the steel faces |
+| Slip: μ·2·F_min / pillar shear (μ = 0.2, untreated dry machined steel, EN 1993-1-8 class D) | 7.40 / 4.08 | OK OK |
+| End faces stay closed (linear contact pressure, preload at the screws, cap face 424 mm² less the holes and counterbores under it, and the ob1 face) | 3.82 / 2.11 | OK OK |
+| Pillar stress (bending + the max preload), mild steel, SF on yield | 3.05 / 2.86 | OK OK |
+| Bearing displacement (sway + twist of the plate) at the limit / at the peak | 1.8 / 3.2 µm | at the limit ≤ 20 µm (the seat tolerance) OK |
+| Tie screw stress at the max preload (M8 12.9, Rp0.2 1100) | 747 MPa | ≤ 0.9·Rp0.2 OK |
+| Thread in the cap + outer layer (S235, 17.5 engaged) at the max preload | 104 MPa shear | OK |
+| Hardened washer (Ø16) on ob2 at the max preload | 199 MPa | OK |
+
+The plate is located on the two pillars by friction only: there is no room on the 70 mm cap layer for dowels or spigots next to the comb and wall screws (the ligament check found it). It is therefore lined up at assembly by the shafts themselves (all six bearings in, both shafts turning freely), and only then are the four M8 12.9 screws tightened to 35 N·m with a torque wrench (DESIGN.md §7.2). They clamp steel only: 3 hardened washers under each head; the printed hood is held by its own M5 screws. The checks use the MINIMUM preload, the most-loaded pillar and the twist from the unequal bearing loads; the end-face check makes sure each pillar stays clamped flat on the cap, so it behaves as the fixed-fixed column the sway assumes.
 
 ## 8. Axial clamp chain, end screws and the stack schedule
 
 | Shaft | Clamped parts between the two end caps (mm) | Sum | Shaft length | Recess each end | ≥ 1.0 |
 |---|---|---|---|---|---|
-| A | 39.2 + 8.8 + 22.4 + 11 + 17 + 10.5 + 131.2 + 10.5 + 17 + 13 | 280.6 | 277.6 | 1.50 | OK |
-| B | 39.2 + 8.8 + 11 + 17 + 10.5 + 131 + 10.7 + 17 + 13 | 258.2 | 255.2 | 1.50 | OK |
+| A | 48 + 3.5 + 17 + 28.5 + 62 + 11 + 17 + 10.5 + 131.2 + 10.5 + 17 + 13 | 369.2 | 366.2 | 1.50 | OK |
+| B | 48 + 3.5 + 17 + 3.5 + 11 + 17 + 10.5 + 131 + 10.7 + 17 + 13 | 282.2 | 279.2 | 1.50 | OK |
 
 Each end cap therefore always bears on the parts, never on the shaft end, as long as the sum of the part tolerances stays within ±1 mm. The shaft itself floats inside the clamped stack; its axial position is bounded by the hex shoulders touching the clamp sleeves (≤ 1 mm).
 End screws M10 x 30 (8.8): engagement 18.5 mm (OK), tapped depth 25 mm (OK). Clamp 4 kN ≈ 8 N·m tightening torque.
@@ -279,37 +309,17 @@ Smallest clamped contact: clamp sleeve on a round-bore spacer, 37 mm², 108 MPa 
 Bore-slug hold-down: an **M5** screw with a Ø10 washer (radius 5.0) through a Ø5.5 centre hole. The bore's roughing slot (6.4 wide inside the 25.1 AF bore) reaches in to r = 6.15, leaving 1.15 mm to the washer (OK). Tool stickout ≥ 16 mm so the ER11 nut clears the 5 mm M5 heads over the full 8 mm depth.
 These are conservative **starting values, not a proven recipe** for this machine. Before the first blade, run the test cut in DESIGN.md §5.1 on an offcut of the faced strip. Then generate the real toolpaths in AXIS CAM Studio from `cad/stl/blade_v*.stl` with the Mild steel 1018 material; its force model checks the hold-down.
 
-### 9b. Making the gears: layers on the CNC4030, teeth on the SIEG X3.5D
-
-| Item | Value | Note |
-|---|---|---|
-| Layer | Ø64 rough outline, bore Ø25 H7, keyway 8 JS9 (R1.5 corners) | cut from the 70x10 flat faced to 9.8 (DXF `cad/dxf/gear_layer.dxf`) |
-| Tools | Ø6 carbide for the outline and the bore, Ø3 carbide for the keyway | 3 depth levels of 3.3 mm, same speeds as the blades |
-| Per layer | ~63 min | 18.5 cm³ of slot + finish passes |
-| All 8 layers | ~8 h | plus setups; the same strip hold-down as the blades (DESIGN.md §5.1) |
-
-Bore: roughing slot 6.4 wide leaves a slug of R6.10; the M5 washer (R5) leaves 1.10 mm (OK). Finish the bore with the Ø6 in a spiral/circle pass to Ø24.9, then try a Ø25 h6 shaft offcut and sneak up on the same fit as the blades' hex: **a hand slide fit, no rocking, 25.00-25.04** (H7 is 25.000-25.021; the bore is finished to the real shaft, like the blades' hex in §5). Keyway: Ø3 end mill, roughing then a finishing pass on each side to 8.00 +0.02/−0.02 (JS9: ±0.018); its two bottom corners are R1.5, so the key's top edges need a 1.5 x 45° chamfer. Measure the keyway width and the bore with the shaft offcut and the real key BEFORE the next layer.
-| Cutter OD (measure yours) | rpm at 20 m/min | rpm at 25 m/min |
-|---|---|---|
-| Ø40 | 159 | 199 |
-| Ø45 | 141 | 177 |
-| Ø50 | 127 | 159 |
-| Ø55 | 116 | 145 |
-| Ø60 | 106 | 133 |
-
-Teeth, on the SIEG with the rotary table standing on its side (axis along X), cutter module 1.5 #3 (35-54 teeth) on the MT3 slitting-saw arbor: depth 3.475 in 3 passes (1.2 / 1.2 / 1.075, last pass light), cutting oil, the 4 layers cut together over 39.2 mm of face. Cutter speed: **HSS form cutter in mild steel 20-25 m/min**, i.e. n = 1000·Vc/(π·D) in the table above (round DOWN to the nearest speed the mill has). NOTE: the brief said 60-80 m/min; that is about 3x too fast for a form-relieved HSS gear cutter in steel (catalogue figures are 60-80 *ft*/min = 18-24 m/min), so the table uses 20-25 m/min. Feed: about 0.03 mm per tooth of the cutter (count its teeth), i.e. roughly 25-50 mm/min on the table's X crank (or the power feed). Index 9° per tooth: handwheel turns = ratio/40 (90:1 → 2.25). Check the ratio on your table by counting 90 handwheel turns against 360° before the first tooth. After 10 teeth check the angle with a dial indicator on a tooth flank; at the 40th tooth the cut must meet the first.
-
 ## 10. Stock use
 
 | Stock | Use | Length mm |  |
 |---|---|---|---|
 | 70x10 flat, 1300 | 2 blade strips of 5 (380 each) + 3 end-plate layers (170 each) | 1280 (left 20) | OK |
 | 70x10 flat, 1170 | 2 blade strips of 4 (308 each) + 3 end-plate layers | 1136 (left 34) | OK |
-| 70x10 flat, extra piece (**TO BUY**) | 8 gear layers Ø64, pitch 70.4 (64 + 6.4 slot) + 20 hold-down | 583 of 600 (left 17) | OK |
+| 100x10 flat (**TO BUY locally**, 400 mm) | 2 outboard-plate layers 180 x 100 + kerf + 20 | 384 of 400 | OK |
 | 50x10 flat (2410) | 2 combs + 2 walls (4 x 133) + blade test lever (540) | ~1081 | OK |
-| Ø55 x 500 | 16 spacers (~11 each) + 4 clamp sleeves (~14) + 4 collared sleeves (~17) + 2 gear spacer sleeves (~12)  | ~324 | OK |
-| Bought 4140 bar, 914 mm | shaft A (277.6) + shaft B (255.2) + facing + kerf | 544 | OK |
-| Ø30 x 410 / 270 (yours) | gear mandrel (Ø30 x ~111, §9b / DESIGN.md §5.7) + washer Ø30 x 6; spare, test pieces | ~121 | OK |
+| Ø55 x 500 | 16 spacers (~11 each) + 4 clamp sleeves (~14) + 4 collared sleeves (~17) + 4 outboard sleeves Ø30 (~6)  | ~326 | OK |
+| Bought 4140 bar, 914 mm | shaft A (366.2) + shaft B (279.2) + facing + kerf | 656 | OK |
+| 60x15 flat (**TO BUY locally**, 150 mm) | 2 pillars 15 x 60 x 58 + facing + kerf | 123 of 150 | OK |
 | Ø30 x 500 x2 (yours) | gearbox output shaft (Ø25 x ~190), end caps, stacking mandrel, spare shafts |  |  |
 
 
@@ -320,29 +330,42 @@ Teeth, on the SIEG with the rotary table standing on its side (axis along X), cu
 
 | Feature | From – to (mm from drive end) | Note |
 |---|---|---|
-| Overall length | 277.6 | face both ends; centre-drill; drill Ø8.5 x 30, tap M10 x 25 both ends |
-| Ø25 h6 journal (drive side) | 0 – 108.4 | everything left of the hex |
-| Hex 25.05 AF (left Ø30 when turning) | 108.4 – 237.6 | 129.2 long |
-| Ø25 h6 journal (free side) | 237.6 – 277.6 |  |
-| Gear keyway 8 JS9 x 4 deep | 30.7 – 67.9 | key 8x7x35 (the full 4-layer gear bore), top edges chamfered 1.5 |
-| Sprocket keyway 8 JS9 x 4 deep | 0.0 – 19.9 | key 8x7x18; open at the shaft end |
+| Overall length | 366.2 | turned in the chuck from each end (no tailstock, DESIGN.md §5.3); drill Ø8.5 x 30, tap M10 x 25 both ends |
+| Ø25 h6 journal (drive side) | 0 – 197.0 | everything left of the hex |
+| Hex 25.05 AF (left Ø30 when turning) | 197.0 – 326.2 | 129.2 long |
+| Ø25 h6 journal (free side) | 326.2 – 366.2 |  |
+| Gear keyway 8 JS9 x 4 deep | 110.5 – 156.5 | key 8x7x44 (the gear's whole bore, hub + teeth) |
+| Torque-limiter keyway 8 JS9 x 4 deep | 1.5 – 57.5 | key 8x7x54 (under the TL350 hub) |
 
 
 ### Shaft B
 
 | Feature | From – to (mm from drive end) | Note |
 |---|---|---|
-| Overall length | 255.2 | face both ends; centre-drill; drill Ø8.5 x 30, tap M10 x 25 both ends |
-| Ø25 h6 journal (drive side) | 0 – 86.0 | everything left of the hex |
-| Hex 25.05 AF (left Ø30 when turning) | 86.0 – 215.2 | 129.2 long |
-| Ø25 h6 journal (free side) | 215.2 – 255.2 |  |
-| Gear keyway 8 JS9 x 4 deep | 8.3 – 45.5 | key 8x7x35 (the full 4-layer gear bore), top edges chamfered 1.5 |
+| Overall length | 279.2 | turned in the chuck from each end (no tailstock, DESIGN.md §5.3); drill Ø8.5 x 30, tap M10 x 25 both ends |
+| Ø25 h6 journal (drive side) | 0 – 110.0 | everything left of the hex |
+| Hex 25.05 AF (left Ø30 when turning) | 110.0 – 239.2 | 129.2 long |
+| Ø25 h6 journal (free side) | 239.2 – 279.2 |  |
+| Gear keyway 8 JS9 x 4 deep | 23.5 – 69.5 | key 8x7x44 (the gear's whole bore, hub + teeth) |
 
 Keyways on the same side as hex corner 0 (mark it).
 
 ## 12. Throughput (rough)
 
-About 138 W reaches the blades. Twin-shaft shredders use roughly 30-100 Wh per kg, so **1.4-4.6 kg/h** at best; feeding with the lid closed (DESIGN.md §8) limits it to well under 1 kg/h. Output strips are about 8 mm wide.
+About 150 W reaches the blades. Twin-shaft shredders use roughly 30-100 Wh per kg, so **1.5-5.0 kg/h** at best; feeding with the lid closed (DESIGN.md §8) limits it to well under 1 kg/h. Output strips are about 8 mm wide.
+
+## 13. The fixed screen under the blades
+
+| Case | Force on the screen | σ (net section) | ≥ 1.5 / 1.2 on yield 240 | deflection (gap stays ≥ 1) | M4 8.8 screw (A 8.78 mm², proof 580) |
+|---|---|---|---|---|---|
+| torque-limiter limit | 1860 N | 104 MPa | SF 2.30 OK | 0.11 mm OK | 106 MPa OK |
+| hard-jam peak (s.3b) | 3377 N | 189 MPa | SF 1.27 OK | 0.21 mm OK | 192 MPa OK |
+
+**What it is.** An aluminium block (6061 or 6082) under the blades: the top follows the blade-tip circles 2 mm below them (R36), the wall is 10 mm, Ø5 holes on a 8 mm hexagonal pattern (open area 35 %, ligaments 3 mm). A piece that passes a hole falls into the drawer; a bigger piece is dragged on round by the teeth to the comb, cut again and fed back into the bite.
+**Load model (conservative).** A piece jammed between a tooth tip and the screen takes the whole torque the drive can pass: F = T / R_tip. The screen is taken as a straight beam over the chord of one arc (67 mm, ridge to comb) with the load in the middle; its width is the tooth plus a 2:1 spread through the wall (48 mm), cut down to the net section through a row of holes (38 %: 18.0 mm). The real part is an arch fixed to the combs and continuous over the ridge, so the bending is several times smaller.
+**Guard.** ISO 13857 Table 4: round openings 4 < e ≤ 6 mm need ≥ 5 mm from the opening to the hazard. Each hole is ≥ 10 mm long and the blades are 2 mm above it (CAD check C40g); the ends of the screen are 0.5 mm from the end plates. The screen is held by 4 screws: it is a fixed guard (a tool is needed to remove it).
+**Throughput.** Fines must pass a Ø5 hole, so everything goes round until it is about that small: expect slower output than without a screen, and more limiter slips with tough plastics (PETG, nylon). If it clogs: pull the drawer, undo the 4 screws from below, drop the screen out, clean it.
+**24 V supply:** only the lid lock's solenoid now (10 W): a 30 W supply OK.
 
 ## Summary
 

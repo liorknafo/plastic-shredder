@@ -10,8 +10,8 @@ import interference as I
 CLI = os.environ.get("SOLIDCRAFT_CLI", "/Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli")
 SC = os.path.join(os.path.dirname(HERE), "shredder_assembly.sc")
 PTS = [(10, 20, 30), (-150, -60, -140), (60, 80, 300), (-400, -90, -200)]
-OCC = {"Rotor A": "Rotor A:1", "Rotor B": "Rotor B:1", "Torque limiter + output shaft": "Torque limiter + output shaft:1",
-       "Worm + gearbox pulley": "Worm + gearbox pulley:1", "Motor shaft + pulley": "Motor shaft + pulley:1", "Lid": "Lid:1", "Drawer": "Drawer:1"}
+OCC = {"Rotor A": "Rotor A:1", "Rotor B": "Rotor B:1", "Output shaft + pin flange": "Output shaft + pin flange:1",
+       "Worm + jaw coupling": "Worm + jaw coupling:1", "Motor shaft": "Motor shaft:1", "Lid": "Lid:1", "Drawer": "Drawer:1"}
 
 
 def sc_poses(joint, value):

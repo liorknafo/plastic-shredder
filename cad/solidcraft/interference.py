@@ -74,14 +74,14 @@ def translate(v):
     return [[1, 0, 0, v[0]], [0, 1, 0, v[1]], [0, 0, 1, v[2]], [0, 0, 0, 1]]
 
 
-def study_a(a):      # Shaft A joint value a (axis -x): A -a about +x, B +a, TL -a/2 (chain 2:1), worm 50x the TL, motor 2x the worm; worm / motor axes -y
-    tl = a / 2
+def study_a(a):      # Shaft A joint value a (axis -x): A -a about +x, B +a, TL -a (pin coupling), worm 50x the TL, motor = worm (coupling); worm / motor axes -y
+    tl = a          # pin coupling (2026-11-15): the output shaft turns with shaft A, on the same axis
     return {
         "Rotor A": rot_about((0, AX["shaft_y_A"], 0), (1, 0, 0), -a),
         "Rotor B": rot_about((0, AX["shaft_y_B"], 0), (1, 0, 0), +a),
-        "Torque limiter + output shaft": rot_about((0, AX["out_y"], AX["out_z"]), (1, 0, 0), -tl),
-        "Worm + gearbox pulley": rot_about((AX["worm_x"], 0, AX["worm_z"]), (0, 1, 0), -50 * tl),
-        "Motor shaft + pulley": rot_about((AX["motor_x"], 0, AX["motor_z"]), (0, 1, 0), -100 * tl),
+        "Output shaft + pin flange": rot_about((0, AX["out_y"], AX["out_z"]), (1, 0, 0), -tl),
+        "Worm + jaw coupling": rot_about((AX["worm_x"], 0, AX["worm_z"]), (0, 1, 0), -50 * tl),
+        "Motor shaft": rot_about((AX["motor_x"], 0, AX["motor_z"]), (0, 1, 0), -50 * tl),
     }
 
 

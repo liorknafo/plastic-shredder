@@ -1,11 +1,10 @@
-// gear.scad -- the MADE spur gear (module 1.5, z = 40, 20 deg), with real involute teeth, backlash, bore Ø25 and the 8 mm keyway.
-// Also: one rough LAYER (the CNC part) and the gear mandrel (lathe part).  All 2D profiles are in the gear's own (u, v) plane, tooth 0 centred on +u.
+// gear.scad -- the BOUGHT spur gear (module 4, z = 15, 20 deg, hardened teeth) as modelled: real involute teeth, the bore re-bored Ø25 with the broached 8 mm keyway, and its hub.
+// All 2D profiles are in the gear's own (u, v) plane, tooth 0 centred on +u.
 //
-// BACKLASH.  The gear is cut with a form cutter `extra` (GEAR_cut_extra = 0.10 mm) deeper than standard on BOTH gears.  A rack-shaped cutter moved radially in by
-// `extra` is a profile shift x = -extra / m, so each tooth gets thinner at the pitch circle by 2 * extra * tan(alpha) = 0.0728 mm (transverse); the base circle,
-// the involute flanks and the tip circle (OD 63.0, turned on the lathe) stay as they are.  Two such gears in mesh have a circumferential backlash of
-// 2 * 0.0728 = 0.1456 mm (normal backlash 0.1368 mm; see CALC s.6).  Root circle = OD - 2 * (standard 2.25 m + extra) = 56.05.  Below the base circle (r 28.19 > root r 28.025)
-// the flank is a radial line down to the root circle.
+// BACKLASH.  A bought gear's teeth are made a little thin (tooth-thickness tolerance); the model represents that as a cut `extra` (GEAR_cut_extra = 0.10 mm) deeper
+// than standard on BOTH gears: a rack-shaped cutter moved radially in by `extra` is a profile shift x = -extra / m, so each tooth is thinner at the pitch circle by
+// 2 * extra * tan(alpha) = 0.0728 mm; two such gears in mesh have 0.1456 mm of circumferential backlash (calc s.6, check C31off).  Measure your gears' backlash on the 60.00 mm
+// centre distance before fitting.  Below the base circle the flank is a radial line down to the root circle.
 // Facets: NF points per flank (inscribed in the convex tooth: the polygon is never bigger than the real tooth, so a clearance seen in the model is real).
 include <common.scad>
 
@@ -36,8 +35,7 @@ function gear_pts(m = GEAR_module, z = GEAR_z, alpha = GEAR_alpha, extra = GEAR_
 
 module gear_outline(extra = GEAR_cut_extra, phase = 0) polygon(gear_pts(GEAR_module, GEAR_z, GEAR_alpha, extra, phase));
 
-// bore Ø25 (+ clearance `bd_extra`) with the 8 mm keyway, 3.3 above the bore surface, corners rounded with the CNC end mill (GEAR_KEY_TOOL_D / 2).
-// Keyway on +v (the shaft keyways are on +z = +v).  The keyway is cut by the Ø3 end mill: its bottom corners have R = GEAR_KEY_TOOL_D / 2.
+// bore Ø25 (+ clearance `bd_extra`) with the broached 8 mm keyway, 3.3 above the bore surface (corner R = GEAR_KEY_TOOL_D / 2, nearly sharp).  Keyway on +v (the shaft keyways are on +z = +v).
 module bore_keyway_2d(bd_extra = 0) {
     rt = GEAR_KEY_TOOL_D / 2;
     circle(d = GEAR_bore + bd_extra, $fn = 96);
@@ -52,35 +50,16 @@ module bore_keyway_2d(bd_extra = 0) {
 module gear_2d(extra = GEAR_cut_extra, phase = 0, bd_extra = 0)
     difference() { gear_outline(extra, phase); bore_keyway_2d(bd_extra); }
 
-// the finished gear, GEAR_LAYERS layers = gear_face thick, axis = +w (local frame, w = 0 at the face toward the shaft end of the stack)
+// the teeth, gear_face thick, axis = +w (local frame, w = 0 at the face toward the hub)
 module gear_solid(extra = GEAR_cut_extra, phase = 0, bd_extra = 0, L = gear_face) linear_extrude(L) gear_2d(extra, phase, bd_extra);
 
-// ONE rough layer as the CNC cuts it: Ø64 outline, bore Ø25 H7 (finished on the CNC), keyway 8 JS9; GEAR_LAYER_T thick
-module gear_layer_2d() difference() { circle(d = GEAR_ROUGH_D, $fn = 180); bore_keyway_2d(0); }
-module gear_layer() linear_extrude(GEAR_LAYER_T) gear_layer_2d();
+// the hub (bought; APPROXIMATE size until the listing is chosen): GEAR_HUB_D x GEAR_HUB_L, the same bore + keyway
+module gear_hub_solid(bd_extra = 0, L = GEAR_HUB_L) linear_extrude(L) difference() { circle(d = GEAR_HUB_D, $fn = 96); bore_keyway_2d(bd_extra); }
+// the whole bought gear in its own frame: hub w = 0 .. GEAR_HUB_L, teeth w = GEAR_HUB_L .. GEAR_HUB_L + gear_face (on the machine the hub is OUTBOARD)
+module gear_part(phase = 0) { gear_hub_solid(); translate([0, 0, GEAR_HUB_L]) gear_solid(GEAR_cut_extra, phase); }
 
-// gear mandrel (lathe, from the Ø30 bar): grip Ø30 x grip_L (shoulder at its end), Ø25 g6 seat (4 layers + 2.8) with the 8 mm key keyway, M16 x 1.5 stud, centre drilled
-// axis +w; w = 0 at the grip end.  Washer Ø30 x 6 and M16 nut are standard parts (not drawn).
-G_GRIP_L = 45;  G_SEAT_L = gear_face + 2.8;  G_THR_L = 24;
-module gear_mandrel() {
-    $fn = 96;
-    difference() {
-        union() {
-            cylinder(d = 30, h = G_GRIP_L);
-            translate([0, 0, G_GRIP_L]) cylinder(d = 25, h = G_SEAT_L);
-            translate([0, 0, G_GRIP_L + G_SEAT_L]) cylinder(d = 16, h = G_THR_L);
-        }
-        // keyway 8 x 4 (on +v), closed at both ends, 40 long, starts 1 mm past the shoulder
-        translate([-4, 25 / 2 - 4, G_GRIP_L + 1]) cube([8, 5, 40]);
-        translate([0, 0, G_GRIP_L + G_SEAT_L + G_THR_L - 4]) cylinder(d1 = 0, d2 = 5, h = 4.01);   // centre hole for the live centre
-    }
-}
-
-// standalone render:  -D 'part="layer"|"gear"|"gear_B"|"mandrel"|"layer_2d"|"profile_2d"'
+// standalone render:  -D 'part="gear"|"gear_B"|"profile_2d"'
 part = "none";
-if (part == "layer") gear_layer();
-if (part == "gear") gear_solid();                                     // gear A: a tooth centred on the keyway
-if (part == "gear_B") gear_solid(GEAR_cut_extra, 180 / GEAR_z);      // gear B: a gap centred on the keyway (same blank, first space cut half a pitch later)
-if (part == "mandrel") gear_mandrel();
-if (part == "layer_2d") gear_layer_2d();
+if (part == "gear") gear_part();                                      // gear A: a tooth centred on the keyway
+if (part == "gear_B") gear_part(GEAR_z % 2 == 0 ? 180 / GEAR_z : 0);  // gear B: the same part for an odd tooth count
 if (part == "profile_2d") gear_2d();

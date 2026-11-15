@@ -8,37 +8,29 @@ AQUA, BLUE, PURPLE, GRAY, DARK = "#3e999f", "#4271ae", "#8959a8", "#8e908c", "#4
 PRINT, METAL = "#e69138", "#b0b4b8"
 
 FRAME = ("Frame", [
-    ("Bearings NA4905",            "f_bearings",   AQUA, 1),
+    ("Bearings NA4905 (6)",        "f_bearings",   AQUA, 1),
     ("Bearing rollers",            "f_rollers",    "#9fd4d8", 1),
     ("Seals",                      "f_seals",      "#222222", 1),
     ("Thrust bearings",            "f_thrust",     "#c8c8c8", 1),
     ("Crinkle washers",            "f_crinkle",    "#d8b0ff", 1),
     ("End plates (free end)",      "f_plates_free",  "#b4b7b4", 1),
     ("End plates (drive end)",     "f_plates_drive", "#c5c8c6", 1),
+    ("Outboard bearing plate + pillars", "f_plates_ob", "#a9b0b8", 1),
     ("Combs",                      "f_combs",      GREEN, 1),
     ("Chamber walls",              "f_walls",      PURPLE, 1),
     ("Hopper collar + funnel",     "f_hopper",     "#6fa8dc", 0.30),
     ("Lid guard-lock switch + screws", "f_lidswitch", DARK, 1),
-    ("Side skirts",                "f_skirts",     PRINT, 0.55),
-    ("Drive-end guard + free-end cover", "f_guards", PRINT, 0.55),
+    ("Fixed screen (aluminium)",   "f_screen",     "#9aa5b1", 1),
+    ("Screen + wall screws",       "f_screenscrews", DARK, 1),
+    ("Gear band, drive-end hood + free-end cover", "f_guards", PRINT, 0.55),
     ("Base plate",                 "f_baseplate",  "#d9b98a", 1),
     ("Cabinet (sides, back, floor)", "f_cabinet",  "#c8a46e", 0.55),
-    ("Fixed upper front panel",    "f_upperfront", "#8c5a2b", 0.8),
-    ("Drawer switch pad",          "f_drawerpad",  PRINT, 1),
-    ("Drawer switch + screws, front panel screws", "f_drawersw", DARK, 1),
-    ("Safety grid mesh",           "f_mesh",       "#6b7076", 1),
-    ("Grid cleats",                "f_cleats",     "#a67c52", 1),
-    ("Grid screws",                "f_gridscrews", DARK, 1),
     ("Worm gearbox NRV063",        "f_gearbox",    GRAY, 0.6),
-    ("Gearbox + rail + tensioner bolts", "f_gbbolts", DARK, 1),
+    ("Gearbox + rail bolts",       "f_gbbolts",    DARK, 1),
     ("Gearbox rails",              "f_rails",      METAL, 1),
-    ("Chain idler sprocket",       "f_idler",      ORANGE, 0.9),
-    ("Chain tensioner",            "f_tensioner",  RED, 1),
-    ("Chain #40",                  "f_chain",      "#444444", 0.9),
     ("Motor",                      "f_motor",      DARK, 1),
-    ("V-belt",                     "f_belt",       "#222222", 0.8),
-    ("Belt guard",                 "f_beltguard",  PRINT, 0.55),
-    ("Belt guard hardware",        "f_beltguardhw", DARK, 1),
+    ("Coupling guard + stub cap",  "f_cplguard",   PRINT, 0.55),
+    ("Coupling guard screws",      "f_cplguardhw", DARK, 1),
     ("Drive deck + legs",          "f_deck",       "#c8a46e", 0.85),
     ("Leg angles",                 "f_angles",     METAL, 1),
     ("Deck + leg bolts",           "f_deckbolts",  DARK, 1),
@@ -52,10 +44,10 @@ def rotor(sh):
         ("Blades " + sh,  "r_blades",  bc, 1, sh),
         ("Spacers " + sh, "r_spacers", GRAY, 1, sh),
         ("Clamp + collared sleeves " + sh, "r_sleeves", YELLOW, 1, sh),
-        ("Gear m1.5 z40 " + sh, "r_gear", RED, 0.75, sh),
+        ("Gear m4 z15 " + sh, "r_gear", RED, 0.75, sh),
     ]
     if sh == "A":
-        bodies.append(("Sprocket 15T A", "r_sprocket", ORANGE, 0.9, sh))
+        bodies.append(("Torque limiter TL350 (30T)", "r_sprocket", "#8e6fb0", 1, sh))
     bodies.append(("End screws " + sh, "r_screws", DARK, 1, sh))
     return ("Rotor " + sh, bodies)
 
@@ -66,22 +58,20 @@ LID = ("Lid", [
 ])
 DRAWER = ("Drawer", [
     ("Drawer front + bin",        "d_panels",  "#bf9000", 1),
-    ("Handle + actuator pad",     "d_printed", PRINT, 1),
-    ("Handle + actuator screws",  "d_screws",  DARK, 1),
-    ("Drawer actuator key",       "d_key",     METAL, 1),
+    ("Handle",                    "d_printed", PRINT, 1),
+    ("Handle screws",             "d_screws",  DARK, 1),
 ])
-TL = ("Torque limiter + output shaft", [
+TL = ("Output shaft + pin flange", [
     ("Output shaft 4140",         "t_shaft", "#2b6cb0", 1),
-    ("Torque limiter TL350",      "t_tl",    "#8e6fb0", 1),
+    ("Pin flange + 4 pins",       "t_tl",    "#9aa5b1", 1),
     ("Circlip, spacer, stop collar", "t_hw", YELLOW, 1),
 ])
-WORM = ("Worm + gearbox pulley", [
-    ("Worm",           "w_worm",   DARK, 1),
-    ("Gearbox pulley", "w_pulley", DARK, 1),
+WORM = ("Worm + jaw coupling", [
+    ("Worm",           "w_worm",     DARK, 1),
+    ("Jaw coupling",   "w_coupling", "#c45a1a", 1),
 ])
-MOTOR = ("Motor shaft + pulley", [
+MOTOR = ("Motor shaft", [
     ("Motor shaft",  "m_shaft",  DARK, 1),
-    ("Motor pulley", "m_pulley", DARK, 1),
 ])
 
 COMPONENTS = [FRAME, rotor("A"), rotor("B"), LID, DRAWER, TL, WORM, MOTOR]

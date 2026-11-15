@@ -9,6 +9,5 @@ echo(AX = [
     ["out_y", YA], ["out_z", ZO],
     ["worm_x", XG], ["worm_z", ZW], ["worm_y0", GB_Y0],
     ["motor_x", XM], ["motor_z", ZM],
-    ["sprocket_A_pd", sprocket_A_pd], ["tl_sprocket_pd", tl_sprocket_pd], ["gear_z", GEAR_z],
-    ["gearbox_pulley_d", GEARBOX_PULLEY_D], ["motor_pulley_d", MOTOR_PULLEY_D], ["chain_ratio", CHAIN_RATIO]]);
+    ["gear_z", GEAR_z]]);
 cube(1);

@@ -122,11 +122,11 @@ p(f"Torques in N·m at shaft A. **Rating at {P.T_OPERATING:.0f} N·m:** solid se
   "and must be cut smaller first.")
 
 # ------------------------------------------------------------------ 3 drive
-h("3. Drive: your motor, V-belt, worm gearbox, torque limiter and chain")
+h("3. Drive: your motor, jaw coupling, worm gearbox, pin coupling and torque limiter")
 M = P.MOTOR
 w_m = M["rpm"] * 2 * math.pi / 60
-i_tot = P.BELT_RATIO * P.WORM["ratio"] / P.CHAIN_RATIO     # motor rpm / shaft rpm
-eta = P.BELT_EFF * P.WORM["eff"] * P.CHAIN["eff"]
+i_tot = P.WORM["ratio"]                     # motor rpm / shaft rpm (motor -> jaw coupling -> worm; the gearbox output is coaxial with shaft A)
+eta = P.WORM["eff"]
 n_out = M["rpm"] / i_tot
 w_out = n_out * 2 * math.pi / 60
 rows = []
@@ -137,9 +137,9 @@ table(rows, ["Motor case", "W", "Motor N·m", "Shaft A N·m (rated)", "Shaft A N
 p(f"Motor {M['nameplate_W']:.0f} W / {M['volt']:.0f} V / {M['amp']} A / {M['rpm']:.0f} rpm, "
   f"{M['phase']}-phase {M['poles']}-pole, {M['duty']}. 1.7 A x 220 V is only 374 VA of input, so "
   "the real shaft output is probably 200-250 W; 250 W is used.")
-p(f"Drive: V-belt {P.BELT_RATIO:.0f}:1 → {P.WORM['name']} → {P.TL['name']} → "
-  f"{P.CHAIN['name']} → {P.SPROCKET_A['z']}T sprocket on shaft A ({P.CHAIN_RATIO:.0f}:1 speed-up). "
-  f"Overall {i_tot:.0f}:1, η ≈ {eta:.2f} (assumed), **shaft speed {n_out:.1f} rpm**.")
+p(f"Drive: motor → jaw coupling → {P.WORM['name']}, its output **coaxial with shaft A** → a pin flange with {P.PIN_N} dowel pins → "
+  f"the {P.TL['z']}T sprocket plate of the {P.TL['name']} **on shaft A** (4 holes drilled in it; the teeth carry nothing). "
+  f"Overall {i_tot:.0f}:1, η ≈ {eta:.2f} (assumed), **shaft speed {n_out:.1f} rpm**. No belt and no chain (2026-11-15): the gearbox carries the shafts' torque.")
 T_rated = M["P_likely_W"] / w_m * i_tot * eta
 p(f"At its likely rating the motor gives about **{T_rated:.0f} N·m** at shaft A; the "
   f"{P.T_OPERATING:.0f} N·m design torque keeps it at ~{P.T_OPERATING/T_rated:.0%} load "
@@ -149,9 +149,8 @@ p(f"At its likely rating the motor gives about **{T_rated:.0f} N·m** at shaft A
 T_max_drive = M["breakdown_ratio"] * M["nameplate_W"] / w_m * i_tot * eta
 p()
 p(f"**Torque limiting.** At stall the motor and worm could push up to ~{T_max_drive:.0f} N·m into "
-  f"shaft A. The **friction torque limiter** on the gearbox output slips instead: it is set to "
-  f"**{P.TL_SET_AT_TL:.0f} N·m at the limiter** (= {P.T_SET:.0f} N·m at shaft A through the "
-  f"{P.CHAIN_RATIO:.0f}:1 chain). Friction scatter of +{P.TL_SCATTER:.0%} means shaft A can see at "
+  f"shaft A. The **friction torque limiter** on shaft A slips instead: it is set to "
+  f"**{P.TL_SET_AT_TL:.0f} N·m**. Friction scatter of +{P.TL_SCATTER:.0%} means shaft A can see at "
   f"most **T_LIMIT = {P.T_LIMIT:.1f} N·m** quasi-statically. The TL350-2 range is "
   f"{P.TL['T_min']:.0f}-{P.TL['T_max']:.0f} N·m. "
   f"{check('TL setting inside its range', min(P.TL_SET_AT_TL - P.TL['T_min'], P.TL['T_max'] - P.TL_SET_AT_TL), 0)}")
@@ -161,48 +160,50 @@ p(f"Setting it (DESIGN.md §6.3), on the bench with a chain whip: {P.TL_SET_AT_T
   f"{LEVER*1000:.0f} mm lever.")
 gb_T = P.TL_SET_AT_TL * (1 + P.TL_SCATTER)
 p(f"Gearbox output torque at slip ≤ {gb_T:.0f} N·m vs. ~{P.WORM['rated_out_Nm']:.0f} N·m rated "
-  f"({check('gearbox at TL slip', P.WORM['rated_out_Nm'] / gb_T, 1.0)}). Chain pull at slip "
-  f"{gb_T*1000/(D['tl_sprocket_pd']/2):.0f} N on a #40 chain (breaking ~14 kN).")
+  f"({check('gearbox at TL slip', P.WORM['rated_out_Nm'] / gb_T, 1.0)}).")
 p(f"Duty: {M['duty']}: about 30 minutes of running, then let it cool.")
 
-# ---- 3a drive mounting, gearbox output shaft, gearbox overhung load
-h("3a. Gearbox output shaft, gearbox side load and the drive deck's hold-down", 3)
-_pg = P.__dict__
-gb_gap = _pg.get("TL_GB_GAP", 3.0)
-tl_cm = _pg.get("TL_CM_OFFSET", 12.0)
-a_ohl = gb_gap + tl_cm                                  # gearbox housing face -> chain plane
-T_tl_max = P.TL_SET_AT_TL * (1 + P.TL_SCATTER)          # most the TL passes, gearbox side
-r_tl = D["tl_sprocket_pd"] / 2 / 1000
-F_ch = T_tl_max / r_tl                                  # tight-side chain pull at the limit
-F_slack = 100.0                                         # tensioner preload on the slack side
-F_up = F_ch + F_slack
+# ---- 3a the pin coupling, the gearbox output shaft and the drive deck's hold-down
+h("3a. Pin coupling, gearbox output shaft and the drive deck's hold-down", 3)
 OS = P.SHAFT_MATERIALS[P.SHAFT_MATERIAL]
-M_os = F_up * a_ohl                                     # N*mm at the housing face
-sb_os = 1.6 * M_os / Z_KW_B
-st_os = 1.3 * T_tl_max * 1000 / Z_KW_T
-vm_os = math.sqrt(sb_os ** 2 + 3 * st_os ** 2)
-T_gb_op = P.T_OPERATING * P.CHAIN_RATIO
-F_op = T_gb_op / r_tl + F_slack
-sa_os = 1.6 * F_op * a_ohl / Z_KW_B
-sm_os = math.sqrt(3) * 1.3 * T_gb_op * 1000 / Z_KW_T
-gm_os = 1 / (sa_os / endurance(OS["Su"], 25) + sm_os / OS["Su"])
-FR_ALLOW = _pg.get("GB_FR_ALLOW", 3000.0)
+T_c = P.T_LIMIT                                          # the most the coupling carries: it is on the DRIVING side of the limiter
+F_pin = T_c * 1000 / (2 * P.PIN_R)                       # only 2 of the 4 pins carrying (hole play, misalignment)
+arm = P.PF_GAP + P.TL_CM_OFFSET                          # flange face -> the sprocket plate's mid-plane (the pin is a cantilever from the flange)
+sb_pin = F_pin * arm / (math.pi * P.PIN_D ** 3 / 32)
+PIN_SY = 1000.0                                          # hardened dowel ISO 8734 / DIN 6325 (550-650 HV surface): 1000 MPa used for its core
+p_plate = F_pin / (P.PIN_D * P.SPROCKET_T)              # pin on the 7.2 mm plate's hole wall
+SPR_SY = 300.0                                           # sprocket plate (C45 / 1045, soft between the teeth)
+p_press = 6 * F_pin * arm / (P.PIN_D * P.PF_T ** 2) + F_pin / (P.PIN_D * P.PF_T)   # pin pressed PF_T deep in the 6061 disc: couple + shear (linear bearing pressure)
+AL_SY = 240.0                                            # 6061-T6
+pf_kl = P.PF_KEY_L - P.PF_SHAFT_RECESS - 2 * P.TL_KEY_END # shaft keyway under the flange's bore
+F_kc = T_c * 1000 / (P.JOURNAL_D / 2)
+p_kh = F_kc / (3.3 * pf_kl)                              # key on the 6061 hub (keyway 3.3 deep)
+p_ks = F_kc / (4.0 * pf_kl)
+st_os = 1.3 * T_c * 1000 / Z_KW_T                        # the output shaft carries torque only
+vm_os = math.sqrt(3) * st_os
+T_gb_op = P.T_OPERATING
+gm_os = OS["Su"] / (math.sqrt(3) * 1.3 * T_gb_op * 1000 / Z_KW_T)          # Goodman with a steady torsion only: mean stress, no alternating part
+F_up = T_c * 1000 / P.GB_FOOT[1]                         # the gearbox's reaction torque lifts one row of feet (the rows are GB_FOOT[1] apart)
 n_anchor = 8
 table([
-    ["Chain pull at the limiter limit", f"{F_ch:.0f} N + {F_slack:.0f} N slack side", f"{T_tl_max:.0f} N·m on the {P.TL['z']}T sprocket"],
-    ["Overhang, housing face → chain plane", f"{a_ohl:.0f} mm", "the TL sits flange-first against the housing; its sprocket is inside the friction pack"],
-    ["Output shaft (Ø25, keyways, made from the 4140 bar)", f"σvM·Kf {vm_os:.0f} MPa", f"SF {OS['Sy']/vm_os:.1f} on yield " + check("gearbox output shaft static", OS["Sy"] / vm_os, P.STATIC_SF)],
+    ["Pin load, 2 of 4 pins carrying", f"{F_pin:.0f} N each", f"{T_c:.1f} N·m (the most the limiter passes) on PCD {2*P.PIN_R:.0f}"],
+    ["Pin bending (cantilever from the flange face)", f"{sb_pin:.0f} MPa at {arm:.0f} mm", f"Ø{P.PIN_D:g} hardened dowel, {PIN_SY:.0f} MPa used: " + check("pin coupling: pin bending", PIN_SY / sb_pin, P.STATIC_SF)],
+    ["Pin on the sprocket plate's hole", f"{p_plate:.0f} MPa", f"{P.SPROCKET_T} mm plate: " + check("pin coupling: plate bearing", SPR_SY / p_plate, 2.0)],
+    ["Pin pressed in the 6061 disc", f"{p_press:.0f} MPa", f"{P.PF_T:g} deep: " + check("pin coupling: press seat in 6061", AL_SY / p_press, 1.5)],
+    ["Pin flange key (8 x 7 x " + f"{pf_kl:.0f})", f"hub {p_kh:.0f} MPa, shaft {p_ks:.0f} MPa", check("pin flange key, 6061 hub side", AL_SY / p_kh, 1.5) + " " + check("pin flange key, shaft side", OS["Sy"] / p_ks, 1.5)],
+    ["Output shaft (Ø25, keyways, 4140)", f"σvM·Kf {vm_os:.0f} MPa (torsion only)", f"SF {OS['Sy']/vm_os:.1f} on yield " + check("gearbox output shaft static", OS["Sy"] / vm_os, P.STATIC_SF)],
     ["Same, operating (fatigue)", f"Goodman SF {gm_os:.1f}", check("gearbox output shaft fatigue", gm_os, P.FATIGUE_SF)],
-    ["Gearbox output radial load", f"{F_up:.0f} N at {a_ohl:.0f} mm", f"vs ~{FR_ALLOW:.0f} N assumed permissible for size 063 (catalogues 3-4.5 kN at mid-hub); "
-     + check("gearbox overhung load", FR_ALLOW / F_up, 1.0)],
-    ["Uplift on the gearbox / deck", f"{F_up:.0f} N", f"through 2 slotted rails (4 x M8 through-bolts, Ø24 washers under the ply) into the leg frame; "
+    ["Gearbox output radial load", "0 (torque only)", "the pins slide in their holes: no chain pull, no overhung load"],
+    ["Uplift on one row of gearbox feet", f"{F_up:.0f} N", f"the reaction torque over the {P.GB_FOOT[1]:.0f} mm foot spacing; rails (4 x M8 through-bolts, Ø24 washers under the ply) -> leg frame; "
      f"legs anchored with {n_anchor} x M8 (2 per leg): {F_up/4:.0f} N per anchor if only 2 legs carry it "
      + check("deck anchor load (M8 lag/anchor >= 2 kN)", 2000 / (F_up / 4), 2.0)],
 ], ["Item", "Value", "Note"])
-p("The drive deck is bolted down: the chain pulls the gearbox UP with the tight-side tension. Use M8 "
-  "concrete anchors into a floor, or M8 lag screws/through-bolts into a solid bench (each ≥ 2 kN pull-out). "
-  f"The permissible radial load of YOUR gearbox's output must be ≥ {F_up:.0f} N at {a_ohl:.0f} mm from the "
-  "housing face: check its catalogue (value FR2) before buying.")
+p(f"The pins pass through Ø{P.PIN_HOLE_D:g} holes ({(P.PIN_HOLE_D - P.PIN_D) / 2:.2f} mm play each side) and slide freely along them, so the coupling takes a little "
+  "misalignment without a radial load. Line the gearbox up with shaft A to within that play: shim the feet and slide them in the rail slots until the 4 pins enter "
+  "the 4 holes by hand at every position of a full turn, with a dial indicator on the flange's rim reading under ±0.2 mm. The pins are only loaded "
+  "when the motor runs: a steady torque, not a rotating bending stress.")
+p("The drive deck is bolted down: when the shafts are loaded the gearbox's reaction torque tries to roll it about the output axis. Use M8 "
+  "concrete anchors into a floor, or M8 lag screws/through-bolts into a solid bench (each ≥ 2 kN pull-out).")
 
 # ---- 3b hard-jam transient
 h("3b. Hard jam: the torque spike from the parts downstream of the limiter", 3)
@@ -213,15 +214,18 @@ _ms = math.pi / 4 * (P.SPACER_OD ** 2 - P.SPACER_BORE ** 2) * P.T_SPACER * rho
 J_blades = P.N_SLOTS * _mb * ((P.R_TIP ** 2 + 14 ** 2) / 2) * 1e-6
 J_spacers = P.N_SLOTS * _ms * ((25 ** 2 + 14.6 ** 2) / 2) * 1e-6
 J_shafts = 2 * (math.pi / 4 * 25 ** 2 * D["shaft_A_len"] * rho) * 12.5 ** 2 / 2 * 1e-6
-# two gears, GEAR_LAYERS laminations each: pitch Ø60 solid disc less the Ø25 bore (the teeth and the gaps roughly cancel at the pitch circle)
+# two bought gears: the toothed part as a pitch-Ø60 disc less the Ø25 bore (teeth and gaps roughly cancel at the pitch circle) + the hub
 _mg = math.pi / 4 * (D["gear_pitch_d"] ** 2 - P.GEAR["bore"] ** 2) * D["gear_face"] * rho
-J_gears = 2 * _mg * ((D["gear_pitch_d"] / 2) ** 2 + (P.GEAR["bore"] / 2) ** 2) / 2 * 1e-6
-r_sa = D["sprocket_A_pd"] / 2 / 1000
-J_spa = 0.25 * 0.022 ** 2
-chain_len = 2 * 0.25 + math.pi * (r_sa + D["tl_sprocket_pd"] / 2000)
-J_chain = P.CHAIN["kg_per_m"] * chain_len * r_sa ** 2
-J_tlspr = 0.6 * 0.05 ** 2 / P.CHAIN_RATIO ** 2      # the TL's sprocket (it is on the slipping side)
-J_down = J_blades + J_spacers + J_shafts + J_gears + J_spa + J_chain + J_tlspr
+_mh = math.pi / 4 * (P.GEAR_HUB_D ** 2 - P.GEAR["bore"] ** 2) * P.GEAR_HUB_L * rho
+J_gears = 2 * (_mg * ((D["gear_pitch_d"] / 2) ** 2 + (P.GEAR["bore"] / 2) ** 2) / 2 + _mh * ((P.GEAR_HUB_D / 2) ** 2 + (P.GEAR["bore"] / 2) ** 2) / 2) * 1e-6
+def _ring(od, idd, L):                                  # mass (kg) and J (kg·m²) of a steel ring, mm
+    m = math.pi / 4 * (od ** 2 - idd ** 2) * L * rho
+    return m * ((od / 2000) ** 2 + (idd / 2000) ** 2) / 2
+# the TL350 on shaft A: everything but its sprocket (the centre member, driven by the pins = the slipping side) turns with the shaft. Solid rings at the outer Ø89 (conservative):
+_tl_pp = P.TL_CM_OFFSET + P.SPROCKET_T / 2 + 0.4          # pressure plate starts here (as cad/tl350.scad)
+J_tl = (_ring(P.TL["D"], P.JOURNAL_D, P.TL_FLANGE_T) + _ring(P.TL["D"], P.TL_HUB_D, P.TL_PRESS_T) + 0.4 * _ring(P.TL["D"], P.TL_HUB_D, P.TL_SPRING_L)
+        + _ring(P.TL["D"], P.TL_HUB_D, P.TL["L"] - _tl_pp - P.TL_PRESS_T - P.TL_SPRING_L) + _ring(P.TL_HUB_D, P.JOURNAL_D, P.TL["L"]))   # flange, pressure plate, disc springs (40 % solid), nut, hub
+J_down = J_blades + J_spacers + J_shafts + J_gears + J_tl
 G = 80770.0
 L_k = abs((D["x_gear_in"] + D["x_gear_out"]) / 2) + P.END_CLEAR + P.T_BLADE / 2   # shortest twist path: B's gear to B's first blade (stiffest)
 k_tors = G * 0.1154 * P.HEX_AF ** 4 / L_k / 1000                 # N*m/rad, hex all the way (stiffer = conservative)
@@ -229,27 +233,27 @@ dT = w_out * math.sqrt(J_down * k_tors)
 T_PEAK = P.T_LIMIT + dT
 TRANSIENT_SF = 1.2
 p("If something hard (a screw, a nut) stops the blades instantly, the limiter slips, but the parts "
-  "after it (blades, spacers, shafts, gears, sprocket, chain, the limiter's own sprocket) must still be "
-  "stopped by the jam. With a rigid jam and only the shaft's torsion as a spring (both pessimistic), "
-  "the extra torque is ΔT = ω·√(J·k):")
+  "after it (blades, spacers, shafts, gears, and the limiter's own hub, flange, pressure plate, springs and nut) must still be "
+  "stopped by the jam. The limiter is ON SHAFT A, so its own sprocket plate, the pins, the pin flange, the gearbox and the motor are all on its driving side. "
+  "With a rigid jam and only the shaft's torsion as a spring (both pessimistic), the extra torque is ΔT = ω·√(J·k):")
 table([
     ["Inertia after the limiter J", f"{J_down*1e4:.1f} x10⁻⁴ kg·m²",
      f"blades {J_blades*1e4:.1f}, spacers {J_spacers*1e4:.1f}, shafts {J_shafts*1e4:.1f}, gears {J_gears*1e4:.1f}, "
-     f"sprocket {J_spa*1e4:.1f}, chain {J_chain*1e4:.1f}, TL sprocket {J_tlspr*1e4:.1f}"],
+     f"TL350 on A (all but its sprocket) {J_tl*1e4:.1f}"],
     ["Torsional stiffness k", f"{k_tors:,.0f} N·m/rad", f"hex AF {P.HEX_AF} over {L_k:.0f} mm: the shortest path from a torque input (B's gear) to a blade"],
     ["Shaft speed ω", f"{w_out:.2f} rad/s", f"{n_out:.1f} rpm"],
     ["Spike ΔT", f"**{dT:.0f} N·m**", ""],
     ["Peak = T_LIMIT + ΔT", f"**{T_PEAK:.0f} N·m**", f"checked below with SF ≥ {TRANSIENT_SF} on yield and bearing s0 ≥ 1.0"],
 ], ["Item", "Value", "Note"])
-p("Without the limiter on the output side, the worm and the gearbox pulley would add 50-150 N·m more "
-  "(their inertia is multiplied by the gear ratio squared), which is why the limiter sits after the "
-  "gearbox and not at the belt.")
+p("Why the limiter is on shaft A and not on the gearbox: there, the pin flange and the TL's sprocket would be after it and add to the spike. "
+  "Before the gearbox, the worm would add far more (its inertia is multiplied by the ratio squared).")
 
 # ------------------------------------------------------------------ 4 shafts
 h("4. Shafts")
 x_b1, x_b2 = D["bearing_x_drive"], D["bearing_x_free"]
+x_bo = D["bearing_x_ob"]                 # the OUTBOARD bearing (2026-11-13): each shaft runs in THREE bearings
 x_g = (D["x_gear_in"] + D["x_gear_out"]) / 2
-x_spr = D["x_chain"]          # the chain pulls at the tooth plate (outer end of the sprocket hub)
+x_spr = D["x_cm"]             # the torque enters at the TL's sprocket plate (the pins): no radial force
 R_JAM = P.R_ROOT
 K_SEP = 0.3
 PRESS = math.radians(20)
@@ -259,7 +263,7 @@ r_p = D["gear_pitch_d"] / 2
 def section(x, shaft="A"):
     if D["hex_x0"] <= x <= D["hex_x1"]:
         return "hex", Z_HEX_B, Z_HEX_T, A_HEX, 1.0, 1.0
-    if D["x_gear_out"] <= x <= D["x_gear_in"] or (shaft == "A" and D["x_sprocket_out"] <= x <= D["x_sprocket_in"]):
+    if D["x_gear_hub_out"] <= x <= D["x_gear_in"] or (shaft == "A" and D["x_sprocket_out"] <= x <= D["x_sprocket_in"]):
         return "keyway", Z_KW_B, Z_KW_T, A_KW, 1.6, 1.3
     return "round", Z_RD_B, Z_RD_T, A_RD, 1.0, 1.0
 
@@ -277,42 +281,97 @@ def jam_force(T, phi):
     return (F * math.sin(a) - K_SEP * F * math.cos(a), -F * math.cos(a) - K_SEP * F * math.sin(a))
 
 
+# ---- the shaft on THREE bearings (outboard x_bo, drive x_b1, free x_b2): continuous beam, uniform Ø25 stiffness (the hex is stiffer: this puts a little
+# more load on the middle bearing, which is conservative for the bearings and about neutral for the stresses).  Base beam = the two outer bearings; the drive
+# bearing's reaction is the redundant: R1 = -sum(F_i * c1(x_i)) / c1(x_b1), where c1 is the deflection line of the base beam under a unit force at x_b1 (Maxwell).
+EI_UNI = S["E"] * math.pi * P.JOURNAL_D ** 4 / 64
+_DX = 0.5
+_GRID = [x_bo - 50 + _DX * i for i in range(int((x_b2 - x_bo + 50) / _DX) + 1)]
+
+
+def defl_line(forces):
+    """deflection (mm, in the force direction) along _GRID of the shaft under `forces` [(x, F)] that are in equilibrium WITH their support reactions; y = 0 at x_bo and x_b2"""
+    th, y = [0.0], [0.0]
+    M = [sum(f * (g - xf) for xf, f in forces if xf < g) for g in _GRID]
+    for i in range(1, len(_GRID)):
+        th.append(th[-1] + 0.5 * (M[i] + M[i - 1]) / EI_UNI * _DX)
+    for i in range(1, len(_GRID)):
+        y.append(y[-1] + 0.5 * (th[i] + th[i - 1]) * _DX)
+    yo, y2 = y_at(_GRID, y, x_bo), y_at(_GRID, y, x_b2)
+    return [yy - yo - (y2 - yo) * (g - x_bo) / (x_b2 - x_bo) for g, yy in zip(_GRID, y)]
+
+
+def y_at(xs, ys, x):
+    i = max(0, min(len(xs) - 2, int((x - xs[0]) / (xs[1] - xs[0]))))
+    t = (x - xs[i]) / (xs[i + 1] - xs[i])
+    return ys[i] + t * (ys[i + 1] - ys[i])
+
+
+def outer_reactions(fl):
+    """reactions at x_bo and x_b2 that hold the forces fl [(x, F)] in equilibrium"""
+    R2 = -sum(f * (x - x_bo) for x, f in fl) / (x_b2 - x_bo)
+    return -sum(f for x, f in fl) - R2, R2
+
+
+_ro, _r2 = outer_reactions([(x_b1, 1.0)])
+C1 = defl_line([(x_b1, 1.0), (x_bo, _ro), (x_b2, _r2)])
+C1_11 = y_at(_GRID, C1, x_b1)
+
+
+def reactions3(lc):
+    """bearing forces ON the shaft (outboard, drive, free) for one load component [(x, F)], rigid bearings in line"""
+    R1 = -sum(f * y_at(_GRID, C1, x) for x, f in lc) / C1_11
+    Ro, R2 = outer_reactions(lc + [(x_b1, R1)])
+    return Ro, R1, R2
+
+
+# forced bending: the drive bearing seat off the line through the other two by DELTA_MIS (each seat +-BORE_POS_TOL)
+DELTA_MIS = 2 * P.BORE_POS_TOL
+R_MIS = DELTA_MIS / C1_11            # force the shaft needs to reach the misplaced seat
+_mo, _m2 = outer_reactions([(x_b1, R_MIS)])
+def m_mis(x):
+    return sum(f * (x - xf) for xf, f in [(x_bo, _mo), (x_b1, R_MIS), (x_b2, _m2)] if xf < x)
+
+
+def shaft_loads(shaft, T_A, T_B, x_c, phi=180):
+    """point loads (x, fy, fz) on one shaft in its own frame (see shaft_case)"""
+    Fg = T_B * 1000 / r_p
+    if shaft == "A":
+        fy, fz = jam_force(T_A, phi)
+        return [(x_c, fy, fz), (x_g, Fg * math.tan(PRESS), Fg), (x_spr, 0.0, 0.0)]             # the pin coupling: torque only
+    fy, fz = jam_force(T_B, phi)
+    return [(x_c, fy, fz), (x_g, Fg * math.tan(PRESS), -Fg)]
+
+
 def shaft_case(shaft, T_A, T_B, x_c, phi=180):
     """Point loads on one shaft in its own (y, z) frame; y points away from the other shaft.
 
     A: jam force (jam_force) at x_c; gear force from driving B, T_B/r_p up (+z) + radial (+y) at the
-       gear; chain pull (T_A+T_B)/r_sprocket DOWN (-z) at the sprocket (the gearbox is below).
+       gear; the drive torque enters at the TL350's sprocket plate through the pins (no radial force: pin coupling).
     B: jam force at x_c; driven-gear force DOWN + radial at the gear.
     """
+    loads = shaft_loads(shaft, T_A, T_B, x_c, phi)
     if shaft == "A":
-        Fg = T_B * 1000 / r_p
-        fy, fz = jam_force(T_A, phi)
-        loads = [(x_c, fy, fz), (x_g, Fg * math.tan(PRESS), Fg),
-                 (x_spr, 0.0, -(T_A + T_B) * 1000 / (D["sprocket_A_pd"] / 2))]
-        # torque enters at the sprocket (outermost); the gear takes T_B off, T_A goes on to the bite
+        # torque enters at the TL's sprocket plate (outermost); the gear takes T_B off, T_A goes on to the bite
         torque = lambda x: ((T_A + T_B) if x_spr <= x < x_g else (T_A if x_g <= x <= x_c else 0.0))  # noqa: E731
     else:
-        Fg = T_B * 1000 / r_p
-        fy, fz = jam_force(T_B, phi)
-        loads = [(x_c, fy, fz), (x_g, Fg * math.tan(PRESS), -Fg)]
         torque = lambda x: (T_B if x_g <= x <= x_c else 0.0)  # noqa: E731
-    L = x_b2 - x_b1
-    R = []
+    R, Ms_all = [], []
+    xs = []
     for comp in (1, 2):
-        m2 = sum(F[comp] * (F[0] - x_b1) for F in loads) / L
-        R.append((sum(F[comp] for F in loads) - m2, m2))
-    R1, R2 = math.hypot(R[0][0], R[1][0]), math.hypot(R[0][1], R[1][1])
-    pts, x = [], min(F[0] for F in loads) - 1
+        lc = [(F[0], F[comp]) for F in loads]
+        Ro, R1, R2 = reactions3(lc)
+        R.append((Ro, R1, R2))
+    R_o, R_1, R_2 = (math.hypot(R[0][i], R[1][i]) for i in range(3))
+    pts, x = [], min(min(F[0] for F in loads), x_bo) - 1
     while x <= x_b2:
         Ms = []
         for comp in (1, 2):
-            m = sum(F[comp] * (x - F[0]) for F in loads if F[0] < x)
-            if x_b1 < x:
-                m -= R[comp - 1][0] * (x - x_b1)
-            Ms.append(m)
-        pts.append((x, math.hypot(*Ms), torque(x)))
+            fl = [(F[0], F[comp]) for F in loads] + [(x_bo, R[comp - 1][0]), (x_b1, R[comp - 1][1]), (x_b2, R[comp - 1][2])]
+            Ms.append(sum(f * (x - xf) for xf, f in fl if xf < x))
+        pts.append((x, math.hypot(*Ms) + abs(m_mis(x)), torque(x)))     # + the forced bending of a misaligned middle bearing seat (any plane: added, conservative)
         x += 2.0
-    return (R1, R2), pts
+    return (R_1 + R_MIS, R_2 + R_MIS, R_o + R_MIS), pts
 
 
 SHARES = [("all on A", 1.0, 0.0), ("all on B", 0.0, 1.0), ("split evenly", 0.5, 0.5)]
@@ -329,7 +388,7 @@ def worst(shaft, T_A, T_B, mat, fatigue):
     best = dict(sf=1e9, R=0)
     for k, phi in ((k, ph) for k in range(0, int(D["stack_A"]) + 1, 4) for ph in JAM_PHI):
         x_c = P.END_CLEAR + 0.5 + k
-        (R1, R2), pts = shaft_case(shaft, T_A, T_B, x_c, phi)
+        (R1, R2, Ro), pts = shaft_case(shaft, T_A, T_B, x_c, phi)
         for x, Mb, T in pts:
             name, Zb, Zt, A, kfb, kft = section(x, shaft)
             sb, st, sax = Mb / Zb, T * 1000 / Zt, P.CLAMP_N / A
@@ -343,8 +402,8 @@ def worst(shaft, T_A, T_B, mat, fatigue):
                 sf = mat["Sy"] / vm
             if sf < best["sf"]:
                 best.update(sf=sf, vm=vm, x=x, sec=name, sb=sb, st=st, sax=sax, Se=Se)
-        if max(R1, R2) > best["R"]:
-            best.update(R=max(R1, R2), R1=R1, R2=R2)
+        if max(R1, R2, Ro) > best["R"]:
+            best.update(R=max(R1, R2, Ro), R1=R1, R2=R2, Ro=Ro)
     return best
 
 
@@ -387,10 +446,13 @@ def allowable(mat, fatigue):
     return lo
 
 
-p(f"Beam model: simply supported at the bearing centres (x = {x_b1:.0f} and {x_b2:.1f}); "
+p(f"Beam model: a continuous beam on THREE bearings: the outboard bearing (x = {x_bo:.0f}), the drive-end bearing (x = {x_b1:.1f}) and the free-end bearing (x = {x_b2:.1f}), "
+  f"uniform Ø{P.JOURNAL_D:.0f} stiffness for the redundant reaction. The drive bearing's seat is taken {DELTA_MIS:.2f} mm off the line through the other two "
+  f"(each seat ±{P.BORE_POS_TOL} from its DRO position): forcing the shaft into it takes {R_MIS:.0f} N and bends it by up to {abs(m_mis(x_b1))/1000:.1f} N·m, "
+  "which is added to every section's bending moment and every bearing load (conservative). "
   f"point loads from the jam (scanned along the whole chamber AND all round each shaft every 15°, "
-  f"acting at the blade root radius {P.R_ROOT:.0f} mm), the gear (x = {x_g:.1f}) and, on A, the chain "
-  f"pull at the sprocket (x = {x_spr:.1f}, down toward the gearbox). Separating force 30 % of the jam force. "
+  f"acting at the blade root radius {P.R_ROOT:.0f} mm) and the gear (x = {x_g:.1f}); on A the drive torque enters at the TL350's sprocket plate "
+  f"(x = {x_spr:.1f}) through the pin coupling, with no radial force. Separating force 30 % of the jam force. "
   "**Torque sharing between the shafts is not assumed:** every case is run with all the torque "
   "on A, all on B, and split evenly. The M10 clamp adds "
   f"{P.CLAMP_N/1000:.0f} kN of tension ({P.CLAMP_N/A_RD:.0f} MPa in Ø25), included as a static "
@@ -405,7 +467,7 @@ for label, sh, fat, b in all_cases(SM, P.T_OPERATING, P.T_LIMIT):
     kind = f"Goodman (Se {b['Se']:.0f})" if fat else "yield"
     rows.append([label, sh, f"{b['sec']} @ x={b['x']:.0f}", f0(b["sb"]), f0(b["st"]), f0(b["sax"]),
                  f"{b['sf']:.2f} on {kind}", check(f"shaft {sh} {label}", b["sf"], need)])
-    bearing_rows.append([label, sh, f0(b["R1"]), f0(b["R2"]), f0(b["R"])])
+    bearing_rows.append([label, sh, f0(b["R1"]), f0(b["R2"]), f0(b["Ro"]), f0(b["R"])])
 table(rows, ["Case", "Shaft", "Worst section", "σb MPa", "τ MPa", "σ clamp MPa", "SF", ""])
 
 h("4b. Torque allowed by each shaft steel", 3)
@@ -440,21 +502,16 @@ p(f"Mid-span deflection with the full jam force {F_j:.0f} N on one shaft: {defl:
 h("Keys (8 x 7, shaft keyway 4 deep, key 3 mm into the hub; gear: top edges chamfered)", 3)
 F_key = T_PEAK * 1000 / (d / 2)       # keys checked at the hard-jam peak
 rows = []
-for name, Lk, hub_sy in [("Sprocket on A (mild-steel hub)", P.SPROCKET_A["hub_L"] - 4, 300.0),
-                         ("Gear (A and B), 4 layers, no hub", D["gear_face"] - 4, P.GEAR["Sy"])]:
-    # the gear keyway is milled with a Ø3 end mill (corner R1.5): the key's top edges are chamfered 1.5, so only 3 - 1.5 of its flank bears on the gear
-    h_hub = 3.0 - (P.GEAR_KEY_CHAMFER if name.startswith("Gear") else 0.0)
+for name, Lk, hub_sy in [("TL350 hub on A (bought, keyed bore 25)", P.TL["L"] - 2 * P.TL_KEY_END, 300.0),
+                         ("Gear (A and B), bought, hub + teeth", D["gear_face"] + P.GEAR_HUB_L - 4, P.GEAR["Sy"])]:
+    h_hub = 3.0
     p_sh, p_hub = F_key / (4 * Lk), F_key / (h_hub * Lk)
     rows.append([name, f0(Lk), f0(F_key / (8 * Lk)), f0(p_sh), f0(p_hub),
                  check(f"key {name} shaft side", SM["Sy"] / p_sh, 1.5),
                  check(f"key {name} hub side", hub_sy / p_hub, 1.2)])
 table(rows, ["Key", "L mm", "τ key MPa", "p shaft MPa", "p hub MPa", "shaft SF≥1.5", "hub SF≥1.2"])
-p(f"The made gear's keyway is cut on the CNC4030 with a Ø{P.GEAR_KEY_TOOL_D:g} end mill, so its bottom corners have R{P.GEAR_KEY_TOOL_D/2:g}. "
-  f"**The 8 x 7 key must have its two top edges (the ones in the gear keyway) chamfered {P.GEAR_KEY_CHAMFER:g} x 45° or more** "
-  f"(file or mill them; the key is bought bar or cut from your flat), otherwise it sits on the corner radius and is not seated. The chamfer leaves "
-  f"{3.0-P.GEAR_KEY_CHAMFER:g} mm of flank, which the gear row uses as bearing height. All four layers of a gear are keyed one by one, so they share the load. "
-  f"Keys checked at the hard-jam peak {T_PEAK:.0f} N·m. The torque limiter's own key (on the gearbox "
-  f"output shaft you turn from the Ø30 bar) carries {P.TL_SET_AT_TL*(1+P.TL_SCATTER):.0f} N·m at most.")
+p(f"The gears' keyways are broached (8 mm, the same broach as the pin flange) through the re-bored Ø25: the key runs the whole bore, hub and teeth. "
+  f"Keys checked at the hard-jam peak {T_PEAK:.0f} N·m. The pin flange's key (on the output shaft) carries {P.T_LIMIT:.0f} N·m at most (§3a).")
 
 # ------------------------------------------------------------------ 5 blades
 h("5. Blades")
@@ -519,109 +576,177 @@ p(f"The shaft side of the same contact ({P.SHAFT_MATERIAL}) sees the same pressu
 G = P.GEAR
 m_g, z_g, al_g = G["module"], G["z"], math.radians(G["alpha"])
 face = D["gear_face"]
-h(f"6. Gears (MADE by you: module {m_g:g}, z = {z_g}, {P.GEAR_LAYERS} layers of {P.GEAR_LAYER_T} mm, case-hardened)")
+h(f"6. Gears (bought: module {m_g:g}, z = {z_g}, face {face:.0f}, {G['material']})")
 e_cut = G["cut_extra"]
-s_std = math.pi * m_g / 2                          # circular tooth thickness on the pitch circle, standard
-dt = 2 * e_cut * math.tan(al_g)                     # thinning of each tooth by cutting e_cut deeper (rack profile shift)
-s_cut = s_std - dt
+s_std = math.pi * m_g / 2
+dt = 2 * e_cut * math.tan(al_g)                     # the bought gears' tooth thinning as modelled (cad/gear.scad)
 j_t = 2 * dt                                        # circumferential backlash of the pair at the nominal centre distance
-j_n = j_t * math.cos(al_g)
 r_b = D["gear_pitch_d"] / 2 * math.cos(al_g)
 r_a = D["gear_od"] / 2
 eps = (2 * math.sqrt(r_a ** 2 - r_b ** 2) - P.C * math.sin(al_g)) / (math.pi * m_g * math.cos(al_g))
-turns = lambda ratio: ratio / z_g                  # handwheel turns per tooth for a rotary table of this ratio
+span_g = x_b1 - x_bo
 table([
-    ["Module / teeth / pressure angle", f"{m_g:g} / {z_g} / {G['alpha']:.0f}°", f"{G['cutter']} of your set ({G['cutter_set']})"],
-    ["Pitch Ø / outside Ø", f"{D['gear_pitch_d']:.1f} / {D['gear_od']:.1f} mm", f"pitch Ø = C = {P.C:.0f}: 1:1, no profile shift"],
-    ["Root Ø: standard / as cut", f"{D['gear_root_d_std']:.2f} / {D['gear_root_d']:.2f} mm",
-     f"whole depth standard 2.25 m = {2.25*m_g:.3f}; **cut {D['gear_cut_depth']:.3f} deep** (0.10 deeper on both gears)"],
-    ["Base Ø", f"{2*r_b:.2f} mm", "the root circle is below it: the flank is a radial line down to the root"],
-    ["Face width", f"{face:.1f} mm", f"{P.GEAR_LAYERS} layers of {P.GEAR_LAYER_T:.2f} (faced from the 10 mm flat); no hub. A {D['gear_spacer_L']:.1f} mm Ø{P.GEAR_SPACER_D:.0f} spacer sleeve (Ø55 bar) follows it: "
-     f"gear + sleeve = {P.GEAR_STACK_L:.0f} = the old 30 + 18 hub, so sprocket, chain plane, gearbox and shafts stay put"],
-    ["Tooth thickness on the pitch circle", f"{s_cut:.4f} mm", f"standard {s_std:.4f}; 2·0.10·tan{G['alpha']:.0f}° = {dt:.4f} thinner"],
-    ["**Backlash of the pair** (circumferential)", f"**{j_t:.4f} mm**", f"= 2 thinnings of 2·0.10·tan{G['alpha']:.0f}° each; normal {j_n:.4f}; "
-     f"{math.degrees(j_t/(D['gear_pitch_d']/2)):.3f}° of play between the shafts (±{math.degrees(j_t/D['gear_pitch_d']):.3f}° about the mesh)"],
-    ["Transverse contact ratio", f"{eps:.2f}", "two to one pairs of teeth share the load"],
-    ["Indexing", f"{360/z_g:.0f}° per tooth", f"rotary table of ratio R: **turns = R/{z_g}** (90:1 -> {turns(90):g}, 80:1 -> {turns(80):g}, 72:1 -> {turns(72):g}, 60:1 -> {turns(60):g}, 40:1 -> {turns(40):g}; "
-     f"the handwheel turns through {360*turns(90):.0f}° per tooth on a 90:1)"],
+    ["Module / teeth / pressure angle", f"{m_g:g} / {z_g} / {G['alpha']:.0f}°", "bought spur gear, hardened teeth; re-bored Ø25 H7, 8 mm keyway broached (like the pin flange)"],
+    ["Pitch Ø / outside Ø / root Ø", f"{D['gear_pitch_d']:.0f} / {D['gear_od']:.0f} / {D['gear_root_d_std']:.0f} mm", f"pitch Ø = C = {P.C:.0f}: 1:1"],
+    ["Face / hub", f"{face:.0f} mm / Ø{P.GEAR_HUB_D:.0f} x {P.GEAR_HUB_L:.0f} (APPROX)", "hub outboard; teeth next to the drive collar"],
+    ["Mounting", f"between the drive bearing (x = {x_b1:.1f}) and the outboard bearing (x = {x_bo:.0f}): {span_g:.1f} mm apart", "straddled, not overhung (review 7)"],
+    ["Backlash of the pair (as modelled)", f"{j_t:.3f} mm", "measure yours on the 60.00 centre distance: 0.05-0.30 is fine"],
+    ["Transverse contact ratio", f"{eps:.2f}", "≥ 1.2"],
 ], ["Item", "Value", "Note"])
-p("The backlash comes only from the extra cutting depth: a form cutter plunged 0.10 deeper cuts each space wider by 2·0.10·tan20° = "
-  f"{dt:.4f} mm at the pitch circle, so each tooth is {dt:.4f} mm thinner, and two such teeth leave {j_t:.4f} mm. (The brief's "
-  "'2·0.10·tan20°·2 ≈ 0.07 mm' is only the first factor, 0.0728 per gear; the pair has twice that, 0.146 mm. The OpenSCAD mesh check C31off confirms "
-  "it: the model gears turn ±0.135° against each other without touching and collide at ±0.145°, the predicted ±0.139°.)")
-# tolerance stack on the backlash: cutter depth +-0.03 on each gear, centre distance -0.02, bore clearance 0.08 -> eccentricity 0.04 each
-dep_tol, cd_tol, bore_play = 0.03, 0.02, 0.08
-j_min = j_t - 2 * math.tan(al_g) * (2 * dep_tol + cd_tol + bore_play)
-p(f"Worst-case minimum backlash: cutting depth ±{dep_tol} on each gear (read the Z DRO), centre distance −{cd_tol} (bearing seats 60.00 ±0.02), "
-  f"bore play {bore_play} (the bore is finished 0.03-0.08 over the shaft, so each gear sits up to half of that off its axis: together {bore_play}): "
-  f"{j_t:.3f} − 2·tan{G['alpha']:.0f}°·(2·{dep_tol} + {cd_tol} + {bore_play}) = **{j_min:.3f} mm** "
-  f"({check('gear minimum backlash (tolerance stack)', j_min, 0.02)}). Too much depth is therefore not forgiving: do not cut deeper than {D['gear_cut_depth']+dep_tol:.3f}.")
-p()
-# -- bending (Lewis)
+check("gear contact ratio", eps, 1.2)
+cd_tol, bore_play = 0.02, 0.08
+j_min = j_t - 2 * math.tan(al_g) * (cd_tol + bore_play)
+p(f"Minimum backlash with the bearing seats −{cd_tol} and the gears' bore play {bore_play}: {j_t:.3f} − 2·tan{G['alpha']:.0f}°·({cd_tol} + {bore_play}) = {j_min:.3f} mm "
+  f"({check('gear minimum backlash', j_min, 0.02)}); a bought pair usually has more.")
+
+# -- face load factor, ISO 6336-1 method C, from the ACTUAL mounting
+def gear_tilt(T):
+    """f_sh (µm): relative tilt of the two gears across the face from the shafts' bending, all torque through the gears ("all on B": the drive torque on A,
+    the jam on B, scanned along the chamber and round the shaft), each shaft on its three bearings; the worst over the scan"""
+    worst = 0.0
+    for k in range(0, int(D["stack_A"]) + 1, 4):
+        x_c = P.END_CLEAR + 0.5 + k
+        for phi in JAM_PHI:
+            v = [0.0, 0.0]
+            for sh, sy in (("A", -1.0), ("B", 1.0)):
+                loads = shaft_loads(sh, 0.0, T, x_c, phi)
+                for comp in (1, 2):
+                    lc = [(F[0], F[comp]) for F in loads]
+                    Ro, R1, R2 = reactions3(lc)
+                    yl = defl_line(lc + [(x_bo, Ro), (x_b1, R1), (x_b2, R2)])
+                    tilt = y_at(_GRID, yl, D["x_gear_in"]) - y_at(_GRID, yl, D["x_gear_out"])
+                    v[comp - 1] += (sy if comp == 1 else 1.0) * tilt * (1 if sh == "A" else -1)
+            worst = max(worst, math.hypot(*v) * 1000)
+    return worst
+
+
+fHb5 = 0.07 * math.sqrt(D["gear_pitch_d"]) + 0.45 * math.sqrt(face) + 3.0          # ISO 1328-1 helix slope deviation, grade 5
+fHb = fHb5 * 2 ** ((P.GEAR_ISO_GRADE - 5) / 2)
+f_bore = math.sqrt(2) * P.BORE_POS_TOL / span_g * face * 1000                    # both shafts: their drive and outboard seats each within +-tol after the plate is lined up by the shafts
+f_ma = math.hypot(fHb, f_bore)
+C_GAM = 20.0                                                                       # mesh stiffness, N/(mm·µm), steel spur gears (ISO 6336-1)
+h_t = 2.25 * m_g
+N_F = (face / h_t) ** 2 / (1 + face / h_t + (face / h_t) ** 2)
+
+
+def k_face(T, f_sh):
+    """ISO 6336-1 method C: K_Hbeta, K_Fbeta for torque T (all through the gears) with shaft misalignment f_sh (µm)"""
+    w = T * 1000 / r_p / face
+    F_bx = 1.33 * f_sh + f_ma
+    F_by = F_bx - min(0.15 * F_bx, 6.0)                                            # running-in allowance for surface-hardened steel
+    q = C_GAM * F_by / (2 * w)
+    KH = 1 + q if q <= 1 else 2 * math.sqrt(q)
+    return KH, KH ** N_F, F_bx, F_by
+
+
+fsh_op, fsh_lim, fsh_pk = gear_tilt(P.T_OPERATING), gear_tilt(P.T_LIMIT), gear_tilt(T_PEAK)
+KH_op, KF_op, Fbx_op, Fby_op = k_face(P.T_OPERATING, fsh_op)
+KH_lim, KF_lim, _, _ = k_face(P.T_LIMIT, fsh_lim)
+KH_pk, KF_pk, Fbx_pk, Fby_pk = k_face(T_PEAK, fsh_pk)
+KH_half, _, _, _ = k_face(P.T_OPERATING / 2, fsh_op / 2)
+p("**Face load factor (how unevenly the load spreads across the face).** Review 7 asked for it from the actual mounting, not assumed. ISO 6336-1 method C: "
+  f"F_βx = 1.33·f_sh + f_ma, F_βy = F_βx − y_β (running-in, y_β = 0.15·F_βx ≤ 6 µm), K_Hβ = 1 + c_γ·F_βy/(2·F/b) (≤ 2) else 2·√(c_γ·F_βy/(2·F/b)), "
+  f"K_Fβ = K_Hβ^N with N = {N_F:.2f} (b/h = {face/h_t:.2f}), c_γ = {C_GAM:g} N/(mm·µm).")
+table([
+    ["f_sh: the shafts' bending at the gears (3-bearing beam, all torque through the gears, worst jam place)", f"{fsh_op:.1f} / {fsh_lim:.1f} / {fsh_pk:.1f} µm", f"at {P.T_OPERATING:.0f} / {P.T_LIMIT:.0f} / {T_PEAK:.0f} N·m"],
+    [f"f_Hβ of a grade-{P.GEAR_ISO_GRADE} gear (ISO 1328-1, d {D['gear_pitch_d']:.0f}, b {face:.0f}): ASSUMED for a cheap bought gear", f"{fHb:.1f} µm", "grade 5 value x √2 per grade"],
+    [f"bearing seats ±{P.BORE_POS_TOL} over {span_g:.1f} mm, both shafts (RSS)", f"{f_bore:.1f} µm", "the outboard plate is lined up by the shafts at assembly (DESIGN.md §7.2)"],
+    ["f_ma = √(f_Hβ² + seats²)", f"{f_ma:.1f} µm", ""],
+    ["K_Hβ / K_Fβ at the operating torque", f"{KH_op:.2f} / {KF_op:.2f}", f"F_βy {Fby_op:.1f} µm"],
+    ["K_Hβ / K_Fβ at the jam limit", f"{KH_lim:.2f} / {KF_lim:.2f}", ""],
+    ["K_Hβ / K_Fβ at the hard-jam peak", f"{KH_pk:.2f} / {KF_pk:.2f}", f"F_βy {Fby_pk:.1f} µm"],
+], ["Item", "Value", "Note"])
+p("These factors are high (a 2-3 times overload at one end of the face) because a cheap gear's helix error and ±0.02 mm seats are large next to the "
+  "few µm the teeth deflect under load. They are taken as they are: no crowning, no contact-pattern correction is assumed.")
+
+# -- bending (Lewis with K_Fbeta)
 Ft = P.T_LIMIT * 1000 / r_p
 Yb = face * m_g * G["lewis_Y"]
-k_thin = (s_cut / s_std) ** 2                      # tooth bending stress grows with 1/s^2: the thinned tooth carries ~6 % more
-sg, sg_pk, sg_op = Ft / Yb / k_thin, T_PEAK * 1000 / r_p / Yb / k_thin, P.T_OPERATING * 1000 / r_p / Yb / k_thin
-Se_g = endurance(G["Su"], 7.0)
+sg, sg_pk, sg_op = KF_lim * Ft / Yb, KF_pk * T_PEAK * 1000 / r_p / Yb, KF_op * P.T_OPERATING * 1000 / r_p / Yb
+Se_g = endurance(G["Su"], 8.0)
 Kf_g = 1.5
 sg_allow = 2 / (Kf_g * (1 / Se_g + 1 / G["Su"]))     # pulsating (0 .. max) root bending, Goodman, Kf on both components
-p(f"**Bending (Lewis).** σ = Ft / (b·m·Y) / k_thin, b = {face:.1f} mm (all {P.GEAR_LAYERS} layers share the load: they are cut together, keyed one by one, and clamped), m = {m_g:g}, "
-  f"Y = {G['lewis_Y']} for z = {z_g}, 20° full-depth teeth (Shigley's Mechanical Engineering Design, Lewis form-factor table: z = 38 → 0.384, z = 43 → 0.397, interpolated), "
-  f"k_thin = (s_cut/s_std)² = {k_thin:.3f} for the thinned teeth. Material: your {S['name'].split(' (')[0]} flat, Sy {G['Sy']:.0f}; the thin hardened case is ignored. "
-  f"All the torque is taken through the gears (conservative: the gears only pass shaft B's share).")
+p(f"**Bending (Lewis).** σ = K_Fβ·Ft / (b·m·Y), b = {face:.0f}, m = {m_g:g}, Y = {G['lewis_Y']} for z = {z_g} (Shigley's Lewis form factor, load at the tip). "
+  f"Material: the CORE of C45 (Sy {G['Sy']:.0f}, Su {G['Su']:.0f}); the hardened tooth surface is ignored. All the torque is taken through the gears.")
 table([
-    ["Jam, all torque through the gears", f0(Ft) + " N", f0(sg) + " MPa", f"SF {G['Sy']/sg:.2f} on yield",
-     check("gear Lewis jam", G["Sy"] / sg, P.STATIC_SF)],
-    [f"Hard-jam peak {T_PEAK:.0f} N·m", f0(T_PEAK * 1000 / r_p) + " N", f0(sg_pk) + " MPa", f"SF {G['Sy']/sg_pk:.2f} on yield",
-     check("gear Lewis hard-jam peak", G["Sy"] / sg_pk, TRANSIENT_SF)],
-    [f"Operating {P.T_OPERATING:.0f} N·m", f0(Ft * P.T_OPERATING / P.T_LIMIT) + " N", f0(sg_op) + " MPa",
+    ["Jam limit, all through the gears", f0(Ft) + " N", f0(sg) + " MPa", f"SF {G['Sy']/sg:.2f} on yield", check("gear Lewis jam", G["Sy"] / sg, P.STATIC_SF)],
+    [f"Hard-jam peak {T_PEAK:.0f} N·m", f0(T_PEAK * 1000 / r_p) + " N", f0(sg_pk) + " MPa", f"SF {G['Sy']/sg_pk:.2f} on yield", check("gear Lewis hard-jam peak", G["Sy"] / sg_pk, TRANSIENT_SF)],
+    [f"Operating {P.T_OPERATING:.0f} N·m", f0(P.T_OPERATING * 1000 / r_p) + " N", f0(sg_op) + " MPa",
      f"SF {sg_allow/sg_op:.2f} vs {sg_allow:.0f} MPa tooth fatigue", check("gear Lewis operating (fatigue)", sg_allow / sg_op, P.FATIGUE_SF)],
-], ["Case", "Ft", "Lewis σ", "Margin", ""])
-p(f"Tooth fatigue allowable {sg_allow:.0f} MPa: Se = {Se_g:.0f} MPa (Marin-corrected 0.5·Su, Su {G['Su']:.0f}), pulsating load, Goodman, root stress concentration Kf = {Kf_g}. "
+], ["Case", "Ft", "σ", "Margin", ""])
+p(f"Tooth fatigue allowable {sg_allow:.0f} MPa: Se = {Se_g:.0f} MPa (Marin-corrected 0.5·Su of the core), pulsating load, Goodman, Kf = {Kf_g}. "
   f"Required: yield SF ≥ {P.STATIC_SF} at the jam limit, ≥ {TRANSIENT_SF} at the hard-jam peak, Goodman ≥ {P.FATIGUE_SF} at the operating torque. "
-  f"With only 3 layers (29.4 mm) the peak SF would be {G['Sy']/(sg_pk*face/(3*P.GEAR_LAYER_T)):.2f}, below {TRANSIENT_SF}: that is why there are 4.")
-p()
-# -- contact (Hertz, ISO 6336 simplified)
-ZE, ZH, uu = 189.8, 2.495, 1.0                      # ZE sqrt(MPa) steel on steel; ZH = sqrt(2/(sin a cos a)) = 2.495 at 20 deg, no helix, no shift
-assert abs(ZH - math.sqrt(2 / (math.sin(al_g) * math.cos(al_g)))) < 2e-3
-sigH = lambda T: ZE * ZH * math.sqrt(T * 1000 / r_p / (face * D["gear_pitch_d"]) * (uu + 1) / uu)
-sH_lim_hard, sH_lim_soft = G["sigma_H_lim"], 300.0
-sH_op, sH_jam, sH_pk = sigH(P.T_OPERATING), sigH(P.T_LIMIT), sigH(T_PEAK)
-E_star = S["E"] / (2 * (1 - 0.3 ** 2))
-rho_eq = (r_p * math.sin(al_g)) / 2
-a_hz = lambda T: math.sqrt(4 * (T * 1000 / r_p / math.cos(al_g) / face) * rho_eq / (math.pi * E_star))
+  f"The same check with bought m3 z20 gears (Y 0.322) gives a hard-jam SF of about 1.0: that is why m4 z15.")
+
+# -- contact (Hertz, ISO 6336-2 simplified, with the life factor)
+ZE, ZH, uu = 189.8, 2.495, 1.0
+sigH = lambda T, KH: ZE * ZH * math.sqrt(KH * T * 1000 / r_p / (face * D["gear_pitch_d"]) * (uu + 1) / uu)    # noqa: E731
+N_L = 1e6                                                       # load cycles of each tooth = shaft turns: the life basis of every other fatigue check here
+# ISO 6336-2 method B: lubricant, speed and roughness factors (they apply at the endurance limit; at <= 1e5 cycles the static value 1.6 holds, log-log in between)
+C_ZL = G["sigma_H_lim"] / 4375 + 0.6357                          # for 850 <= σHlim <= 1200
+Z_L = C_ZL + 4 * (1 - C_ZL) / (1.2 + 134 / P.GREASE_NU40) ** 2
+C_Zv = C_ZL + 0.02
+v_pl = math.pi * D["gear_pitch_d"] / 1000 * n_out / 60
+Z_v = C_Zv + 2 * (1 - C_Zv) / math.sqrt(0.8 + 32 / v_pl)
+rho_red = r_p * r_p / (2 * r_p) * math.sin(al_g)                 # relative radius of curvature at the pitch point
+Rz10 = P.GEAR_RZ * (10 / rho_red) ** (1 / 3)
+Z_R = (3 / Rz10) ** (0.32 - 0.0002 * G["sigma_H_lim"])
+Z_LVR = Z_L * Z_v * Z_R
+def zn_eff(N):
+    t = min(1.0, max(0.0, math.log(N / 1e5) / math.log(5e7 / 1e5)))
+    return 1.6 ** (1 - t) * Z_LVR ** t                          # Z_NT x Z_L Z_v Z_R, interpolated log-log
+Z_N = zn_eff(N_L)
+sHP = G["sigma_H_lim"] * Z_N
+sH_half, sH_op, sH_pk = sigH(P.T_OPERATING / 2, KH_half), sigH(P.T_OPERATING, KH_op), sigH(T_PEAK, KH_pk)
+# pitting LIFE at the conservative rating: the cycles N at which σHP(N) = σH (all the operating torque through the gears)
+lo, hi = 1e5, 5e7
+if G["sigma_H_lim"] * zn_eff(lo) < sH_op * P.GEAR_HERTZ_SF:
+    N_pit = 0.0
+else:
+    for _ in range(60):
+        mid = math.sqrt(lo * hi)
+        lo, hi = (mid, hi) if G["sigma_H_lim"] * zn_eff(mid) >= sH_op * P.GEAR_HERTZ_SF else (lo, mid)
+    N_pit = lo
+life_h = N_pit / n_out / 60
 table([
-    [f"Operating {P.T_OPERATING:.0f} N·m", f"**{sH_op:.0f}**", f"{sH_lim_hard/sH_op:.2f}", check("gear Hertz contact, case-hardened (operating)", sH_lim_hard / sH_op, P.GEAR_HERTZ_SF),
-     f"{sH_op/sH_lim_soft:.2f} x {sH_lim_soft:.0f}: the soft gear would pit (information only)"],
-    [f"Jam limit {P.T_LIMIT:.0f} N·m (information)", f"{sH_jam:.0f}", f"{sH_lim_hard/sH_jam:.2f}", "", f"{sH_jam/sH_lim_soft:.2f} x {sH_lim_soft:.0f}"],
-    [f"Hard-jam peak {T_PEAK:.0f} N·m (information)", f"{sH_pk:.0f}", f"{sH_lim_hard/sH_pk:.2f}", "", f"{sH_pk/sH_lim_soft:.2f} x {sH_lim_soft:.0f}"],
-], ["Case", "σH MPa", f"σH,lim {sH_lim_hard:.0f} / σH", "", "Unhardened S235"])
-p(f"**Contact stress (pitting), ISO 6336 simplified:** σH = ZE·ZH·√(Ft/(b·d1)·(u+1)/u), ZE = {ZE} √MPa (steel on steel), ZH = {ZH} (20°, spur, no profile shift), "
-  f"u = {uu:g} (1:1), b = {face:.1f}, d1 = {D['gear_pitch_d']:.0f}; the tooth force is taken at the pitch circle with all torque through the gears. "
-  f"**Unhardened S235 does not pass for a long life:** σH {sH_op:.0f} MPa against about {sH_lim_soft:.0f} MPa (my estimate of the ISO 6336-5 order of magnitude for ~130 HV "
-  "normalised low-carbon steel, not a table value), so the teeth would pit. **The design therefore REQUIRES the finished gears to be case-hardened after cutting** "
-  "(Kasenit-type pack carburising and quench, DESIGN.md §5.7; low-carbon steel is what it is for). "
-  f"Allowable for the check: σH,lim = **{sH_lim_hard:.0f} MPa** with SF ≥ {P.GEAR_HERTZ_SF}. That is my CONSERVATIVE ASSUMPTION for a thin pack-carburised case, about two thirds of the "
-  "1300-1650 MPa that ISO 6336-5 gives for properly carburised gears (a pack case is thin, shallow-graded and not process-controlled). It is not a measured value: "
-  "if the hardened teeth feel only file-soft, the check does not hold.")
-a_pk = a_hz(T_PEAK)
-case_need = 5 * 0.78 * a_pk
-p(f"Case depth: the Hertz half-width is {a_hz(P.T_OPERATING):.3f} mm at {P.T_OPERATING:.0f} N·m and {a_pk:.3f} mm at the hard-jam peak; the maximum shear is at 0.78·a "
-  f"(= {0.78*a_pk:.2f} mm deep at the peak). A case of **≥ {max(0.3, math.ceil(case_need*10)/10):.1f} mm** (5 x that depth) is enough; pack carburising a few hours at ~900 °C gives a few tenths of a mm; "
-  "the thin tooth (2.3 mm at the pitch circle, 1.1 mm at the tip) is case-hardened all through at the tip, which is fine for these loads. "
-  "Quench as the powder's instruction says, then temper at ~180 °C for an hour to take the brittleness out.")
+    ["Z_L (base oil " + f"{P.GREASE_NU40:.0f} mm²/s) / Z_v (v {v_pl:.3f} m/s) / Z_R (Rz {P.GEAR_RZ:g} µm)", f"{Z_L:.3f} / {Z_v:.3f} / {Z_R:.3f}", "ISO 6336-2 method B"],
+    [f"σH, all {P.T_OPERATING:.0f} N·m through the gears (K_Hβ {KH_op:.2f})", f"{sH_op:.0f} MPa", ""],
+    [f"**Pitting life at that load** (σHP = σH,lim·Z_NT·Z_L·Z_v·Z_R = σH)", f"**{N_pit:.2e} cycles = {life_h:.0f} h of cutting**",
+     f"≥ {P.GEAR_LIFE_MIN_H:.0f} h " + check("gear pitting life, conservative rating (all the operating torque through the gears)", life_h, P.GEAR_LIFE_MIN_H)],
+    [f"SH at the machine's {N_L:.0e} turns, same load (information)", f"{sHP/sH_op:.2f}", ""],
+    [f"B's average share ({P.T_OPERATING/2:.1f} N·m, information): SH at {N_L:.0e}", f"{sHP/sH_half:.2f}", ""],
+], ["Item", "Value", ""])
+p(f"**Contact stress (pitting):** σH = ZE·ZH·√(K_Hβ·Ft/(b·d)·(u+1)/u), ZE {ZE}, ZH {ZH}, u 1. σH,lim = 0.740·HV + 602 = {G['sigma_H_lim']:.0f} MPa "
+  f"(ISO 6336-5, flame / induction-hardened, quality ML, at the **minimum hardness of the buying spec, HRC 50 = {G['HV_min']:.0f} HV**). "
+  f"Lubrication: **grease with a base oil of at least ISO VG {P.GREASE_NU40:.0f}**; flanks hobbed, not ground (Rz {P.GEAR_RZ:g} µm assumed). "
+  f"**The rating is conservative:** all of the motor's operating torque through the gears, all the time. On that basis the gears are good for **{life_h:.0f} hours of cutting**, "
+  f"less than the {N_L/n_out/60:.0f} h basis of the shafts and bearings, so **the gears are a wear part**: 2 spares are on the buying list. In service the gears pass only "
+  "shaft B's share of the torque and the motor seldom runs at its limit, so the real life is longer. "
+  "Look at the flanks every 20 running hours (DESIGN.md §8.3); replace both gears when pits spread. "
+  "Unhardened gears would fail at any face width: the contact stress at d = 60 is above ~600 MPa even at K = 1.")
+# static contact at the hard-jam peak: the hardened layer must not yield (no pitting here: it is a few events, not a fatigue load)
+E_star = S["E"] / (2 * (1 - 0.3 ** 2))
+R_eq = r_p * math.sin(al_g) / 2
+w_pk_max = KH_pk * T_PEAK * 1000 / r_p / math.cos(al_g) / face          # the peak line load at the loaded end of the face
+b_hz = math.sqrt(4 * w_pk_max * R_eq / (math.pi * E_star))
+p0 = 2 * w_pk_max / (math.pi * b_hz)
+Rp_case = 0.85 * 3.45 * G["HV_min"]                                      # Rm ≈ 3.45·HV (ASTM A370 / E140 order of magnitude), Rp ≈ 0.85·Rm for hardened steel
+tau_y = 0.577 * Rp_case
+p(f"**Hard-jam peak ({T_PEAK:.0f} N·m), contact:** a few events, so the check is that the hardened layer does not yield (no dents), not pitting. "
+  f"With the face load concentrated (K_Hβ {KH_pk:.2f}): line load {w_pk_max:.0f} N/mm, Hertz half-width {b_hz:.3f} mm, peak pressure p0 = {p0:.0f} MPa, "
+  f"maximum shear 0.30·p0 = {0.30*p0:.0f} MPa at {0.78*b_hz:.2f} mm depth, well inside the case of at least {P.GEAR_CASE_MIN:g} mm that the buying spec requires "
+  f"({check('hardened case depth vs the depth of the maximum shear at the hard-jam peak', P.GEAR_CASE_MIN / (0.78 * b_hz), 2.5)}: ≥ 2.5 x that depth). "
+  f"Shear yield of the HRC 50 layer ≈ 0.577 x 0.85 x 3.45·HV = {tau_y:.0f} MPa: SF {tau_y/(0.30*p0):.2f} "
+  f"({check('gear contact at the hard-jam peak (no yield of the hardened layer)', tau_y / (0.30 * p0), TRANSIENT_SF)}).")
 v = math.pi * D["gear_pitch_d"] / 1000 * n_out / 60
-p(f"Pitch-line speed {v:.3f} m/s (dynamic factor ~1; grease). Both gears are the same part: a layer is cut once (DXF `cad/dxf/gear_layer.dxf`), the teeth are cut "
-  "with the SAME setup on both gears; only the start of the indexing differs by half a tooth for gear B "
-  f"({180/z_g:g}° = {turns(P.ROTARY_RATIO_ASSUMED)/2:g} handwheel turns on a {P.ROTARY_RATIO_ASSUMED:.0f}:1 table, R/{2*z_g}) if you want the two shafts' keyways in the same position as in the CAD. "
-  "Any other keyway position also works: shaft B can be turned until its gear meshes before the key goes in (the blades of A and B run in different slots, so their relative angle does not matter).")
+p(f"Pitch-line speed {v:.3f} m/s (dynamic factor ~1; grease the gears).")
 
 # ------------------------------------------------------------------ 7 bearings
-h(f"7. Bearings ({P.BEARING['name']} x 4)")
+h(f"7. Bearings ({P.BEARING['name']} x 6: drive end, free end, outboard plate; both shafts)")
 B = P.BEARING
-table(bearing_rows, ["Case", "Shaft", "R drive-end N", "R free-end N", "max N"])
+table(bearing_rows, ["Case", "Shaft", "R drive-end N", "R free-end N", "R outboard N", "max N"])
 jam = [r for r in bearing_rows if r[0].startswith("Jam")]
-worst_static = max(float(r[4]) for r in jam)
+worst_static = max(float(r[5]) for r in jam)
 s0 = B["C0"] / worst_static
 p(f"Static: s0 = C0/P = {B['C0']:.0f}/{worst_static:.0f} = **{s0:.2f}** at the limit torque, with C0 the "
   "lowest rating among the Amazon listings (branded NA4905 parts are rated 30.7-34.5 kN). "
@@ -629,7 +754,7 @@ p(f"Static: s0 = C0/P = {B['C0']:.0f}/{worst_static:.0f} = **{s0:.2f}** at the l
 s0_pk = B["C0"] / max(peak_rows)
 p(f"At the hard-jam peak ({T_PEAK:.0f} N·m): worst load {max(peak_rows):.0f} N, s0 = **{s0_pk:.2f}** "
   f"({check('bearing s0 at the hard-jam peak', s0_pk, 1.0)}).")
-P_op = max(float(r[4]) for r in bearing_rows if r[0].startswith("Operating"))
+P_op = max(float(r[5]) for r in bearing_rows if r[0].startswith("Operating"))
 L10 = (B["C"] / P_op) ** 3 * 1e6 / (60 * n_out)
 p(f"Life at the worst operating load ({P_op:.0f} N, all torque on one shaft, bite at the worst "
   f"place) and {n_out:.1f} rpm: L10 = {L10:,.0f} h. {check('bearing L10 hours', L10, 2000)}")
@@ -638,18 +763,160 @@ p(f"Axial: needle bearings carry no axial load and let the inner ring slide, so 
   f"cap face), kept loaded by {P.CRINKLE['n']} {P.CRINKLE['name']}s at the free end that push the "
   "shaft toward +x. The only axial forces are friction and the spring, far below the thrust "
   "bearing's rating, and the stacks cannot wander. Oil seals "
-  f"({P.SEAL['name']}) in the inner plate layers keep shred dust out of the bearings.")
+  f"({P.SEAL['name']}) in the inner plate layers keep shred dust out of the bearings. The outboard bearings sit inside the drive-end guard: grease them, no seal.")
+
+# ---- 7b the outboard plate
+h("7b. The outboard bearing plate: standoffs, tie screws, friction joint", 3)
+YP = P.PILLAR_Y0 + P.PILLAR[0] / 2          # |y| of each pillar's centre line (the tie screws are at |y| = GUARD_HOLE_Y, z = ±GUARD_HOLE_Z)
+L_so = D["standoff_L"]
+PW, PH = P.PILLAR                             # pillar width (y) and height (z)
+d_h = P.TIE_D + 1
+A_p = PW * PH - 2 * math.pi / 4 * d_h ** 2
+I_py = PW * PH ** 3 / 12 - 2 * (math.pi * d_h ** 4 / 64 + math.pi / 4 * d_h ** 2 * P.GUARD_HOLE_Z ** 2)   # bending from z-forces (stress varies with z)
+I_pz = PH * PW ** 3 / 12 - 2 * math.pi * d_h ** 4 / 64 - 2 * math.pi / 4 * d_h ** 2 * (P.GUARD_HOLE_Y - YP) ** 2
+W_py, W_pz = I_py / (PH / 2), I_pz / (PW / 2)
+k_y, k_z = 12 * S["E"] * I_pz / L_so ** 3, 12 * S["E"] * I_py / L_so ** 3   # sway stiffness of one pillar, both ends clamped (N/mm)
+
+
+def contact_grid(face):
+    """the pillar's clamped end face as grid points (y, z) with dA = h², for the CAP face (overhangs the cap's edge at |y| = 85; lies over the comb / wall / joining
+    screws' counterbores and the tie holes) or the OB1 face (the full pillar section less the tie holes); side +y"""
+    holes = [(P.GUARD_HOLE_Y, z, d_h / 2) for z in (-P.GUARD_HOLE_Z, P.GUARD_HOLE_Z)]
+    if face == "cap":
+        holes += [(P.COMB_SCREW_Y, 0.0, 5.5), (71.0, 14.0, 4.75), (71.0, 27.0, 4.75), (76.0, -25.0, 5.5)]
+    y_hi = min(P.PILLAR_Y0 + PW, P.PLATE_L / 2) if face == "cap" else P.PILLAR_Y0 + PW
+    z_lo, z_hi = (max(-PH / 2, -P.PLATE_H / 2), min(PH / 2, P.PLATE_H / 2)) if face == "cap" else (-PH / 2, PH / 2)
+    h, pts = 0.25, []
+    y = P.PILLAR_Y0 + h / 2
+    while y < y_hi:
+        z = z_lo + h / 2
+        while z < z_hi:
+            if all((y - hy) ** 2 + (z - hz) ** 2 > r * r for hy, hz, r in holes):
+                pts.append((y, z))
+            z += h
+        y += h
+    return pts, h * h
+
+
+def linear_pressure(pts, dA, N, My, Mz, yref, zref):
+    """contact pressure σ = a + b·(y - yc) + c·(z - zc) (compression +) carrying the normal force N at (yref, zref) plus the moments My (about y: varies with z) and
+    Mz (about z: varies with y) given about (yref, zref); returns the pressure at every point"""
+    A = len(pts) * dA
+    yc, zc = sum(q[0] for q in pts) / len(pts), sum(q[1] for q in pts) / len(pts)
+    Iyy = sum((q[1] - zc) ** 2 for q in pts) * dA          # Σ z'²
+    Izz = sum((q[0] - yc) ** 2 for q in pts) * dA          # Σ y'²
+    Iyz = sum((q[0] - yc) * (q[1] - zc) for q in pts) * dA
+    mz = Mz + N * (yref - yc)                               # moments about the centroid (the force N sits at yref, zref)
+    my = My + N * (zref - zc)
+    det = Izz * Iyy - Iyz * Iyz
+    bb, cc = (mz * Iyy - my * Iyz) / det, (my * Izz - mz * Iyz) / det
+    return [N / A + bb * (q[0] - yc) + cc * (q[1] - zc) for q in pts]
+
+
+CONTACT = {f: contact_grid(f) for f in ("cap", "ob1")}
+A_c = len(CONTACT["cap"][0]) * CONTACT["cap"][1]
+
+
+def opening_sf(face, N, My, Mz):
+    """the factor on the external end moments (My, Mz) at which the face starts to open, with the preload N acting at the two tie screws (y = GUARD_HOLE_Y, z = 0)"""
+    pts, dA = CONTACT[face]
+    s_pre = linear_pressure(pts, dA, N, 0.0, 0.0, P.GUARD_HOLE_Y, 0.0)
+    s_ext = linear_pressure(pts, dA, 0.0, My, Mz, P.GUARD_HOLE_Y, 0.0)
+    if min(s_pre) <= 0:
+        return 0.0
+    return min([sp / -se for sp, se in zip(s_pre, s_ext) if se < 0] + [1e9])
+
+
+F_nom = P.TIE_PRELOAD_N
+F_min = F_nom * (1 - P.TIE_SCATTER) * (1 - P.TIE_EMBED)
+F_max = F_nom * (1 + P.TIE_SCATTER)
+As_tie = 36.6                                                    # M8 stress area
+Rp_tie = {"8.8": 640.0, "10.9": 940.0, "12.9": 1100.0}[P.TIE_GRADE]
+
+
+def plate_cases(T_A, T_B):
+    """yield (Fy, Fz, Mx) ON the outboard plate (world; Mx about the shaft direction, through the pillars' midpoint) for every jam place, from the two outboard bearings"""
+    for k in range(0, int(D["stack_A"]) + 1, 4):
+        x_c = P.END_CLEAR + 0.5 + k
+        for phi in JAM_PHI:
+            Fy = Fz = Mx = 0.0
+            for sh, sy, yb in (("A", -1.0, -P.C / 2), ("B", 1.0, P.C / 2)):    # own frame y points away from the other shaft: world y = sy * own y
+                loads = shaft_loads(sh, T_A, T_B, x_c, phi)
+                Ro = [reactions3([(F[0], F[comp]) for F in loads])[0] for comp in (1, 2)]
+                fy, fz = -sy * Ro[0], -Ro[1]                       # the force ON the plate = minus the bearing's force on the shaft
+                Fy += fy; Fz += fz; Mx += yb * fz                  # the bearings are at z = 0
+            yield Fy, Fz, Mx
+
+
+PILLAR_LOADS = []
+
+
+def plate_eval(T):
+    """minimum safety factors over every torque share and jam place: slip, end-face opening, pillar stress; and the largest bearing displacement"""
+    r = dict(slip=1e9, open=1e9, stress=1e9, disp=0.0, F=0.0, M=0.0, shear=0.0)
+    for _, a, b in SHARES:
+        for Fy, Fz, Mx in plate_cases(a * T, b * T):
+            for yp in (-YP, YP):                                    # each pillar: half the force + its share of the twist (two pillars, rigid plate)
+                fy, fz = Fy / 2, Fz / 2 + Mx / (2 * yp)
+                V = math.hypot(fy, fz)
+                My, Mz = fz * L_so / 2, fy * L_so / 2                # fixed-fixed sway: end moments
+                r["slip"] = min(r["slip"], P.TIE_MU * 2 * F_min / max(V, 1e-9))
+                for sgn in (1, -1):                                   # the two ends of a fixed-fixed pillar see opposite end moments; the pillar is +y-side by symmetry
+                    yy = 1 if yp > 0 else -1
+                    for face in ("cap", "ob1"):
+                        r["open"] = min(r["open"], opening_sf(face, 2 * F_min, sgn * My, sgn * Mz * yy))
+                PILLAR_LOADS.append((T, fy * (1 if yp > 0 else -1), fz))
+                r["stress"] = min(r["stress"], S["Sy"] / (abs(My) / W_py + abs(Mz) / W_pz + 2 * F_max / A_p))
+                r["shear"] = max(r["shear"], V)
+            th = Mx / (2 * k_z * YP ** 2)
+            r["disp"] = max(r["disp"], max(math.hypot(Fy / (2 * k_y), Fz / (2 * k_z) + th * yb) for yb in (-P.C / 2, P.C / 2)))
+            r["F"], r["M"] = max(r["F"], math.hypot(Fy, Fz)), max(r["M"], abs(Mx))
+    return r
+
+
+R_lim, R_pk = plate_eval(P.T_LIMIT), plate_eval(T_PEAK)
+if os.environ.get("DUMP_PILLAR"):
+    import json
+    json.dump(dict(loads=PILLAR_LOADS, L=L_so, F_min=F_min, T_limit=P.T_LIMIT, T_peak=T_PEAK), open(os.environ["DUMP_PILLAR"], "w"))
+L_e = P.LAYER_T + 9.5 - 2.0                                       # thread engaged in the cap + outer layer (less the tap chamfers)
+A_strip = 0.6 * math.pi * P.TIE_D * L_e                           # shear area of the internal thread (approx.)
+table([
+    ["Plate force at the limit / at the peak (the two outboard bearings, vector sum)", f"{R_lim['F']:.0f} / {R_pk['F']:.0f} N", "jam scanned along the chamber and round each shaft, every torque share"],
+    ["Twist about the shaft direction at the limit / at the peak", f"{R_lim['M']/1000:.0f} / {R_pk['M']/1000:.0f} N·m", "the gear forces push one bearing up and the other down"],
+    ["Most-loaded pillar: half the force + its share of the twist (rigid plate)", f"{R_lim['shear']:.0f} / {R_pk['shear']:.0f} N", f"pillars {PW:g} (y) x {PH:g} (z) x {L_so:.0f}, centred at |y| = {YP:g}"],
+    [f"Tie preload, M8 {P.TIE_GRADE} at {P.TIE_TORQUE:g} N·m: nominal / min / max", f"{F_nom/1000:.1f} / {F_min/1000:.1f} / {F_max/1000:.1f} kN",
+     f"k = 0.2; ±{P.TIE_SCATTER*100:.0f} % torque-wrench scatter; min also − {P.TIE_EMBED*100:.0f} % settling of the steel faces"],
+    [f"Slip: μ·2·F_min / pillar shear (μ = {P.TIE_MU}, untreated dry machined steel, EN 1993-1-8 class D)", f"{R_lim['slip']:.2f} / {R_pk['slip']:.2f}",
+     check("outboard plate slip at the limit", R_lim["slip"], 1.5) + " " + check("outboard plate slip at the hard-jam peak", R_pk["slip"], 1.2)],
+    [f"End faces stay closed (linear contact pressure, preload at the screws, cap face {A_c:.0f} mm² less the holes and counterbores under it, and the ob1 face)", f"{R_lim['open']:.2f} / {R_pk['open']:.2f}",
+     check("pillar end face stays closed at the limit", R_lim["open"], 1.5) + " " + check("pillar end face stays closed at the hard-jam peak", R_pk["open"], 1.0)],
+    ["Pillar stress (bending + the max preload), mild steel, SF on yield", f"{R_lim['stress']:.2f} / {R_pk['stress']:.2f}",
+     check("pillar stress at the limit", R_lim["stress"], P.STATIC_SF) + " " + check("pillar stress at the hard-jam peak", R_pk["stress"], TRANSIENT_SF)],
+    ["Bearing displacement (sway + twist of the plate) at the limit / at the peak", f"{R_lim['disp']*1000:.1f} / {R_pk['disp']*1000:.1f} µm",
+     f"at the limit ≤ {P.BORE_POS_TOL*1000:.0f} µm (the seat tolerance) " + check("outboard bearing displacement at the limit", P.BORE_POS_TOL / R_lim["disp"], 1.0)],
+    [f"Tie screw stress at the max preload (M8 {P.TIE_GRADE}, Rp0.2 {Rp_tie:.0f})", f"{F_max/As_tie:.0f} MPa", "≤ 0.9·Rp0.2 " + check("tie screw stress at the max preload", 0.9 * Rp_tie / (F_max / As_tie), 1.0)],
+    [f"Thread in the cap + outer layer (S235, {L_e:.1f} engaged) at the max preload", f"{F_max/A_strip:.0f} MPa shear", check("tie thread stripping in the end plate", 0.58 * S["Sy"] / (F_max / A_strip), 1.2)],
+    ["Hardened washer (Ø16) on ob2 at the max preload", f"{F_max/(math.pi/4*(16**2-9**2)):.0f} MPa", check("washer pressure on ob2 (S235, limit 490)", 490 / (F_max / (math.pi / 4 * (16 ** 2 - 9 ** 2))), 1.0)],
+], ["Item", "Value", ""])
+p(f"The plate is located on the two pillars by friction only: there is no room on the 70 mm cap layer for dowels or spigots next to the comb and wall screws "
+  f"(the ligament check found it). It is therefore lined up at assembly by the shafts themselves (all six bearings in, both shafts turning freely), and only then "
+  f"are the four M8 {P.TIE_GRADE} screws tightened to {P.TIE_TORQUE:g} N·m with a torque wrench (DESIGN.md §7.2). They clamp steel only: {P.TIE_WASHERS} hardened washers under each head; "
+  "the printed hood is held by its own M5 screws. The checks use the MINIMUM preload, the most-loaded pillar and the twist from the unequal bearing loads; "
+  "the end-face check makes sure each pillar stays clamped flat on the cap, so it behaves as the fixed-fixed column the sway assumes.")
 
 # ------------------------------------------------------------------ 8 clamp chain, screws, stack schedule
 h("8. Axial clamp chain, end screws and the stack schedule")
 ring_w = B["B"]
 cs_d = D["collar_body_L_drive"] + P.COLLAR_T
 cs_f = D["collar_body_L_free"] + P.COLLAR_T
-chainA = [("gear (4 layers)", D["gear_face"]), ("gear spacer sleeve", D["gear_spacer_L"]), ("sprocket hub", P.SPROCKET_A["hub_L"]), ("drive collared sleeve", cs_d),
+ob_ring = B["B"]
+chainA = [("gear (teeth + hub)", D["gear_face"] + P.GEAR_HUB_L), ("inner sleeve", D["gear_spacer_L"]), ("outboard inner ring", ob_ring), ("outer sleeve A", D["ob_sleeve_A_L"]),
+          ("TL350 hub", P.TL["L"]), ("drive collared sleeve", cs_d),
           ("drive bearing inner ring", ring_w), ("drive clamp sleeve", D["sleeve_L_drive"]),
           ("blade/spacer stack A", D["stack_A"]), ("free clamp sleeve A", D["sleeve_L_free_A"]),
           ("free bearing inner ring", ring_w), ("free collared sleeve", cs_f)]
-chainB = [("gear (4 layers)", D["gear_face"]), ("gear spacer sleeve", D["gear_spacer_L"]), ("drive collared sleeve", cs_d),
+chainB = [("gear (teeth + hub)", D["gear_face"] + P.GEAR_HUB_L), ("inner sleeve", D["gear_spacer_L"]), ("outboard inner ring", ob_ring), ("outer sleeve", D["ob_sleeve_L"]),
+          ("drive collared sleeve", cs_d),
           ("drive bearing inner ring", ring_w), ("drive clamp sleeve", D["sleeve_L_drive"]),
           ("blade/spacer stack B", D["stack_B"]), ("free clamp sleeve B", D["sleeve_L_free_B"]),
           ("free bearing inner ring", ring_w), ("free collared sleeve", cs_f)]
@@ -789,42 +1056,6 @@ p("These are conservative **starting values, not a proven recipe** for this mach
   "the real toolpaths in AXIS CAM Studio from `cad/stl/blade_v*.stl` with the Mild steel 1018 "
   "material; its force model checks the hold-down.")
 
-# ---- 9b the gear layers (CNC4030) and the teeth (SIEG X3.5D + rotary table)
-h("9b. Making the gears: layers on the CNC4030, teeth on the SIEG X3.5D", 3)
-ring_in = P.GEAR_ROUGH_D                              # rough outline Ø64
-g_out = math.pi * ring_in
-g_bore = math.pi * P.GEAR["bore"]
-g_key = 2 * (P.GEAR["bore"] / 2 + P.GEAR_KEYWAY_H - P.GEAR["bore"] / 2) + P.GEAR_KEY_W      # rough length of the keyway outline
-g_vol = (g_out + g_bore + g_key) * slot_w * P.GEAR_LAYER_T
-t_layer = g_vol / Q * cn["air_factor"] + (g_out + g_bore + g_key) / cn["feed"] * 3 + 3.0
-n_layers = 2 * P.GEAR_LAYERS
-g_levels = math.ceil(P.GEAR_LAYER_T / cn["ap"])
-slot_in_g = P.GEAR["bore"] / 2 - slot_w
-table([
-    ["Layer", f"Ø{ring_in:.0f} rough outline, bore Ø{P.GEAR['bore']:.0f} H7, keyway {P.GEAR_KEY_W:g} JS9 (R{P.GEAR_KEY_TOOL_D/2:g} corners)", f"cut from the 70x10 flat faced to {P.GEAR_LAYER_T} (DXF `cad/dxf/gear_layer.dxf`)"],
-    ["Tools", f"Ø{cn['tool_d']:.0f} carbide for the outline and the bore, Ø{P.GEAR_KEY_TOOL_D:g} carbide for the keyway", f"{g_levels} depth levels of {P.GEAR_LAYER_T/g_levels:.1f} mm, same speeds as the blades"],
-    ["Per layer", f"~{t_layer:.0f} min", f"{g_vol/1000:.1f} cm³ of slot + finish passes"],
-    [f"All {n_layers} layers", f"~{t_layer*n_layers/60:.0f} h", "plus setups; the same strip hold-down as the blades (DESIGN.md §5.1)"],
-], ["Item", "Value", "Note"])
-p(f"Bore: roughing slot {slot_w:.1f} wide leaves a slug of R{slot_in_g:.2f}; the M5 washer (R{slug_hw_r:.0f}) leaves "
-  f"{slot_in_g - slug_hw_r:.2f} mm ({check('gear bore slug hardware vs cutter', slot_in_g - slug_hw_r, 1.0)}). Finish the bore with the Ø6 in a spiral/circle pass to "
-  f"Ø{P.GEAR['bore']-0.1:.1f}, then try a Ø25 h6 shaft offcut and sneak up on the same fit as the blades' hex: **a hand slide fit, no rocking, 25.00-25.04** (H7 is 25.000-25.021; "
-  "the bore is finished to the real shaft, like the blades' hex in §5). Keyway: Ø3 end mill, roughing then a finishing pass on each side to 8.00 +0.02/−0.02 (JS9: ±0.018); "
-  f"its two bottom corners are R{P.GEAR_KEY_TOOL_D/2:g}, so the key's top edges need a {P.GEAR_KEY_CHAMFER:g} x 45° chamfer. "
-  "Measure the keyway width and the bore with the shaft offcut and the real key BEFORE the next layer.")
-# teeth
-Vc_lo, Vc_hi = 20.0, 25.0
-rows = [[f"Ø{Dc}", f0(1000 * Vc_lo / (math.pi * Dc)), f0(1000 * Vc_hi / (math.pi * Dc))] for Dc in (40, 45, 50, 55, 60)]
-table(rows, ["Cutter OD (measure yours)", f"rpm at {Vc_lo:.0f} m/min", f"rpm at {Vc_hi:.0f} m/min"])
-d_pass = [1.2, 1.2, D["gear_cut_depth"] - 2.4]
-p(f"Teeth, on the SIEG with the rotary table standing on its side (axis along X), cutter {G['cutter']} on the MT3 slitting-saw arbor: depth {D['gear_cut_depth']:.3f} "
-  f"in 3 passes ({d_pass[0]:g} / {d_pass[1]:g} / {d_pass[2]:.3f}, last pass light), cutting oil, the 4 layers cut together over {face:.1f} mm of face. "
-  f"Cutter speed: **HSS form cutter in mild steel {Vc_lo:.0f}-{Vc_hi:.0f} m/min**, i.e. n = 1000·Vc/(π·D) in the table above (round DOWN to the nearest speed the mill has). "
-  "NOTE: the brief said 60-80 m/min; that is about 3x too fast for a form-relieved HSS gear cutter in steel (catalogue figures are 60-80 *ft*/min = 18-24 m/min), so the table uses 20-25 m/min. "
-  "Feed: about 0.03 mm per tooth of the cutter (count its teeth), i.e. roughly 25-50 mm/min on the table's X crank (or the power feed). "
-  f"Index {360/z_g:.0f}° per tooth: handwheel turns = ratio/{z_g} (90:1 → {turns(90):g}). Check the ratio on your table by counting 90 handwheel turns against 360° before the first tooth. "
-  "After 10 teeth check the angle with a dial indicator on a tooth flank; at the 40th tooth the cut must meet the first.")
-
 # ------------------------------------------------------------------ 10 stock
 h("10. Stock use")
 KERF = 2.0
@@ -833,49 +1064,43 @@ layer = P.PLATE_L
 f1_used = 2 * strip(5) + 3 * layer + 5 * KERF
 f2_used = 2 * strip(4) + 3 * layer + 5 * KERF
 assert 2 * 5 + 2 * 4 == n_blades
-GM = P.GMAND
-GM_L = GM["grip_L"] + D["gear_face"] + GM["seat_extra"] + GM["thread_L"]               # gear mandrel length
-g_slot = cn["tool_d"] + 0.4                                    # slot the Ø6 cutter leaves between two Ø64 outlines
-g_pitch = P.GEAR_ROUGH_D + g_slot
-g_strip = n_layers * g_pitch + 20.0                          # all 8 layers in a row on one 70 wide bar, 10 mm hold-down margin at each end
-g_left_exist = (1300 - f1_used) + (1170 - f2_used)           # what the two existing bars have left after the blades and the end plates
-g_buy_left = P.GEAR_FLAT_BUY_L - g_strip
+ob_flat = 2 * P.OB_L + 2 * KERF + 20.0
 table([
     ["70x10 flat, 1300", f"2 blade strips of 5 ({strip(5):.0f} each) + 3 end-plate layers ({layer:.0f} each)",
      f"{f1_used:.0f} (left {1300-f1_used:.0f})", check("70x10 flat 1300", 1300 - f1_used, 0)],
     ["70x10 flat, 1170", f"2 blade strips of 4 ({strip(4):.0f} each) + 3 end-plate layers",
      f"{f2_used:.0f} (left {1170-f2_used:.0f})", check("70x10 flat 1170", 1170 - f2_used, 0)],
-    ["70x10 flat, extra piece (**TO BUY**)", f"{n_layers} gear layers Ø{P.GEAR_ROUGH_D:.0f}, pitch {g_pitch:.1f} ({P.GEAR_ROUGH_D:.0f} + {g_slot:.1f} slot) + 20 hold-down",
-     f"{g_strip:.0f} of {P.GEAR_FLAT_BUY_L:.0f} (left {g_buy_left:.0f})", check("70x10 flat extra piece for the 8 gear layers", g_buy_left, 0)],
+    [f"{P.OB_H:.0f}x10 flat (**TO BUY locally**, 400 mm)", f"2 outboard-plate layers {P.OB_L:.0f} x {P.OB_H:.0f} + kerf + 20", f"{ob_flat:.0f} of 400", check("100x10 flat for the outboard plate", 400 - ob_flat, 0)],
     ["50x10 flat (2410)", "2 combs + 2 walls (4 x 133) + blade test lever (540)", f"~{4*134 + 545:.0f}", "OK"],
-    ["Ø55 x 500", f"{P.N_SLOTS} spacers (~11 each) + 4 clamp sleeves (~14) + 4 collared sleeves (~17) + 2 gear spacer sleeves (~{D['gear_spacer_L']+3:.0f}) "
-     "", f"~{P.N_SLOTS*11 + 4*14 + 4*17 + 2*(D['gear_spacer_L']+3):.0f}", "OK"],
+    ["Ø55 x 500", f"{P.N_SLOTS} spacers (~11 each) + 4 clamp sleeves (~14) + 4 collared sleeves (~17) + 4 outboard sleeves Ø30 (~{D['gear_spacer_L']+3:.0f}) ",
+     f"~{P.N_SLOTS*11 + 4*14 + 4*17 + 4*(D['gear_spacer_L']+3):.0f}", "OK"],
     ["Bought 4140 bar, 914 mm", f"shaft A ({D['shaft_A_len']:.1f}) + shaft B ({D['shaft_B_len']:.1f}) + facing + kerf",
      f"{D['shaft_A_len']+D['shaft_B_len']+4*2+3:.0f}",
      check("shafts from the 3 ft 4140 bar", 914 - (D["shaft_A_len"] + D["shaft_B_len"] + 4 * 2 + 3), 0)],
-    ["Ø30 x 410 / 270 (yours)", f"gear mandrel (Ø30 x ~{GM_L:.0f}, §9b / DESIGN.md §5.7) + washer Ø30 x {P.GMAND['washer_T']:g}; spare, test pieces", f"~{GM_L+10:.0f}", "OK"],
+    [f"{P.PILLAR[1]:.0f}x{P.PILLAR[0]:.0f} flat (**TO BUY locally**, 150 mm)", f"2 pillars {P.PILLAR[0]:g} x {P.PILLAR[1]:g} x {D['standoff_L']:.0f} + facing + kerf", f"{2*(D['standoff_L']+2)+3:.0f} of 150",
+     check("60x15 flat for the 2 pillars", 150 - (2 * (D["standoff_L"] + 2) + 3), 0)],
     ["Ø30 x 500 x2 (yours)", "gearbox output shaft (Ø25 x ~190), end caps, stacking mandrel, spare shafts", "", ""],
 ], ["Stock", "Use", "Length mm", ""])
 
 # ------------------------------------------------------------------ 11 shaft drawing table
 h("11. Shaft dimensions, measured from each shaft's drive end")
-g_c = (D["x_gear_in"] + D["x_gear_out"]) / 2
-g_kw = D["gear_face"] - 2.0
-spr_kw = P.SPROCKET_A["hub_L"] - 2.0
+g_c = (D["x_gear_in"] + D["x_gear_hub_out"]) / 2
+g_kw = D["gear_face"] + P.GEAR_HUB_L - 2.0
+spr_kw = D["a_end_hub_L"] - 2 * P.TL_KEY_END
 for sh, x0 in (("A", D["shaft_end_A_drive"]), ("B", D["shaft_end_B_drive"])):
     L = D["shaft_end_free"] - x0
     rows = [
-        ["Overall length", f"{L:.1f}", "face both ends; centre-drill; drill Ø8.5 x 30, tap M10 x 25 both ends"],
+        ["Overall length", f"{L:.1f}", "turned in the chuck from each end (no tailstock, DESIGN.md §5.3); drill Ø8.5 x 30, tap M10 x 25 both ends"],
         ["Ø25 h6 journal (drive side)", f"0 – {D['hex_x0']-x0:.1f}", "everything left of the hex"],
         [f"Hex {AF} AF (left Ø30 when turning)", f"{D['hex_x0']-x0:.1f} – {D['hex_x1']-x0:.1f}",
          f"{D['hex_x1']-D['hex_x0']:.1f} long"],
         ["Ø25 h6 journal (free side)", f"{D['hex_x1']-x0:.1f} – {L:.1f}", ""],
-        ["Gear keyway 8 JS9 x 4 deep", f"{max(0.0, g_c-g_kw/2-x0):.1f} – {g_c+g_kw/2-x0:.1f}", f"key 8x7x{g_kw-2:.0f} (the full 4-layer gear bore), top edges chamfered {P.GEAR_KEY_CHAMFER:g}"],
+        ["Gear keyway 8 JS9 x 4 deep", f"{max(0.0, g_c-g_kw/2-x0):.1f} – {g_c+g_kw/2-x0:.1f}", f"key 8x7x{g_kw-2:.0f} (the gear's whole bore, hub + teeth)"],
     ]
     if sh == "A":
         _sc = D["x_sprocket_c"]
-        rows.append(["Sprocket keyway 8 JS9 x 4 deep", f"{max(0.0, _sc-spr_kw/2-x0):.1f} – {_sc+spr_kw/2-x0:.1f}",
-                     f"key 8x7x{spr_kw-2:.0f}; open at the shaft end"])
+        rows.append(["Torque-limiter keyway 8 JS9 x 4 deep", f"{max(0.0, _sc-spr_kw/2-x0):.1f} – {_sc+spr_kw/2-x0:.1f}",
+                     f"key 8x7x{spr_kw-2:.0f} (under the TL350 hub)"])
     h(f"Shaft {sh}", 3)
     table(rows, ["Feature", "From – to (mm from drive end)", "Note"])
 p("Keyways on the same side as hex corner 0 (mark it).")
@@ -886,6 +1111,50 @@ P_net = M["P_likely_W"] * eta
 p(f"About {P_net:.0f} W reaches the blades. Twin-shaft shredders use roughly 30-100 Wh per kg, so "
   f"**{P_net/100:.1f}-{P_net/30:.1f} kg/h** at best; feeding with the lid closed (DESIGN.md §8) "
   f"limits it to well under 1 kg/h. Output strips are about {P.T_BLADE:.0f} mm wide.")
+
+# ------------------------------------------------------------------ 13 the fixed screen
+h("13. The fixed screen under the blades")
+R_S = P.R_TIP + P.SCREEN_GAP                       # top arcs
+t_s = P.SCREEN_T
+SY_AL, E_AL = 240.0, 69000.0                       # 6061-T6 / 6082-T6: yield (MPa, the lower of the two), modulus
+pitch_s = P.SCREEN_HOLE_PITCH
+lig = (pitch_s - P.SCREEN_HOLE_D) / pitch_s        # net fraction of a section through a row of holes
+open_s = math.pi * P.SCREEN_HOLE_D ** 2 / (2 * math.sqrt(3) * pitch_s ** 2)
+# the span: chord of one arc from the ridge (y = 0) to where it meets the combs' underside (z = -5)
+z_ridge = -math.sqrt(R_S ** 2 - (P.C / 2) ** 2)
+y_meet = P.C / 2 + math.sqrt(R_S ** 2 - 5.0 ** 2)
+L_span = math.hypot(y_meet, z_ridge + 5.0)
+b_eff = P.T_BLADE + 4 * t_s                        # a tooth (8 wide) pushes a piece onto the screen; the load spreads 2:1 each way through the wall
+b_net = b_eff * lig
+Z_s = b_net * t_s ** 2 / 6
+I_s = b_net * t_s ** 3 / 12
+rows = []
+for label, T, sf_req in (("torque-limiter limit", P.T_LIMIT, P.STATIC_SF), ("hard-jam peak (s.3b)", T_PEAK, TRANSIENT_SF)):
+    F = T * 1000 / P.R_TIP                             # all the torque through one tooth at the tip, pressed straight into the screen
+    M_s = F * L_span / 4                               # a straight, simply supported beam over the chord (the arch would carry it with far less bending)
+    sig = M_s / Z_s
+    dfl = F * L_span ** 3 / (48 * E_AL * I_s)
+    F_scr = F / 2                                      # the wing on the loaded side: 2 x M4
+    rows.append([label, f"{F:.0f} N", f"{sig:.0f} MPa", f"SF {SY_AL/sig:.2f} " + check(f"screen bending at the {label}", SY_AL / sig, sf_req),
+                 f"{dfl:.2f} mm " + check(f"screen deflection at the {label} (< gap)", P.SCREEN_GAP - dfl, 1.0),
+                 f"{F_scr/8.78:.0f} MPa " + check(f"screen M4 screws at the {label}", 580.0 / (F_scr / 8.78), 2.0)])
+table(rows, ["Case", "Force on the screen", "σ (net section)", f"≥ {P.STATIC_SF} / {TRANSIENT_SF} on yield {SY_AL:.0f}", "deflection (gap stays ≥ 1)", "M4 8.8 screw (A 8.78 mm², proof 580)"])
+p(f"**What it is.** An aluminium block (6061 or 6082) under the blades: the top follows the blade-tip circles {P.SCREEN_GAP:g} mm below them (R{R_S:g}), the wall is "
+  f"{t_s:g} mm, Ø{P.SCREEN_HOLE_D:g} holes on a {pitch_s:g} mm hexagonal pattern (open area {open_s*100:.0f} %, ligaments {pitch_s-P.SCREEN_HOLE_D:g} mm). "
+  "A piece that passes a hole falls into the drawer; a bigger piece is dragged on round by the teeth to the comb, cut again and fed back into the bite.")
+p(f"**Load model (conservative).** A piece jammed between a tooth tip and the screen takes the whole torque the drive can pass: F = T / R_tip. "
+  f"The screen is taken as a straight beam over the chord of one arc ({L_span:.0f} mm, ridge to comb) with the load in the middle; its width is the tooth "
+  f"plus a 2:1 spread through the wall ({b_eff:.0f} mm), cut down to the net section through a row of holes ({lig*100:.0f} %: {b_net:.1f} mm). "
+  "The real part is an arch fixed to the combs and continuous over the ridge, so the bending is several times smaller.")
+p(f"**Guard.** ISO 13857 Table 4: round openings 4 < e ≤ 6 mm need ≥ 5 mm from the opening to the hazard. Each hole is ≥ {t_s:g} mm long and the blades are "
+  f"{P.SCREEN_GAP:g} mm above it (CAD check C40g); the ends of the screen are {P.SCREEN_END_GAP:g} mm from the end plates. The screen is held by "
+  "4 screws: it is a fixed guard (a tool is needed to remove it).")
+p(f"**Throughput.** Fines must pass a Ø{P.SCREEN_HOLE_D:g} hole, so everything goes round until it is about that small: expect slower output than without a screen, "
+  "and more limiter slips with tough plastics (PETG, nylon). If it clogs: pull the drawer, undo the 4 screws from below, drop the screen out, clean it.")
+
+# ---- the 24 V supply (only the lid lock now)
+p(f"**24 V supply:** only the lid lock's solenoid now ({P.LID_SOLENOID_W:g} W): a {P.PSU_24V_W:g} W supply "
+  + check("24 V supply", P.PSU_24V_W * 0.8 - P.LID_SOLENOID_W, 0) + ".")
 
 h("Summary")
 if fails:
