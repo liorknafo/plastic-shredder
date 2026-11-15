@@ -235,8 +235,9 @@ def write_params_scad(path, extra=None, values=None):
         if isinstance(val, str):
             lines.append(f'{name} = "{val}";')
         elif isinstance(val, (list, tuple)):
-            val = [round(float(v), 4) for v in val]
-            lines.append(f"{name} = [" + ", ".join(str(v) for v in val) + "];")
+            fmt = lambda v: [fmt(w) for w in v] if isinstance(v, (list, tuple)) else round(float(v), 4)   # noqa: E731
+            val = fmt(val)
+            lines.append(f"{name} = " + str(val).replace("'", '"') + ";")
         else:
             val = round(float(val), 4)
             lines.append(f"{name} = {val};")
@@ -250,42 +251,42 @@ def write_params_scad(path, extra=None, values=None):
                "COMB_SLOT_CLEAR", "COMB_SLOT_PAST_TIP", "COMB_SCREW_Y", "WALL_H", "WALL_GAP",
                "END_WASHER_T", "END_SCREW_LEN", "PRINTER_X", "PRINTER_Y",
                "PRINTER_Z", "PRINT_WALL", "PRINT_FLANGE", "HOPPER_TOP_Z", "HOPPER_TOP_IN", "HOPPER_SPLIT_Z",
-               "TOP_HOLE_Y", "TOP_HOLE_DEPTH", "WALL_TOP_HOLE_X", "WALL_TOP_HOLE_Y", "SKIRT_HOLE_Y",
-               "SKIRT_HOLE_DEPTH", "GUARD_HOLE_Y", "GUARD_HOLE_Z", "GUARD_CLEAR", "BASE_T",
-               "MOTOR_PULLEY_D", "GEARBOX_PULLEY_D", "BELT_CENTRE_DIST", "BELT_WIDTH",
-               "BELT_GUARD_CLEAR", "WORM_AXIS_DROP", "GROUND_Z",
+               "TOP_HOLE_Y", "TOP_HOLE_DEPTH", "WALL_TOP_HOLE_X", "WALL_TOP_HOLE_Y", "GUARD_HOLE_Y", "GUARD_HOLE_Z", "GUARD_CLEAR", "BASE_T",
+               "WORM_AXIS_DROP", "GROUND_Z", "MOTOR_SHAFT_L", "TL_B_CLEAR",
                "HANDLE_W", "HANDLE_H", "HANDLE_BACK_T", "HANDLE_LIP_D", "HANDLE_Z", "HANDLE_SCREW_DX", "HANDLE_HOLE_D",
-               "INSERT_D", "INSERT_DEPTH", "DRAWER_SW_Z", "UFRONT_BELOW", "UFRONT_GAP", "SW_PAD_L", "SW_PAD_W", "SW_PAD_T", "SW_SCREW_SPACING",
-               "INTERLOCK_IN", "INTERLOCK_OUT_TRAVEL", "BG_LAP_LEN", "BG_LAP_CLEAR", "BG_FOOT_W", "BG_FOOT_T",
-               "BG_FOOT_REACH", "DECK_PLY_T", "DECK_MARGIN", "LEG_SECTION", "STUB_D", "STUB_L", "STUB_END_D", "STUB_END_L", "STUB_FLAT_AF",
+               "INSERT_D", "INSERT_DEPTH", "DRF_GAP", "SW_PAD_L", "SW_PAD_W", "SW_PAD_T", "SW_SCREW_SPACING",
+               "INTERLOCK_IN", "INTERLOCK_OUT_TRAVEL", "CG_END_GAP", "CG_FOOT_W", "CG_FOOT_T", "CG_FOOT_REACH", "DECK_PLY_T", "DECK_MARGIN", "LEG_SECTION", "STUB_D", "STUB_L", "STUB_END_D", "STUB_END_L", "STUB_FLAT_AF",
                "STUB_FLAT_L", "STUB_KEY_L",
                "T_LIMIT", "HOOK_DEG", "TEST_PIN_D", "TEST_PIN_R", "TEST_PIN_PROJ", "TEST_BLADE_GAP", "TEST_LEVER_L", "TEST_LEVER_W",
                "TEST_LEVER_T", "TEST_LEVER_PIVOT_END", "TEST_LEVER_PIVOT_D", "TEST_WEIGHT_ARM", "TEST_WEIGHT_HOLE_D",
                "TEST_WEIGHT_KG", "TEST_BLADE_ROT", "TEST_LEVER_DEG",
-               "T_SET", "T_OPERATING", "TL_SET_AT_TL", "CHAIN_RATIO", "CHAIN_CD", "SUBPLATE_T", "GB_BOX", "GB_BELOW_OUT",
-               "GB_BOSS", "GB_FOOT", "GB_FLANGE", "GB_WORM_STUB", "SPROCKET_T", "SPROCKET_OD_EXTRA", "CHAIN_ENV_W", "CHAIN_ENV_H",
-               "DRIVE_LEG_MIN", "TENS_DELTA", "TENS_TRAVEL", "TENS_FLAT_W", "TENS_T", "TENS_BASE", "TENS_AXLE_D", "GUARD_FRONT_X",
+               "T_SET", "T_OPERATING", "TL_SET_AT_TL", "SUBPLATE_T", "GB_BOX", "GB_BELOW_OUT",
+               "GB_BOSS", "GB_FOOT", "GB_FLANGE", "GB_WORM_STUB", "SPROCKET_T", "SPROCKET_OD_EXTRA", "SPROCKET_ROOT", "CHAIN_ENV_W", "CHAIN_ENV_H",
+               "DRIVE_LEG_MIN", "PIN_N", "PIN_D", "PIN_L", "PIN_R", "PIN_HOLE_D", "PF_D", "PF_T", "PF_GAP", "PF_HUB_D", "PF_POCKET_D", "PF_POCKET_CLEAR",
+               "PF_KEY_L", "PF_SHAFT_RECESS",
                "DG_SEAM_Z", "DG_FLANGE_W", "DG_FLANGE_T", "TLFIX_ARM", "TLFIX_LEVER_L", "TLFIX_LEVER_W", "TLFIX_LEVER_T",
                "TL_HUB_D", "TL_FLANGE_T", "TL_CM_OFFSET", "TL_GB_GAP", "TL_PACK_D", "TL_PRESS_T", "TL_SPRING_L", "GB_HUB_L", "OUT_SPACER_D",
                "SHAFT_KEY_W", "SHAFT_KEY_D", "GB_KEY_END", "TL_KEY_END", "CIRCLIP_GROOVE_D", "CIRCLIP_GROOVE_W", "CIRCLIP_T", "CIRCLIP_OD",
-               "CIRCLIP_EDGE", "TL_COLLAR_D", "TL_COLLAR_T", "SHAFT_OUT_END", "GB_RAIL_W", "GB_RAIL_T", "GB_RAIL_SLOT", "GB_RAIL_BOLT_DX",
-               "GB_RAIL_END", "GB_SPACER_L", "DECK_RAIL_MARGIN", "CHAIN_UPLIFT_LIMIT_N", "CHAIN_UPLIFT_DESIGN_N", "DECK_ANCHOR_D", "DECK_ANGLE",
+               "CIRCLIP_EDGE", "GB_RAIL_W", "GB_RAIL_T", "GB_RAIL_SLOT", "GB_RAIL_BOLT_DX",
+               "GB_RAIL_END", "GB_SPACER_L", "DECK_RAIL_MARGIN", "DECK_ANCHOR_D", "DECK_ANGLE",
                "DECK_ANGLE_L", "DECK_ANGLE_DECK_BOLTS", "DECK_ANGLE_LEG_BOLTS", "FOOT_ANGLE_LEG_BOLTS", "FOOT_ANGLE_ANCHORS", "BIG_WASHER_D",
-               "BIG_WASHER_T", "DECK_LEG_INSET_Y", "TENS_HEAD_H", "TENS_COL_GAP", "TLFIX_PIN_L",
+               "BIG_WASHER_T", "DECK_LEG_INSET_Y", "TLFIX_PIN_L",
                "TLFIX_LEVER_GAP", "TLFIX_PIVOT_D", "TLFIX_LUG", "TLFIX_LUG_GAP",
                "SW_BODY", "SW_HOLE_SPACING", "SW_SLOT", "ACT_SIZE", "ACT_BLADE_T", "ACT_BLADE_L", "ACT_HOLE_SPACING", "PILOT_D", "PILOT_DEPTH",
-               # review round 4: Pizzato lid switch, Omron drawer switch, fixed mesh grid
+               # review round 4: Pizzato lid switch
                "HSW_BODY", "HSW_HOLE_SPACING", "HSW_SLOT", "HACT_SIZE", "HACT_BLADE_T", "HACT_BLADE_L", "HACT_HOLE_SPACING", "HSW_SCREW", "HACT_SCREW", "HSW_PAD_W",
-               "DSW_BODY", "DSW_HOLE_SPACING", "DSW_SLOT", "DACT_SIZE", "DACT_BLADE_T", "DACT_BLADE_L", "DACT_HOLE_SPACING", "DSW_SCREW", "DACT_SCREW",
-               "GRID_PITCH", "GRID_WIRE", "GRID_Z", "GRID_CLEAT", "GRID_MIN_DIST", "GRID_MAX_OPEN", "GRID_EDGE_GAP", "GRID_MAX_EDGE_GAP", "FINGER_D",
-               "GRID_BIN_CLEAR", "GRID_SCREW"]
+               # the fixed screen
+               "SCREEN_GAP", "SCREEN_T", "SCREEN_HOLE_D", "SCREEN_HOLE_PITCH", "SCREEN_HOLE_SLOPE", "SCREEN_RELIEF_D", "SCREEN_END_GAP", "SCREEN_SCREW", "SCREEN_SCREW_Y", "SCREEN_TAP_DEPTH",
+               "SCREEN_SCREW_LAND", "SCREEN_POCKET", "WALL_SCREW_HEAD", "BASE_CUT_Y"]
     for s in scalars:
         put(s, getattr(P, s))
+    for k in ("D", "hub_L", "gap"):
+        put("CPL_" + k, P.CPL[k])
     for k, v in P.BEARING.items():
         put("BEARING_" + k, v)
     for k in ("module", "z", "alpha", "bore", "hub_L", "cut_extra"):
         put("GEAR_" + k, P.GEAR[k])
-    for k in ("GEAR_LAYER_T", "GEAR_LAYERS", "GEAR_SPACER_D", "GEAR_ROUGH_D", "GEAR_KEY_W", "GEAR_KEYWAY_H", "GEAR_KEY_TOOL_D", "GEAR_KEY_CHAMFER"):
+    for k in ("GEAR_FACE", "GEAR_HUB_L", "GEAR_HUB_D", "GEAR_SPACER_D", "GEAR_KEY_W", "GEAR_KEYWAY_H", "GEAR_KEY_TOOL_D", "OB_T", "OB_H", "OB_ZC", "OB_L", "OB_GAP", "OB_STEP", "PILLAR", "PILLAR_Y0", "TIE_D", "TIE_WASHERS", "HOOD_SCREW_PTS"):
         put(k, getattr(P, k))
     for k in ("d", "D", "B"):
         put("SEAL_" + k, P.SEAL[k])
@@ -293,13 +294,10 @@ def write_params_scad(path, extra=None, values=None):
         put("THRUST_" + k, P.THRUST[k])
     for k in ("d", "D", "n", "stack_h"):
         put("CRINKLE_" + k, P.CRINKLE[k])
-    for k in ("z", "hub_L", "hub_D"):
-        put("SPROCKET_A_" + k, P.SPROCKET_A[k])
     for k in ("z", "L", "D", "T_min", "T_max"):
         put("TL_" + k, P.TL[k])
     put("CHAIN_pitch", P.CHAIN["pitch"])
     put("DECK_ANCHOR", P.DECK_ANCHOR)
-    put("IDLER_NAME", P.IDLER["name"])
     lines.append("")
     lines.append("// derived")
     for k, v in d.items():

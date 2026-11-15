@@ -9,8 +9,8 @@
 # make verify       : assembly and parts against the measurements of the old OpenSCAD model (reference.json, parts_reference.json); fails on a difference.
 #                     After a deliberate change of the design: `python3 build.py --freeze` and `python3 parts.py --freeze` in cad/solidcraft
 # make checks       : the design checks C1 .. C32 of cad/checks.scad (alignment, clearances, envelopes).  They still run on the OpenSCAD sources: needs OpenSCAD
-# make variants     : try the unknown bought parts (SPROCKET_A hub_L = 20 / 25, GEAR_LAYER_T = 9.5 / 10.0, CHAIN_CD = 152 / 157, GB_HUB_L = 80) in a TEMPORARY copy and run the
-#                     alignment / collision checks there (cad/variants.sh); fails if any check fails; the real tree is not touched.  Needs OpenSCAD
+# make variants     : try the unknown bought parts (GEAR_HUB_L = 12 / 22, the TL350's sprocket 1 mm deeper, GB_HUB_L = 80 + motor shaft 50) and the pin
+#                     flange set off (PF_GAP 1 / 3, spacer 6) in a TEMPORARY copy and run the alignment / collision checks there (cad/variants.sh); fails if any check fails; the real tree is not touched.  Needs OpenSCAD
 # make cad          : the OLD OpenSCAD pipeline (cd cad && ./build.sh): PNG previews, the checks, and STL / DXF as OpenSCAD meshes, which OVERWRITE the SolidCraft exports in
 #                     cad/stl and cad/dxf (run `make parts` after it).  Needs OpenSCAD
 # make all          : params, calc, solidcraft, parts, checks

@@ -18,7 +18,7 @@ import sys
 path = sys.argv[1] if len(sys.argv) > 1 else "logs/holes.echo"
 min_ok = float(sys.argv[2]) if len(sys.argv) > 2 else 1.0   # mm: anything below this is reported as a failure
 
-axial, foot = {}, {}
+axial, foot, dims = {}, {}, {}      # dims: per-kind plate size (PLATEK) where it differs from PLATE
 plate = None
 num = r"(-?[0-9.]+(?:e-?[0-9]+)?)"
 for line in open(path):
@@ -37,6 +37,9 @@ for line in open(path):
     m = re.match(r"ECHO: \"PLATE\", " + ", ".join([num] * 3), line)
     if m:
         plate = tuple(map(float, m.groups()))
+    m = re.match(r'ECHO: "PLATEK", "(\w+)", ' + ", ".join([num] * 3), line)
+    if m:
+        dims[m.group(1)] = tuple(map(float, m.groups()[1:]))
 if not axial or plate is None:
     sys.exit(f"ligament.py: no hole table found in {path}")
 PL, PH, T = plate
@@ -61,8 +64,9 @@ for kind, holes in axial.items():
             results.append((lig, kind, f"{f[0]}({f[1]:g}) - {h[0]}({h[1]:g},{h[2]:g})"))
 edge = []
 for kind, holes in axial.items():
+    pl, ph = dims.get(kind, plate)[:2]
     for h in holes:
-        e = min(PL / 2 - abs(h[1]) - h[3], PH / 2 - abs(h[2]) - h[3])
+        e = min(pl / 2 - abs(h[1]) - h[3], ph / 2 - abs(h[2]) - h[3])
         edge.append((e, kind, f"{h[0]}({h[1]:g},{h[2]:g}) to plate edge"))
     for f in foot.get(kind, []):
         edge.append((PL / 2 - abs(f[1]) - f[3], kind, f"{f[0]}({f[1]:g}) to side edge"))

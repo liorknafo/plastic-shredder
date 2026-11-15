@@ -2,8 +2,8 @@
 //   angle           shaft A turns -angle about its axis, shaft B +angle (deg)
 //   show_*          visibility switches
 //   section_x       if set (number), keep only a 1 mm slab around that x (cross-section view)
-//   section_pair    true: two 1 mm slabs through the axis planes y = -30 (shaft A: seal, bearing, thrust, collar, gear, sprocket) and y = +30 (shaft B: ... gear, end cap), the B slab 120 mm lower
-//   ghost_guards    draw the drive-end guard / chain guard / free cover / belt guard as faint ghosts
+//   section_pair    true: two 1 mm slabs through the axis planes y = -30 (shaft A: seal, bearing, thrust, collar, gear, TL350) and y = +30 (shaft B: ... gear, end cap), the B slab 120 mm lower
+//   ghost_guards    draw the drive-end guard / free cover / coupling guard as faint ghosts
 include <common.scad>
 use <stack.scad>
 use <placeholders.scad>
@@ -17,24 +17,25 @@ use <drive.scad>
 use <base.scad>
 
 angle = 0;
-show_drive_side = true;    // drive plates + bearings, gears, sprocket, drive end screws
+show_drive_side = true;    // drive plates + bearings, gears, the TL350, drive end screws
 show_gears = true;
-show_gearbox = true;       // gearbox, TL350, chain, tensioner, motor, belt, deck (the whole drive)
+show_gearbox = true;       // gearbox, pin flange, motor, coupling, deck (the whole drive)
 show_hopper = true;       // collar + funnel + lid (+ interlock switch)
-show_extras = true;       // skirts, guards, free-end cover, base plate, cabinet, belt guard, motor
+show_extras = true;       // guards, free-end cover, base plate, cabinet, screen
 lid_open = 0;             // hopper lid opening angle (deg)
-show_motor = true;        // motor, pulleys, belt, belt guard, deck
+show_motor = true;        // motor, coupling, coupling guard, deck
 show_combs_walls = true;
 ghost_guards = false;
 section_x = undef;
 section_pair = false;
 clip = undef;             // [x0, y0, z0, x1, y1, z1]: keep only this box (close-up views)
-show_grid = true;          // the fixed mesh grid + its cleats in the bin cabinet (with show_extras)
-grid_dims = false;         // dimension the blade-tip-to-grid distance (grid_section view)
+show_cabinet = true;       // base plate, cabinet, drawer, handle (false: see the screen from below)
+show_screen = true;        // the fixed screen under the blades (with show_extras)
+screen_dims = false;       // dimension the blade-tip-to-screen gap and the hole band (screen_section view)
 show_holddown = true;
 hide_guards = false;      // close-ups: leave the guards out
 deck_alpha = 0.85;        // plywood deck opacity (low: the legs, angles and anchors under it show)     // leg angles, foot angles, floor anchors, ghost floor
-drive_only = false;       // clip everything at x > -32: only the drive (gears, sprocket, guards, gearbox, TL, chain, tensioner, motor, belt, deck)
+drive_only = false;       // clip everything at x > -32: only the drive (gears, TL350, guards, gearbox, pin flange, motor, coupling, deck)
 
 // Tomorrow palette
 C_RED = "#c82829"; C_ORANGE = "#f5871f"; C_YELLOW = "#eab700"; C_GREEN = "#718c00";
@@ -59,8 +60,8 @@ module rotor_visual(sh, angle) {
     color(C_YELLOW) cut() rot_frame(sh, angle) { clamp_sleeves_of(sh); collared_sleeves_of(sh); }
     if (show_drive_side) {
         if (show_gears) color(C_RED, 0.75) cut() rot_frame(sh, angle) gear_ph(sh);
-        if (show_gears) color(C_YELLOW) cut() rot_frame(sh, angle) gear_spacer_ph();
-        if (sh == "A") color(C_ORANGE, 0.9) cut() rot_frame(sh, angle) sprocket_ph();
+        if (show_gears) color(C_YELLOW) cut() rot_frame(sh, angle) { gear_spacer_ph(); ob_sleeve_ph(sh); }
+        if (sh == "A") color("#8e6fb0") cut() rot_frame(sh, angle) sprocket_ph();               // TL350-2 on shaft A: flange, linings + its 30T sprocket, pressure plate, springs, nut
         color(C_DARK) cut() rot_frame(sh, angle) end_screw_drive(sh);
     }
     color(C_DARK) cut() rot_frame(sh, angle) end_screw_free();
@@ -75,6 +76,10 @@ module bearings_seals() {
             color("#c8c8c8") cut() translate([0, shaft_y(sh), 0]) thrust_ph(e);
         }
         color("#d8b0ff") cut() translate([0, shaft_y(sh), 0]) crinkle_ph();
+        if (show_drive_side) {                                                                   // the outboard bearing (no seal: it is inside the guard)
+            color(C_AQUA) cut() translate([0, shaft_y(sh), 0]) { bearing_inner_ph("ob"); bearing_outer_ph("ob"); }
+            color("#9fd4d8") cut() translate([0, shaft_y(sh), 0]) bearing_rollers_ph("ob");
+        }
     }
 }
 
@@ -83,7 +88,7 @@ module everything() {
     bearings_seals();
     // plates
     color("#b4b7b4") cut() plates([0, 1, 2], ["free"]);
-    if (show_drive_side) color("#c5c8c6") cut() plates([0, 1, 2], ["drive"]);
+    if (show_drive_side) { color("#c5c8c6") cut() plates([0, 1, 2], ["drive"]); color("#a9b0b8") cut() plates([3, 4], ["drive"]); color(C_DARK) cut() standoffs(); }   // + the outboard bearing plate on its 4 standoffs
     // combs and walls
     if (show_combs_walls) {
         color(C_GREEN) cut() { comb("A"); comb("B"); }
@@ -96,36 +101,32 @@ module everything() {
         color("#b0b4b8") cut() lid_actuator_posed(lid_open);                                      // its coded metal actuator (placeholder)
     }
     if (show_extras) {
-        color("#e69138", 0.55) cut() { skirt(1); skirt(-1); }
         color("#e69138", GA) cut() { free_end_cover(); if (show_drive_side && !hide_guards) drive_end_guard(); }
-        color("#d9b98a") cut() { base_plate(); }
-        color("#c8a46e", 0.55) cut() cabinet_shell_panels();
-        color("#8c5a2b", 0.8) cut() upper_front();                                              // the FIXED upper front panel (screwed on): base plate down to just under the lower grid cleats
-        color("#bf9000") cut() drawer_panels();
-        color("#e69138") cut() { handle_world(); drawer_pad(); drawer_act_pad(); }              // printed: pull handle, switch pad, actuator pad (no tongue)
-        color(C_DARK) cut() { drawer_switch_ph(); handle_screws_ph(); drawer_switch_screws_ph(); drawer_actuator_screws_ph(); upper_front_screws_ph(); }
-        color("#b0b4b8") cut() drawer_actuator();                                              // the coded metal actuator (placeholder)
-        if (show_grid) {
-            color("#6b7076") cut() grid_mesh();                                                 // 1" galvanized welded mesh, 14 ga
-            color("#a67c52") cut() { grid_cleats(0); grid_cleats(1); }                          // 20 x 20 timber cleats (lower set under the mesh, upper set on top)
-            color(C_DARK) cut() grid_screws_ph();
+        if (show_cabinet) {
+            color("#d9b98a") cut() { base_plate(); }
+            color("#c8a46e", 0.55) cut() cabinet_shell_panels();
+            color("#bf9000") cut() drawer_panels();
+            color("#e69138") cut() handle_world();                                               // printed pull handle
+            color(C_DARK) cut() handle_screws_ph();
+        }
+        if (show_screen) {                                                                      // the fixed screen (aluminium) under the blades + its screws
+            color("#9aa5b1") cut() screen();
+            color(C_DARK) cut() { screen_screws_ph(); wall_screws_ph(); }
         }
     }
     if (show_drive_side && show_gearbox) {
         color(C_GRAY, 0.6) cut() { gearbox_ph(); }
-        color(C_DARK) cut() { worm_ph(); gb_foot_bolts_ph(); rail_bolts_ph(); tens_bolts_ph(); tens_bolt_ph(); }
+        color(C_DARK) cut() { worm_ph(); gb_foot_bolts_ph(); rail_bolts_ph(); }
         color("#2b6cb0") cut() output_shaft_ph();                                               // output shaft (made from the bought 4140 bar)
-        color("#8e6fb0") cut() tl_ph();                                                          // TL350-2: flange, linings + sprocket plate, pressure plate, springs, nut
-        color(C_YELLOW) cut() shaft_hw_ph();                                                     // circlip, 3 mm spacer, stop collar
+        color("#9aa5b1") cut() pin_flange();                                                     // the pin flange (6061), coaxial with shaft A
+        color(C_DARK) cut() pins_ph();                                                           // its 4 dowel pins (through the TL350's drilled sprocket plate)
+        color(C_YELLOW) cut() shaft_hw_ph();                                                     // circlip, 3 mm spacer
         color("#b0b4b8") cut() gb_mount();                                                       // the two slotted rails + spacer blocks
-        color(C_ORANGE, 0.9) cut() tens_idler_ph();
-        color(C_RED) cut() { tens_upright(); tens_base(); }                                      // tensioner (welded flats)
-        color("#444444", 0.9) cut() chain_band(0);                                               // chain
         if (show_motor) {
-            color(C_DARK) cut() { motor_ph(); pulleys_ph(); motor_shaft_ph(); }
-            color("#222222", 0.8) cut() belt_ph();
-            if (!hide_guards) color("#e69138", GA) cut() { belt_guard(0); belt_guard(1); }
-            color(C_DARK) cut() belt_guard_hw_ph();
+            color(C_DARK) cut() { motor_ph(); motor_shaft_ph(); }
+            color("#c45a1a") cut() coupling_ph();                                                 // jaw coupling
+            if (!hide_guards) color("#e69138", GA) cut() { cpl_guard(); stub_cap(); }
+            color(C_DARK) cut() cg_screws_ph();
             color("#c8a46e", deck_alpha) cut() { drive_deck(); deck_legs(); }
             if (show_holddown) {
                 color("#b0b4b8") cut() { top_angles(); foot_angles(); }                          // 40x40x4 leg angles
@@ -137,27 +138,12 @@ module everything() {
     }
 }
 
-// dimension of the safety distance (view along +x, +y on the viewer's left): blade-tip envelope bottom (z = -R_TIP) to the mesh top
+// screen section (view along +x, +y on the viewer's left): the blade-tip circles, the 2 mm gap, the hole band
 module lbl(y, z, t, sz = 9) translate([section_x - 0.6, y, z]) rotate([90, 0, -90]) linear_extrude(1) text(t, size = sz, halign = "center", valign = "center");
-module grid_dimensions() {
-    y = -124;                                                                        // in front of the drawer front in this view
-    color(C_RED) {
-        translate([section_x, y, (GRID_Z - R_TIP) / 2]) cube([1.2, 1.2, -R_TIP - GRID_Z], center = true);                 // the dimension line
-        for (z = [-R_TIP, GRID_Z]) translate([section_x, (y + 150) / 2, z]) cube([1.2, abs(y - 150), 0.8], center = true);   // the two levels: blade-tip envelope bottom, mesh top
-        lbl(y - 40, (GRID_Z - R_TIP) / 2, str(-R_TIP - GRID_Z, " mm"), 11);
-        lbl(y - 40, (GRID_Z - R_TIP) / 2 - 14, str("(>= ", GRID_MIN_DIST, ")"), 8);
-        lbl(205, -R_TIP + 7, "blade tips z = -34", 8);
-        lbl(205, GRID_Z + 7, str("mesh top z = ", GRID_Z), 8);
-        // the fixed upper front panel and the short drawer front: the opening left by the drawer is entirely under the mesh
-        translate([section_x, -180, uf_zb()]) cube([1.2, 140, 0.8], center = true);                                         // level line: the fixed panel's bottom edge
-        lbl(-185, uf_zb() - 9, str("panel bottom z = ", uf_zb(), " (<= ", grid_zl(), ")"), 7);
-        lbl(-205, -150, "FIXED front panel", 8);
-        lbl(-205, -162, "(screwed on, 18 mm)", 7);
-        lbl(-205, -295, "DRAWER front", 8);
-        lbl(-205, -307, str("z ", GROUND_Z, " .. ", drf_zt()), 7);
-        lbl(-205, -335, "opening: under the mesh", 7);
-    }
+module screen_dimensions() color(C_RED) {
+    lbl(0, -60, str("screen: ", SCREEN_GAP, " mm under the blade tips, holes Ø", SCREEN_HOLE_D), 6);
+    lbl(0, -70, str("wall ", SCREEN_T, ", holes where the top is <= ", SCREEN_HOLE_SLOPE, " deg"), 6);
 }
-if (grid_dims && !is_undef(section_x)) grid_dimensions();
+if (screen_dims && !is_undef(section_x)) screen_dimensions();
 if (section_pair) for (i = [0, 1]) translate([0, 0, -120 * i]) let($sec_y = shaft_y(i == 0 ? "A" : "B")) everything();
 else everything();

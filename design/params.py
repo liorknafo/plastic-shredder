@@ -129,42 +129,60 @@ SLEEVE_ID = 25.05
 COLLAR_OD = 46.0       # collared sleeves at both ends: body Ø30 through the cap hole and the thrust bearing
 COLLAR_T = 4.0
 
-# --- Gears: MADE IN YOUR SHOP (2026-11-08), keep the shafts in step (1:1, opposite directions) ---
-# Module 1.5, 20 deg, z = 40 (pitch dia 60 = C), cut with your involute cutter set (module 1.5, HSS, #1-#8, Amazon B09TB7FPFF):
-# cutter #3 covers 35-54 teeth. LAMINATED: each gear is GEAR_LAYERS layers of the 70x10 flat, each faced to GEAR_LAYER_T,
-# keyed to the shaft one by one, turned and cut together on a mandrel, then case-hardened (Kasenit-type powder).
-# Round Ø25 bore with the 8 mm key (the NA4905 inner ring must slide over the gear seat, so the shaft stays a Ø25 journal).
-# No hub (hub_L = 0), but a GEAR SPACER SLEEVE (Ø55 bar) fills the length of the old bought gear (30 + 18 hub = GEAR_STACK_L) so that the sprocket, the chain plane, the
-# gearbox, the deck and both shaft lengths stay exactly where they were (`make variants` showed that with the sleeve left out, a 20 mm sprocket hub puts the TL350 and its guard into the cabinet).
-# Teeth are cut GEAR_CUT_EXTRA deeper than standard on both gears: that is the backlash.
-GEAR_LAYER_T = 9.8     # each layer is faced from the 10 mm flat to this
-GEAR_LAYERS = 4
-GEAR_MODULE = 1.5
-GEAR_Z = 40
-GEAR_ALPHA = 20.0      # pressure angle, deg (the cutter set is 20 deg)
-GEAR_CUT_EXTRA = 0.10  # extra cutting depth on BOTH gears, beyond the standard 2.25 m; this makes the backlash (calc s.6)
-GEAR_ROUGH_D = 64.0    # CNC outline of one layer (finished OD 63.0 is turned on the lathe on the gear mandrel)
+# --- Gears: BOUGHT (2026-11-13, user's choice after review 7), keep the shafts in step (1:1, opposite directions) ---
+# Review 7 showed that a gear OVERHUNG 42 mm outside the drive bearing on the Ø25 shaft tilts under load, so its teeth carry the load on only ~7-11 mm of their width
+# (ISO 6336-1 face load factor 4-6): the home-made m1.5 gears failed, and so did any overhung gear.  Now each gear sits BETWEEN two bearings: the drive bearing
+# and an OUTBOARD BEARING PLATE (below), and the gears are bought m4 z15 steel spur gears with HARDENED teeth (the contact stress at d = 60 needs them).
+# m4 z15 rather than m3 z20 (same pitch Ø60): with the ISO face load factor for an assumed cheap gear (grade 9) and +-0.02 bearing seats, m3 misses the hard-jam bending check (calc s.6).
+# Bought from Amazon, re-bored Ø25 H7 and broached for the 8 mm key on the lathe like the sprocket.  *** APPROXIMATE: hub size until the listing is chosen. ***
+GEAR_MODULE = 4.0
+GEAR_Z = 15            # odd: gear B needs no half-pitch turn to mesh with A (a gap of B faces a tooth of A)
+GEAR_ALPHA = 20.0      # pressure angle, deg
+GEAR_FACE = 30.0       # tooth face width (the hub is extra).  (40 would help pitting, but moves the drive out 10 more and the standoffs get too soft: review 7)
+GEAR_HUB_L = 18.0      # APPROX: hub length (on the outboard side of the teeth); make variants tries 12 and 22
+GEAR_HUB_D = 45.0      # APPROX: hub OD
+GEAR_CUT_EXTRA = 0.10  # MODEL ONLY: the bought gears' tooth-thickness tolerance as an equivalent extra cutting depth on both gears (backlash ~0.15, calc s.6; C31)
 GEAR_KEY_W = 8.0       # 8 x 7 key, shaft keyway 4 deep, gear keyway GEAR_KEYWAY_H above the bore surface
-GEAR_KEYWAY_H = 3.3    # keyway depth in the gear above the Ø25 bore surface (key stands 7 - 4 = 3 above the shaft: 0.3 clearance)
-GEAR_KEY_TOOL_D = 3.0  # the keyway is cut on the CNC with this end mill: its radius is the corner radius of the keyway
-GEAR_KEY_CHAMFER = 1.5 # the 8x7 key's top edges (the ones that sit in the gear keyway) are chamfered at least the end-mill radius
-# The face width (layers x layer thickness) is DERIVED (derived()["gear_face"]), so that `make variants` can override GEAR_LAYER_T.
-GEAR = dict(module=GEAR_MODULE, z=GEAR_Z, alpha=GEAR_ALPHA, bore=25.0, hub_L=0.0, cut_extra=GEAR_CUT_EXTRA,
-            material="S235 (your 70x10 flat), teeth case-hardened after cutting",
-            Sy=235.0, Su=360.0, lewis_Y=0.389,   # Y(z=40, 20 deg): Shigley's MED, Table 14-2 (form factor Y for full-depth 20 deg teeth, z = 38: 0.384, 43: 0.397)
-            cutter="module 1.5 #3 (35-54 teeth)", cutter_set="Amazon B09TB7FPFF, HSS, 20 deg, #1-#8",
-            sigma_H_lim=1000.0)   # conservative contact-fatigue limit for a THIN pack-carburised (Kasenit) case on S235, see calc s.6
-GEAR_STACK_L = 48.0     # gear (4 layers) + gear spacer sleeve, drive-end x -38 .. -86: unchanged from the bought 30 + 18 hub gear
-GEAR_SPACER_D = 36.0    # gear spacer sleeve OD (bore 25.05, from the Ø55 bar, ends faced flat and square): it carries the sprocket hub / end cap clamp load
-GEAR_HERTZ_SF = 1.2    # required safety factor on sigma_H,lim at the operating torque
-# Rotary table (size / ratio NOT KNOWN yet: open item). 90:1 is assumed for the worked example only.
-ROTARY_RATIO_ASSUMED = 90.0
-# Gear mandrel (turned from your Ø30 bar): Ø30 grip, Ø25 g6 seat for the layers with the 8 mm key, M16 x 1.5 thread, nut + washer Ø30 x 6
-GMAND = dict(grip_D=30.0, grip_L=45.0, seat_D=25.0, seat_extra=2.8, thread="M16 x 1.5", thread_D=16.0, thread_L=24.0,
-             washer_D=30.0, washer_T=6.0, key_L=40.0)
-# Raw material for the gear layers: how much 70x10 flat you must add. The two existing bars have only 20 and 34 mm left after the
-# blades and plates (calc s.10), the 8 layers need ~580 mm, so one more piece of 70x10 flat must be bought.
-GEAR_FLAT_BUY_L = 600.0   # mm of 70x10 flat to buy for the gear layers (calc s.10 checks that this is enough)
+GEAR_KEYWAY_H = 3.3    # broached keyway depth in the gear above the Ø25 bore surface (the key stands 7 - 4 = 3 above the shaft: 0.3 clearance)
+GEAR_KEY_TOOL_D = 0.4  # corner radius x 2 of the broached keyway (sharp)
+GEAR_ISO_GRADE = 9     # ASSUMED accuracy of a cheap bought gear (ISO 1328): sets the helix slope deviation fHbeta in the face load factor (calc s.6)
+GEAR = dict(module=GEAR_MODULE, z=GEAR_Z, alpha=GEAR_ALPHA, bore=25.0, hub_L=GEAR_HUB_L, cut_extra=GEAR_CUT_EXTRA,
+            material="C45 (45#) steel, teeth induction-hardened (HRC 45-55), bought",
+            Sy=305.0, Su=580.0,   # CORE of C45 normalised, EN 10083-2, 16 < d <= 100 (the hardened tooth surface is ignored for bending: conservative)
+            lewis_Y=0.290,        # Y(z = 15, 20 deg full depth, load at the tip): Shigley's MED, Table 14-2
+            HV_min=513.0,         # BUY REQUIREMENT: teeth >= HRC 50 (= 513 HV, ASTM E140)
+            sigma_H_lim=0.740 * 513.0 + 602.0)   # ISO 6336-5, flame / induction hardened, quality ML: 0.740 HV + 602 = 982 MPa at the minimum hardness
+GEAR_HERTZ_SF = 1.0    # required SF on the pitting limit (with the ISO life factor), the ISO 6336-2 minimum for pitting: pitting is slow and visible, the gears are cheap (DESIGN 8.3)
+# Pitting is rated as a LIFE (review 7): the gears are a replaceable wear part (2 spares on the list).  Inputs of ISO 6336-2's lubrication / speed / roughness factors:
+GEAR_RZ = 10.0         # flank roughness Rz of the pair, µm: ASSUMED for hobbed (not ground) and then induction-hardened teeth
+GREASE_NU40 = 220.0    # base-oil viscosity of the gear grease at 40 °C, mm²/s (BUY: EP2 or open-gear grease, base oil ISO VG 220 or thicker)
+GEAR_CASE_MIN = 0.5    # hardened case depth on the flanks, mm (BUY REQUIREMENT, as stated by the seller; induction hardening of m4 teeth is normally 1-3 mm)
+GEAR_LIFE_MIN_H = 200.0   # required pitting life, hours of cutting with ALL of the motor's operating torque through the gears (the conservative rating)
+GEAR_SPACER_D = SLEEVE_OD   # the two sleeves either side of the outboard bearing's inner ring are plain Ø30 sleeves (the Ø55 bar)
+# --- OUTBOARD BEARING PLATE (2026-11-13): a 2-layer steel plate outside the gears, on 4 standoffs from the drive cap layer, carries a 5th and 6th NA4905 ---
+OB_T = 10.0            # each of its 2 layers (from 100 x 10 flat, bought locally like the gear flat before)
+OB_H = 100.0           # z extent (taller than the 70 end plates: the drive-end guard's hood and the gear band butt fully against it)
+OB_ZC = 3.0            # its centre is this far ABOVE the shaft axes: bottom edge at z = -47, so the chain tube's top wall under it clears the tensioner's head plate (C24c)
+OB_L = 180.0           # y extent (10 more than the end plates: edge margin round the M8 tie holes at |y| = 80)
+OB_GAP = 2.0           # rotating part to the plate face (gear hub inboard; sprocket hub / B end cap outboard)
+OB_STEP = 1.5          # Ø32 step at each outer face holds the bearing's outer ring: pocket 17 = 8.5 + 8.5 bored from the joint face of each layer
+# Two PILLARS (one per side) carry the outboard plate: rectangular bars 15 (y) x 60 (z) x standoff_L, from 60 x 15 flat (bought locally), each with the two Ø9 holes for
+# that side's tie screws.  Review 7: four Ø18 tubes (the most that fit at z = ±9) were overstressed and their end faces opened under the plate's twist; the twist is
+# carried as up/down forces at y = ±80, where the pillar is 50 deep.
+PILLAR = [15.0, 60.0]  # [y width, z height]: from 60 x 15 flat, bought locally (60 tall: the end faces must stay closed at the hard-jam peak, calc s.7b)
+PILLAR_Y0 = 73.0       # |y| of the pillar's inner face (3 mm outside the gear band's lobes at y = ±70); its outer face at ±88, 3 past the cap's edge (±85)
+TIE_D = 8.0            # M8 tie screws: tapped Ø6.8 through the cap and 9.5 into the outer layer (both ends identical), Ø9 through ob1, ob2 and the standoffs
+# The tie screws clamp STEEL ONLY (review 7): head -> 3 hardened washers -> ob2 -> ob1 -> standoff -> cap.  The printed hood does NOT sit under them (its wings have Ø17 clearance
+# holes round the washer stacks) and is held by its own 4 x M5 screws into ob2 (HOOD_SCREW_PTS).
+TIE_GRADE = "12.9"
+TIE_TORQUE = 35.0      # N·m, torque wrench, oiled thread
+TIE_PRELOAD_N = TIE_TORQUE / (0.2 * TIE_D / 1000)   # 21.9 kN nominal (k = 0.2)
+TIE_SCATTER = 0.25     # torque-wrench scatter of the preload, +-
+TIE_EMBED = 0.10       # preload lost to settling of the 6 steel interfaces (VDI 2230 order of magnitude)
+TIE_MU = 0.20          # slip factor of clean, dry, UNTREATED machined steel (EN 1993-1-8 Table 3.7 class D): no surface preparation is needed
+TIE_WASHERS = 3        # ISO 7089 M8 300HV hardened washers (Ø16 x 1.6) under each head: 4.8 = the hood wing (4) + 0.8, so the head never touches it
+HOOD_SCREW_PTS = [[76.0, 28.0], [76.0, -28.0], [-76.0, 28.0], [-76.0, -28.0]]   # 4 x M5 x 12: hood wings -> ob2 (tapped through)
+BORE_POS_TOL = 0.02    # each bearing seat within +-0.02 of its DRO position (calc s.4: forced bending of the 3-bearing shaft; s.6: gear misalignment)
 
 # --- Combs (stripper fingers) and walls ---
 COMB_W = 25.0          # comb bar width (y); 10 thick (z), from the 50x10 flat
@@ -187,30 +205,44 @@ MOTOR = dict(
     P_likely_W=250.0,
     breakdown_ratio=2.2,   # typical max/rated torque for a small capacitor motor
     shaft_d_est=12.0,      # ESTIMATE from the photo - measure
-    pulley_d_est=34.0,     # ESTIMATE: small single-groove V pulley on the motor - measure
 )
 
-# --- Drive (2026-11-07, user's choice): motor -> V-belt 2:1 -> foot-mounted worm gearbox i = 50
-# (NRV063-VS: solid Ø19 input shaft, Ø25 hollow output with a shop-made output shaft) -> TL350-2
-# friction torque limiter with a #40 30T sprocket on the gearbox output -> #40 roller chain -> 15T
-# sprocket on shaft A (2:1 speed-up). The torque limiter slips at its setting for slow AND hard jams,
-# so nothing downstream of it can see more than the setting plus the shafts' own inertia (calc s.3b).
-BELT_RATIO = 2.0       # motor pulley : gearbox pulley diameters
-BELT_EFF = 0.95
+# --- Drive (2026-11-15).  No belt (user: "I don't think we really need a belt") and no chain (user: "why do we need the other belt?"):
+# motor -> flexible JAW COUPLING -> foot-mounted worm gearbox i = 50 (NRV063-VS: solid Ø19 input shaft, Ø25 hollow output with a shop-made output shaft),
+# its output COAXIAL with shaft A -> PIN FLANGE (made, 6061) on the output shaft -> 4 hardened dowel pins through 4 holes drilled in the TL350's own 30T
+# sprocket plate -> TL350-2 friction torque limiter ON SHAFT A.  The motor turns the worm directly (1420 rpm in, 28.4 rpm out = the shaft speed).
+# The limiter stays on shaft A: only the shafts, blades, gears and the limiter's own hub are downstream of it (calc s.3b).
+# (The user's bronze is under Ø50: too small for a home-made friction disc, so the bought TL350 stays and the bronze is not used.)
 WORM = dict(name="NRV063-VS worm gearbox, i = 50, Ø19 input shaft, Ø25 hollow output",
-            ratio=50.0, eff=0.60, rated_out_Nm=150.0)  # catalogue order of magnitude at i = 50
-CHAIN = dict(name="#40 (ANSI 40, 1/2 in) roller chain", pitch=12.7, eff=0.97, kg_per_m=0.41)
-SPROCKET_A = dict(name="#40 15T B-hub sprocket (buy the smallest bore, re-bore Ø25, broach 8 mm keyway)",
-                  z=15, hub_L=22.4, hub_D=39.0)
+            ratio=50.0, eff=0.60, rated_out_Nm=150.0)  # eff: catalogue ~0.63 at i = 50, 1400 rpm in (0.60 used); torque: catalogue order of magnitude at i = 50
+CHAIN = dict(name="#40 (ANSI 40, 1/2 in) roller chain", pitch=12.7, eff=0.97, kg_per_m=0.41)   # only the TL350's 30T sprocket (geometry) and the setting fixture's chain whip
 TL = dict(name="TL350-2 friction torque limiter with #40 30T sprocket (Amazon), bore 25",
           z=30, T_min=34.0, T_max=149.0, L=62.0, D=89.0)
-CHAIN_RATIO = TL["z"] / SPROCKET_A["z"]    # 2: shaft A turns twice as fast as the gearbox output
+TL_B_CLEAR = 5.0           # the TL350 on shaft A starts this far outside B's M10 head (its Ø89 body passes outside B's end, R > C = 60)
+# pin coupling (2026-11-15): the TL350 is FLIPPED (flange end outward), so its sprocket plate is 12 mm from A's outer end; a pin flange on the coaxial gearbox output
+# drives it through 4 pins in 4 holes drilled in the plate, between the TL's Ø89 body and the tooth root (the teeth carry nothing any more)
+PIN_N = 4                  # dowel pins
+PIN_D = 8.0                # Ø8 x 32 hardened dowel (ISO 8734 / DIN 6325), pressed through the flange disc
+PIN_L = 32.0
+PIN_R = 50.5               # pitch radius of the pins (PCD 101): drill the sprocket at (±35.71, ±35.71) from its bore centre
+PIN_HOLE_D = 8.5           # drilled in the sprocket plate: 0.25 radial play + free axial slide = the coupling's misalignment allowance
+PF_D = 120.0               # pin flange disc (6061-T6 from a Ø125 x 50 round, or S235)
+PF_T = 12.0                # disc thickness = the pins' press length
+PF_GAP = 2.0               # disc face to the TL350's outer (flange-end) face
+PF_HUB_D = 50.0            # hub behind the disc
+PF_POCKET_D = 36.0         # pocket in the face over A's end cap (Ø30) and M10 head (Ø16)
+PF_POCKET_CLEAR = 2.0      # pocket bottom beyond the M10 head
+PF_KEY_L = 25.0            # keyed Ø25 H7 bore behind the pocket (8 mm keyway, 1 x M6 grub screw over the key)
+PF_SHAFT_RECESS = 1.0      # the output shaft ends this far short of the pocket bottom
+# jaw coupling between the motor and the worm's input shaft (L090 class: hubs Ø54, the spider between them); APPROXIMATE envelope until bought
+CPL = dict(name="jaw (spider) coupling, L090 size, bores 19 (worm) and your motor's shaft", D=54.0, hub_L=20.6, gap=12.7)
+MOTOR_SHAFT_L = 40.0       # PLACEHOLDER: motor shaft length out of the motor's front face (measure)
 TL_SCATTER = 0.15      # friction slip torque scatter (+15 %) between setting and the most it can transmit
 
 T_OPERATING = 45.0     # design operating input torque at shaft A, N*m (both shafts together)
-T_SET = 55.0           # torque limiter setting, referred to shaft A (the TL itself is set to CHAIN_RATIO x this)
+T_SET = 55.0           # torque limiter setting (the TL is on shaft A)
 T_LIMIT = T_SET * (1 + TL_SCATTER)   # 63.3: the most the TL can pass to shaft A (quasi-static)
-TL_SET_AT_TL = T_SET * CHAIN_RATIO    # 110 N*m at the TL on the gearbox output shaft
+TL_SET_AT_TL = T_SET                  # 55 N*m: the TL is on shaft A
 
 FATIGUE_SF = 1.5       # Goodman, on the Marin-corrected endurance limit. 1e6 rotations at full
                        # load = ~1400 h of continuous cutting at 11.8 rpm.
@@ -247,17 +279,11 @@ TOP_HOLE_Y = 10.0          # |y| of the M5 holes in the TOP edge of each inner e
 TOP_HOLE_DEPTH = 10.0      # M5 tapped depth, down from z = +35
 WALL_TOP_HOLE_X = 30.0     # wall top-edge M5 holes at x = 30 and chamber_L - 30, |y| = 71
 WALL_TOP_HOLE_Y = 71.0
-SKIRT_HOLE_Y = 77.5        # M4 tapped holes up into the comb underside (brief said 75: that overlaps the wall-screw hole at 71)
-SKIRT_HOLE_DEPTH = 8.0
+
 GUARD_HOLE_Y = 80.0        # 4 x M5 tapped through each cap only, at (+-GUARD_HOLE_Y, +-GUARD_HOLE_Z)
 GUARD_HOLE_Z = 9.0
 GUARD_CLEAR = 3.0          # gear guard inner clearance round the gears / washer / screw head
 BASE_T = 18.0              # plywood
-MOTOR_PULLEY_D = MOTOR["pulley_d_est"]
-GEARBOX_PULLEY_D = 2 * MOTOR["pulley_d_est"]
-BELT_CENTRE_DIST = 250.0   # PLACEHOLDER: motor pulley axis to gearbox pulley axis
-BELT_WIDTH = 13.0          # A-section V-belt, PLACEHOLDER
-BELT_GUARD_CLEAR = 15.0
 WORM_AXIS_DROP = 63.0      # worm input axis below the gearbox output axis (NMRV063 centre distance)
 
 
@@ -268,34 +294,31 @@ HANDLE_W = 110.0           # printed drawer pull (x)
 HANDLE_H = 40.0            # (z)
 HANDLE_BACK_T = 8.0        # back plate against the drawer front (2 heat-set inserts, 6 deep)
 HANDLE_LIP_D = 26.0        # shelf depth in front of the drawer front (finger space under it)
-HANDLE_Z = -250.0          # world z of the handle centre (middle of the SHORT drawer front, which now only reaches up to just under the fixed upper front panel)
+HANDLE_Z = -200.0          # world z of the handle centre (about the middle of the full-height drawer front)
 HANDLE_SCREW_DX = 35.0     # the 2 x M4 sit at x = cabinet centre +- this
 HANDLE_HOLE_D = 4.5        # the ONLY holes in the drawer front: M4 clearance, filled by the screw, covered by the handle
 INSERT_D = 5.6             # M4 heat-set insert hole
 INSERT_DEPTH = 6.0
-DRAWER_SW_Z = -300.0       # world z of the drawer interlock switch / key centre line (inside the short drawer front's height, under the handle, above the floor)
-UFRONT_BELOW = 1.0         # the FIXED upper front panel reaches this far below the underside of the lower grid cleats (so the opening left by the drawer is entirely below the mesh)
-UFRONT_GAP = 1.0           # gap between the fixed upper front panel's bottom edge and the top of the sliding drawer front (must stay < 4: C9a)
-SW_PAD_L = 92.0            # switch pad, same as the hopper pad: 32 x 92, 2 x M4 at 22 mm
+DRF_GAP = 1.0              # gap between the drawer front's top edge and the underside of the base plate
+SW_PAD_L = 92.0            # hopper switch pad: 32 x 92, 2 x M4 at 22 mm
 SW_PAD_W = 32.0
 SW_PAD_T = 10.0
 SW_SCREW_SPACING = 22.0
-INTERLOCK_IN = 12.0        # tongue insertion with the drawer fully closed (>= 10)
-INTERLOCK_OUT_TRAVEL = 15.0   # the tongue must be completely out of the switch after this much drawer travel
-# belt guard lap joint and feet
-BG_LAP_LEN = 16.0          # lap joint overlap between the two halves (>= 15)
-BG_LAP_CLEAR = 0.3         # gap between the lapped walls
-BG_FOOT_W = 36.0           # width of a printed mounting foot (along the guard)
-BG_FOOT_T = 4.0            # foot flange thickness
-BG_FOOT_REACH = 16.0       # the flange reaches this far in front of the guard roof so the M5 screws are reachable from above
+INTERLOCK_IN = 12.0        # lid switch: tongue insertion with the lid closed (>= 10)
+INTERLOCK_OUT_TRAVEL = 15.0   # (kept for the hopper's interlock template)
+# coupling guard (printed): a tunnel over the jaw coupling from the motor's face to the gearbox housing, on two feet screwed to the deck
+CG_END_GAP = 1.0           # the tunnel's ends to the motor face and to the housing face
+CG_FOOT_W = 36.0           # foot flange length (along y)
+CG_FOOT_T = 4.0            # foot flange thickness
+CG_FOOT_REACH = 16.0       # the flange sticks out this far beside the tunnel (2 x M5 x 20 wood screws each)
 # drive deck (plywood) and timber legs
 DECK_PLY_T = 18.0
-DECK_MARGIN = 30.0         # deck margin round the motor foot, gearbox, pulleys and belt placeholders
+DECK_MARGIN = 30.0         # deck margin round the motor foot, gearbox, coupling guard
 LEG_SECTION = 45.0         # timber legs 45 x 45
 FOOT_PLATE_L = 130.0       # steel foot plate under each base-wing leg: flat 50 x 10 x 130, 2 x M8 floor bolts, M8 hold-down stud tapped in
 FOOT_PLATE_W = 50.0
 FOOT_PLATE_T = 10.0
-# belt-slip test stub (from the user's Ø30 bar)
+# torque-limiter test stub (from the user's Ø30 bar)
 STUB_D = 25.0              # h6 end that the gearbox hollow shaft slides on
 STUB_L = 80.0
 STUB_END_D = 30.0          # vise end
@@ -350,34 +373,24 @@ BRK_TAB_DY0 = 26.5             # the tabs start at this |dy|; between them the f
 
 
 # --- Drive CAD dimensions (ADDED 2026-11-07 with the foot-mounted gearbox; all PLACEHOLDER envelopes unless said) ---
-CHAIN_CD = 150.0           # TL axis to shaft A axis. Keep it 150-157 (make variants checks 152 and 157):
-                           # longer puts the deck legs below the cabinet's floor (GROUND_Z); at 140 the chain's
-                           # rising run touches shaft B's end screw. Set it with shims under the gearbox feet.
-# CHAIN TENSION (my choice, the brief's idler option): an IDLER sprocket (#40 15T on an M10 bolt) inside the loop on the slack side, on a slotted upright welded to a base
-# plate that is bolted to the drive deck. The gearbox itself is fixed: its 20 mm steel sub-plate sits directly on the deck.
+# The gearbox output is COAXIAL with shaft A (2026-11-15: no chain); its feet sit on two slotted rails on the deck, shimmed so the output lines up with A.
 SUBPLATE_T = 20.0          # gearbox sub-plate: 20 mm steel plate (or 2 x 10), tapped M8 for the gearbox feet, 4 x M8 down into the deck
 GB_BOX = [100.0, 100.0, 145.0]   # NRV063-VS housing envelope (placeholder, measure yours). Brief: "100 (x) x 145 x 100": read as x 100 along the output axis, y 100 along the worm
                            # axis, z 145 (z must be the 145: it holds the output axis AND the worm axis 63 below it)
 GB_BELOW_OUT = 113.0       # foot flange underside this far below the output axis (worm axis is 50 above the foot). With the 20 mm sub-plate on the deck the worm axis is then 70 above
-                           # the deck = the axis height of a motor (Ø120, foot 10) standing on the deck -> horizontal belt. cad/drive_geom.scad asserts this
+                           # the deck = the axis height of a motor (Ø120, foot 10) standing on the deck -> coaxial with the worm (jaw coupling). cad/drive_geom.scad asserts this
 GB_BOSS = 9.0              # output hub boss between the housing face and the TL350 body
 GB_FOOT = [124.0, 76.0]    # gearbox foot bolts, spacing (x, y): 4 x Ø9 -> M8 into the sub-plate (drill to the gearbox you buy)
 GB_FLANGE = [140.0, 100.0, 8.0]  # foot flange x, y, thickness
 GB_WORM_STUB = 40.0        # worm input shaft (Ø19) sticks out this far on each side of the housing
 SPROCKET_T = 7.2           # sprocket tooth plate thickness (#40: 7.2)
-SPROCKET_OD_EXTRA = 6.2    # tooth-tip OD = pitch dia + this  (#40 15T: 67.3, 30T: 127.7)
-CHAIN_ENV_W = 18.0         # #40 roller chain envelope: width over the pin ends
+SPROCKET_OD_EXTRA = 6.2    # tooth-tip OD = pitch dia + this  (#40 30T: 127.7)
+SPROCKET_ROOT = 7.92       # root Ø = pitch Ø - this (#40 roller Ø 7.92): 113.6 for the 30T
+CHAIN_ENV_W = 18.0         # #40 roller chain envelope: width over the pin ends (the setting fixture's chain whip)
 CHAIN_ENV_H = 12.1         # ... and link plate height (centred on the pitch line)
-DRIVE_LEG_MIN = 60.0       # shortest drive-deck leg: the deck stands on its own floor when the gearbox is below the bench
-TENS_DELTA = 8.0           # the idler pushes the slack run this far out of its straight line at the nominal slot position
-TENS_TRAVEL = 10.0         # slot travel +-10 mm along y (+y = takes up slack)
-TENS_FLAT_W = 50.0         # upright = 50 x 10 flat on edge (stock)
-TENS_T = 10.0
-TENS_BASE = [42.0, 70.0]   # base plate x, y (10 mm thick, from the 70 x 10 flat)
-TENS_AXLE_D = 10.0         # M10 bolt
-GUARD_FRONT_X = -70.0      # inner face of the chain guard's machine-side wall (clears the TL screw head at x = -81.2 and the idler bolt head)
-DG_SEAM_Z = -95.0          # horizontal seam between the upper and the lower printed drive-end / chain guard
-DG_FLANGE_W = 12.0         # seam ears on the machine-side wall
+DRIVE_LEG_MIN = 60.0       # shortest drive-deck leg
+DG_SEAM_Z = 0.0            # the drive-end guard is split in two halves at this horizontal seam (through the shaft axes), so it closes round the pin flange
+DG_FLANGE_W = 12.0         # seam ears
 DG_FLANGE_T = 4.0
 TLFIX_ARM = 500.0          # torque-limiter setting fixture: weight hole this far from the TL axis
 TLFIX_LEVER_L = 600.0      # chain-whip lever: flat 50 x 10 x 600, pivots on the stub tip, the chain ends bolt to it
@@ -390,32 +403,28 @@ TLFIX_LEVER_T = 10.0
 TL_HUB_D = 42.0            # hub OD DH
 TL_FLANGE_T = 8.0          # hub flange thickness
 TL_CM_OFFSET = 12.0        # hub flange-end face to the mid-plane of the sprocket (centre member)
-TL_GB_GAP = 3.0            # TL flange-end face to the gearbox housing face (a 3 mm spacer on the shaft)
+TL_GB_GAP = 3.0            # Ø36 spacer on the output shaft between the housing face and the pin flange's hub
 TL_PACK_D = 70.0           # friction pack (linings + bushing) between the flange and the pressure plate, envelope
 TL_PRESS_T = 8.0           # pressure plate (after the 8 mm friction pack: 16 from the flange-end face)
 TL_SPRING_L = 26.0         # disc spring stack after the pressure plate (24 .. 50); the adjusting nut takes the last 12 of the hub (50 .. 62)
 GB_HUB_L = 72.0            # PLACEHOLDER, measure: width of the gearbox housing along the output axis = length of the hollow output hub (supersedes GB_BOX[0]);
                            # the output shaft passes through all of it. make variants also tries 80
-OUT_SPACER_D = 36.0        # shaft spacer (3 mm = TL_GB_GAP) between the housing face and the TL flange
-SHAFT_KEY_W, SHAFT_KEY_D = 8.0, 4.0     # keyways 8 x 4 in the output shaft: gearbox key (along the hollow hub) and TL key (under the TL hub)
+OUT_SPACER_D = 36.0        # shaft spacer (TL_GB_GAP long) between the housing face and the pin flange's hub
+SHAFT_KEY_W, SHAFT_KEY_D = 8.0, 4.0     # keyways 8 x 4 in the output shaft: gearbox key (along the hollow hub) and pin-flange key
 GB_KEY_END = 6.0           # gearbox keyway stops this far inside each end of the hub
 TL_KEY_END = 3.0           # TL keyway stops this far inside each end of the TL hub
-# DIN 471 circlip for a Ø25 shaft against the housing's far face (the TL side is held by the spacer + TL + stop collar)
+# DIN 471 circlip for a Ø25 shaft against the housing's far face (the other side: spacer + pin flange on its key + grub screw)
 CIRCLIP_GROOVE_D, CIRCLIP_GROOVE_W = 23.9, 1.3
 CIRCLIP_T, CIRCLIP_OD = 1.2, 31.4       # ring 25 x 1.2; installed OD about 31.4
 CIRCLIP_EDGE = 3.0         # shaft end beyond the groove
-TL_COLLAR_D, TL_COLLAR_T = 35.0, 5.0    # stop collar Ø35 x 5, 2 x M6 grub screws, on the outboard side of the TL
-SHAFT_OUT_END = 3.0        # shaft end beyond the stop collar
-# gearbox rails: 2 x flat 50 x 10 under the foot rows, slots along x for the axial chain alignment, on 10 mm spacer blocks (SUBPLATE_T = rail + spacer)
+# gearbox rails: 2 x flat 50 x 10 under the foot rows, slots along x for the axial alignment (pin flange gap), on 10 mm spacer blocks (SUBPLATE_T = rail + spacer)
 GB_RAIL_W, GB_RAIL_T = 50.0, 10.0
 GB_RAIL_SLOT = 6.0         # slots run +-6 mm along x
 GB_RAIL_BOLT_DX = 86.0     # M8 deck bolts at +-this from the housing centre, outside the foot flange (x +-70)
 GB_RAIL_END = 10.0         # rail ends this far beyond the deck bolts
 GB_SPACER_L = 18.0         # spacer block under each rail end (x), 50 x 10 flat cut off
 DECK_RAIL_MARGIN = 20.0    # deck margin beyond the rails' +x end (the 30 mm DECK_MARGIN would run into the cabinet)
-# uplift: the chain pulls the gearbox UP; load path = gearbox feet -> rails (M8) -> deck -> leg angles -> legs -> foot angles -> floor anchors
-CHAIN_UPLIFT_LIMIT_N = 2100.0   # at the torque limiter's limit
-CHAIN_UPLIFT_DESIGN_N = 2500.0  # design value
+# hold-down: the gearbox's reaction torque (= the shaft torque, at most T_LIMIT) lifts one foot row; load path = gearbox feet -> rails (M8) -> deck -> leg angles -> legs -> foot angles -> floor anchors
 DECK_ANCHOR = "M8"         # floor / bench anchor (wedge or drop-in anchor, or an M8 coach screw into the bench)
 DECK_ANCHOR_D = 8.0
 DECK_ANGLE = [40.0, 40.0, 4.0]  # steel angle 40 x 40 x 4 (a stock section)
@@ -426,10 +435,6 @@ FOOT_ANGLE_LEG_BOLTS = 2   # M8 through-bolts: foot angle <-> leg (per leg)
 FOOT_ANGLE_ANCHORS = 2     # M8 anchors: foot angle <-> floor (per leg)
 BIG_WASHER_D, BIG_WASHER_T = 24.0, 2.0   # penny washers on the plywood and the timber
 DECK_LEG_INSET_Y = 45.0    # legs stand this far in from the deck's y edges (room for the top angles' flanges under the deck)
-# tensioner: the TL350 body now sits in front of the chain plane, so the upright is an L: a head arm over the TL guard tube, through a window in the chain guard's +y wall, and a column OUTSIDE the chain guard
-TENS_HEAD_H = 40.0         # head arm height below the upright's top (carries the slot); under it only the column
-TENS_COL_GAP = 3.0         # column clear of the chain guard's outer wall and of the rails
-IDLER = dict(name="#40 15T idler sprocket with bearing, M10/12 bore (bought)", z=15, bore=12.0)
 # TL setting fixture: the lever PIVOTS on a Ø25 pin that continues the stub beyond the TL (outboard of the adjusting nut)
 TLFIX_PIN_L = 25.0         # Ø25 pin beyond the TL nut face
 TLFIX_LEVER_GAP = 5.0      # TL nut face to the lever
@@ -455,32 +460,29 @@ HACT_HOLE_SPACING = 30.0         # APPROX: 2 x M5 holes ~30 apart, centred on th
 HSW_SCREW = [4.0, 4.5, 7.0, 3.0, 3.3]   # M4 pan head into the Ø3.3 pilots of the funnel pad
 HACT_SCREW = [5.0, 5.5, 8.5, 3.5, 4.2]  # M5 pan head, Ø4.2 pilots (thread-forming, PETG) in the lid actuator pad
 HSW_PAD_W = 48.0                 # width (across) of the printed switch pad on the funnel: the 42 wide body + 3 each side
-#
-# (2) DRAWER: Omron D4NS-2AF plain safety switch + D4DS-K2 key.  APPROXIMATE too: verify with the Omron drawing.
-DSW_BODY = [30.0, 30.0, 90.0]    # APPROX [width, depth, length]: ~30 x 75 body + ~15 head = 90 long, 30 deep
-DSW_HOLE_SPACING = 22.0          # APPROX 2 x M4
-DSW_SLOT = [5.0, 18.0, 20.0]     # APPROX key entry in the head face [thickness, width, depth]
-DACT_SIZE = [12.0, 15.0, 50.0]   # APPROX D4DS-K2 key 50 x 15 x 12 [height, width, length tip to tail]
-DACT_BLADE_T = 3.0               # APPROX
-DACT_BLADE_L = 20.0              # APPROX tongue length (the mounting block behind it is 30 long)
-DACT_HOLE_SPACING = 20.0         # APPROX 2 x M4
-DSW_SCREW = [4.0, 4.5, 7.0, 3.0, 3.3]
-DACT_SCREW = [4.0, 4.5, 7.0, 3.0, 3.3]
-#
-# (3) FIXED MESH GRID in the bin cabinet: 1" x 1" (25.4) welded wire mesh, 14 ga (2.0 mm wire), galvanized, across the WHOLE inside of the cabinet, resting on
-#     20 x 20 timber cleats screwed to the walls and held down by a second set of cleats on top.  ISO 13857 Table 4: square openings <= 30 mm need >= 120 mm between
-#     the opening and the hazard.  GRID_Z is the z of the mesh's TOP surface; the blade-tip envelope's lowest point is z = -R_TIP = -34.
-GRID_PITCH = 25.4                # wire pitch (clear opening = GRID_PITCH - GRID_WIRE = 23.4)
-GRID_WIRE = 2.0                  # wire Ø
-GRID_Z = -170.0                  # top surface of the mesh (136 mm below the blade tips; >= 120 required)
-GRID_CLEAT = 20.0                # timber cleats 20 x 20 (a lower set under the mesh edge, an upper set on top)
-GRID_MIN_DIST = 120.0            # ISO 13857 Table 4: safety distance for square openings 20 < e <= 30
-GRID_MAX_OPEN = 30.0             # largest clear opening allowed (square)
-GRID_EDGE_GAP = 0.5              # MINIMUM clearance between the cut mesh and the cabinet walls (the CAD centres the wires: 0.9 in x, 2.1 in y)
-GRID_MAX_EDGE_GAP = 10.0         # the edge gap must stay below this (10 mm probe)
-FINGER_D = 16.0                  # finger probe Ø
-GRID_BIN_CLEAR = 4.0             # drawer bin top to the underside of the lower cleats
-GRID_SCREW = [4.0, 4.5, 8.0, 3.0, 3.0]  # M4 x 35 wood screws from OUTSIDE the plywood into the cleats (Ø3 pilots 17 deep)
+# --- FIXED SCREEN (2026-11-15, user: "machine ... the shape of the bottom of the blades with holes so only small enough pieces will pass and the
+# others will have to keep shredding").  It REPLACES the vibrating screen, the wire-mesh safety grid, the fixed upper front panel, the drawer switch and the
+# printed side skirts.  One aluminium block (6061 / 6082, CNC4030), its top a "W": two arcs SCREEN_GAP under the blade-tip circles of A and B, meeting in a
+# ridge between the shafts and rising on the outer sides to the combs' underside, then flat WINGS that are screwed up against the combs (6 x M4 into the comb's
+# tapped holes at |y| = SKIRT_HOLE_Y).  Ø5 holes drilled straight down (z) where the top is no steeper than SCREEN_HOLE_SLOPE.  Oversize stays on the
+# screen and the teeth drag it round to the combs and back into the bite until it passes.  The screen is also the guard from below: ISO 13857 Table 4,
+# round openings 4 < e <= 6 need >= 5 mm to the hazard; here hole length + gap >= 8.
+SCREEN_GAP = 2.0           # blade-tip circle (R_TIP) to the screen's top surface, radial
+SCREEN_T = 10.0            # Ø5 land under the top (the bottom is FLAT at R_TIP + SCREEN_GAP + SCREEN_T under the axes; deeper down each hole is relieved); calc s.13
+SCREEN_RELIEF_D = 6.5      # relief drilled up from the flat bottom so every Ø5 hole is only SCREEN_T long (long thin holes clog); 1.5 mm webs on the 8 mm pitch
+SCREEN_HOLE_D = 5.0        # the largest piece that passes
+SCREEN_HOLE_PITCH = 8.0    # hexagonal pattern (3 mm ligaments: calc s.13)
+SCREEN_HOLE_SLOPE = 50.0   # deg: holes only where the top surface is at most this steep (they are drilled vertically)
+SCREEN_END_GAP = 0.5       # each end face of the screen to the end plate's inner face
+SCREEN_SCREW = [4.0, 4.5, 7.0, 4.0, 8.5]   # M4 x 16 socket head up into the comb: [thread, clearance hole, head Ø, head h, counterbore Ø]
+SCREEN_SCREW_Y = 74.0      # |y| of the 4 screws (2 per comb, at x = L/3 and 2L/3: between the wall screws at x = 20, L/2, L-20)
+SCREEN_TAP_DEPTH = 9.0     # M4 tapped up into the comb's underside (the comb is 10 thick; the wall sits on top of it there)
+SCREEN_SCREW_LAND = 8.0    # wing material under the comb at each screw (the counterbore comes up from the underside to here)
+SCREEN_POCKET = [11.0, 6.0]   # pockets in the wing top round the M5 heads of the wall screws (under the comb at |y| = 71): Ø, depth
+WALL_SCREW_HEAD = [8.5, 5.0]  # M5 socket head of the wall screws (from below, through the comb into the wall)
+BASE_CUT_Y = 83.0          # |y| of the base plate cut-out's long edges (was 55): the screen's screws are reached from below and the screen drops out
+PSU_24V_W = 30.0           # 24 V supply (only the lid lock's solenoid now)
+LID_SOLENOID_W = 10.0      # Pizzato FS 3096D024 solenoid, approx (datasheet: verify)
 
 
 def derived():
@@ -505,24 +507,35 @@ def derived():
     d["sleeve_L_free_A"] = LAYER_T + END_CLEAR                       # 10.5
     d["sleeve_L_free_B"] = LAYER_T + END_CLEAR + (d["stack_A"] - d["stack_B"])  # 10.70
     # drive end, outward: inner ring (-27..-10) | collared sleeve body (-34..-27: 3 mm cap step + 4 mm
-    # thrust bearing on the cap face at -30) + collar (-38..-34) | gear | (A only) sprocket | end cap.
-    # The gear sits next to the bearing (short overhang for B); the sprocket on A is outboard of it and
+    # thrust bearing on the cap face at -30) + collar (-38..-34) | gear (teeth, hub) | sleeve | OUTBOARD bearing | sleeve | (A only) sprocket | end cap.
+    # The gear sits between the drive bearing and the OUTBOARD bearing plate (2026-11-13); the sprocket on A is outboard of that plate and
     # its teeth (R 33.7) clear B's end cap (R 15) by 11 mm.
     d["x_inner_ring_out_drive"] = -LAYER_T - BEARING["B"]            # -27
     d["x_cap_out_drive"] = -3 * LAYER_T                              # -30
     d["collar_body_L_drive"] = (d["x_inner_ring_out_drive"] - d["x_cap_out_drive"]) + THRUST["T"]   # 7
     d["x_collar_in_drive"] = d["x_cap_out_drive"] - THRUST["T"]      # -34
     d["x_collar_out_drive"] = d["x_collar_in_drive"] - COLLAR_T      # -38
-    d["gear_face"] = GEAR_LAYERS * GEAR_LAYER_T                      # 39.2: 4 layers of 9.80
-    d["x_gear_in"] = d["x_collar_out_drive"]                        # -38
-    d["x_gear_out"] = d["x_gear_in"] - d["gear_face"]                # -77.2
-    d["gear_spacer_L"] = GEAR_STACK_L - d["gear_face"]               # 8.8: the sleeve between the gear and the sprocket (shaft A) / end cap (shaft B)
-    assert d["gear_spacer_L"] >= 3.0, "gear spacer sleeve shorter than 3 mm: the layers are too thick for GEAR_STACK_L"
-    d["x_gear_hub_out"] = d["x_gear_out"] - d["gear_spacer_L"]       # -86: outer face of the spacer sleeve (as the outer face of the old hub)
-    d["x_sprocket_in"] = d["x_gear_hub_out"]
-    d["x_sprocket_out"] = d["x_sprocket_in"] - SPROCKET_A["hub_L"]   # -108.4 (shaft A only)
-    d["x_sprocket_c"] = (d["x_sprocket_in"] + d["x_sprocket_out"]) / 2
-    d["x_chain"] = d["x_sprocket_out"] + SPROCKET_T / 2                # chain plane: the tooth plate at the hub's outer end
+    d["gear_face"] = GEAR_FACE
+    d["x_gear_in"] = d["x_collar_out_drive"]                        # -38: teeth next to the collar
+    d["x_gear_out"] = d["x_gear_in"] - GEAR_FACE                     # -68
+    d["x_gear_hub_out"] = d["x_gear_out"] - GEAR_HUB_L               # -86: outer face of the gear's hub
+    # OUTBOARD BEARING PLATE: 2 layers, OB_GAP outside the hub; the NA4905 sits in a 17 mm pocket between OB_STEP steps
+    d["x_ob_in"] = d["x_gear_hub_out"] - OB_GAP                      # -88: inner face (gear side)
+    d["x_ob_out"] = d["x_ob_in"] - 2 * OB_T                          # -108: outer face
+    d["x_ob_ring_in"] = d["x_ob_in"] - OB_STEP                       # bearing (outer + inner ring) inner face
+    d["x_ob_ring_out"] = d["x_ob_ring_in"] - BEARING["B"]            # ... outer face
+    d["bearing_x_ob"] = (d["x_ob_ring_in"] + d["x_ob_ring_out"]) / 2   # -98
+    d["gear_spacer_L"] = d["x_gear_hub_out"] - d["x_ob_ring_in"]      # 3.5: Ø30 sleeve, gear hub -> outboard inner ring
+    d["x_sprocket_in"] = d["x_ob_out"] - OB_GAP                      # -110: B's outer sleeve end = B's end cap
+    d["ob_sleeve_L"] = d["x_ob_ring_out"] - d["x_sprocket_in"]       # 3.5: Ø30 sleeve, outboard inner ring -> end cap (B)
+    # shaft A's drive end, outward: outer sleeve (long) | TL350 FLIPPED (nut end inward, flange end outward, its 30T sprocket TL_CM_OFFSET in from the outer end) | end cap + M10
+    d["x_spA_in"] = d["x_sprocket_in"] - END_WASHER_T - 10.0 - TL_B_CLEAR   # -135: the TL's nut-end face = A's outer sleeve end
+    d["x_sprocket_out"] = d["x_spA_in"] - TL["L"]                    # -197: the TL hub's outer (flange-end) face = A's clamp point (end cap)
+    d["x_cm"] = d["x_sprocket_out"] + TL_CM_OFFSET                   # -185: the TL's sprocket plate (centre member) = where the pins drive it
+    d["a_end_hub_L"] = TL["L"]
+    d["ob_sleeve_A_L"] = d["x_ob_ring_out"] - d["x_spA_in"]          # 28.5: A's outer sleeve (longer than B's)
+    d["standoff_L"] = d["x_cap_out_drive"] - d["x_ob_in"]            # 58 between the faces (+ 2 spigots)
+    d["x_sprocket_c"] = (d["x_spA_in"] + d["x_sprocket_out"]) / 2
     # free end, outward: inner ring | collared sleeve body (3 cap step + crinkle stack + thrust) + collar | end cap
     d["x_inner_ring_out_free"] = d["chamber_L"] + LAYER_T + BEARING["B"]
     d["x_cap_out_free"] = d["chamber_L"] + 3 * LAYER_T
@@ -531,11 +544,12 @@ def derived():
     d["x_collar_out_free"] = d["x_collar_in_free"] + COLLAR_T
     d["shaft_end_free"] = d["x_collar_out_free"] - SHAFT_END_RECESS
     d["shaft_end_A_drive"] = d["x_sprocket_out"] + SHAFT_END_RECESS
-    d["shaft_end_B_drive"] = d["x_gear_hub_out"] + SHAFT_END_RECESS
+    d["shaft_end_B_drive"] = d["x_sprocket_in"] + SHAFT_END_RECESS
     d["shaft_A_len"] = d["shaft_end_free"] - d["shaft_end_A_drive"]
     d["shaft_B_len"] = d["shaft_end_free"] - d["shaft_end_B_drive"]
-    d["sprocket_A_pd"] = CHAIN["pitch"] / math.sin(math.pi / SPROCKET_A["z"])
     d["tl_sprocket_pd"] = CHAIN["pitch"] / math.sin(math.pi / TL["z"])
+    d["sprocket_A_pd"] = d["tl_sprocket_pd"]                         # the TL's own 30T sprocket on A
+    d["tl_sprocket_root_d"] = d["tl_sprocket_pd"] - SPROCKET_ROOT    # 113.6: the pin holes stay inside it
     # hex section: from 1.0 mm inside the first stack element to 1.0 mm inside the last
     d["hex_x0"] = END_CLEAR + 1.0
     d["hex_x1"] = END_CLEAR + d["stack_A"] - 1.0

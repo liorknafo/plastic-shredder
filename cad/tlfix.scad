@@ -1,4 +1,4 @@
-// tlfix.scad -- TORQUE-LIMITER SETTING FIXTURE: the TL350-2 on a keyed stub clamped in a vise, a CHAIN WHIP lever with a weight.  (Replaces the belt-slip test.)
+// tlfix.scad -- TORQUE-LIMITER SETTING FIXTURE: the TL350-2 on a keyed stub clamped in a vise, a CHAIN WHIP lever with a weight.  (Replaces the old belt-slip test.)
 //   -D 'part="world"|"stub"|"stub_2d"|"lever"|"lever_2d"|"bom"'      for the PNG: -D 'labels=true' (labels face the camera given by -D 'cam=[rx,ry,rz]')
 //
 // WHAT IT DOES  The TL350-2 (manufacturer's layout, tl350.scad) sits on the Ø25 end of a stub made from your Ø30 bar; the Ø30 end (two vise flats, 22 across) is clamped in a vise.  The
@@ -156,7 +156,7 @@ else if (part == "stub_2d") stub_2d();
 else if (part == "lever") linear_extrude(TLFIX_LEVER_T) translate([-LEVER_Y0, TLFIX_LEVER_W / 2]) lever_2d();
 else if (part == "lever_2d") translate([-LEVER_Y0, TLFIX_LEVER_W / 2]) lever_2d();
 else if (part == "bom") {
-    echo(str("BOM tlfix: TL350-2 setting ", TL_SET_AT_TL, " N*m (= T_SET ", T_SET, " x chain ratio ", CHAIN_RATIO, ", range ", TL_T_min, " .. ", TL_T_max, "): weight ", r1(W_KG), " kg at ", TLFIX_ARM, " mm; lever's own moment ", r1(LEVER_NM), " N*m"));
+    echo(str("BOM tlfix: TL350-2 setting ", TL_SET_AT_TL, " N*m (= T_SET ", T_SET, ", range ", TL_T_min, " .. ", TL_T_max, "): weight ", r1(W_KG), " kg at ", TLFIX_ARM, " mm; lever's own moment ", r1(LEVER_NM), " N*m"));
     echo(str("TLFIX_WEIGHT_KG = ", r1(W_KG), "  (exact ", W_KG, ")  = (TL_SET_AT_TL ", TL_SET_AT_TL, " - TLFIX_LEVER_NM) / ", TLFIX_ARM / 1000, " m / 9.81"));
     echo(str("TLFIX_LEVER_NM = ", r1(LEVER_NM), "  (exact ", LEVER_NM, ")  lever ", TLFIX_LEVER_L, " x 50 x 10 flat + 2 lugs + 2 M6 bolts + chain tails, ", r1(LEVER_KG), " kg, steel 7.85 g/cm3, about the TL axis (lever horizontal)"));
     echo(str("BOM tlfix: lever 50 x 10 x ", TLFIX_LEVER_L, " flat, PIVOT bore Ø", TLFIX_PIVOT_D, " on the Ø25 pin ", TEST_LEVER_PIVOT_END, " mm from its short end, 2 x Ø6.6 chain-end holes at ", ATT_Y, " mm, Ø10.5 weight hole at ", TLFIX_ARM, " mm; 2 lugs ", TLFIX_LUG[0], " x ", TLFIX_LUG[1], " x ", LUG_X1 - LUG_X0, " (Ø6.6 hole along x); chain #40 x ", CH_LINKS, " links (", round(360 - 2 * TG_ANG), " deg wrap = ", round(CH_ARC), " mm + 2 tails of ", round(CH_TAIL), " mm); stub (Ø25 pin ", FIX_PIN_L, " long, TL on it, pin ", TLFIX_PIN_L, " beyond the nut) from the Ø30 bar"));

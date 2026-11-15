@@ -5,11 +5,11 @@
 // with FIT = 0.01 mm on every surface (OD smaller, ID larger, faces shorter), so the interference checks see true overlaps only and
 // not the zero-thickness sheets that touching faces make.  The real (machined) parts - plate layers, sleeves, collared sleeves, shafts - are exact.
 include <common.scad>
+include <tl350.scad>
 use <gear.scad>
 
 FIT = 0.01;
-GEAR_OD = GEAR_module * (GEAR_z + 2);       // 63.0
-SPA_OD = sprocket_A_pd + SPROCKET_OD_EXTRA; // 67.3 (#40 15T tooth tips)
+GEAR_OD = GEAR_module * (GEAR_z + 2);       // 68.0
 
 module tube_x(od, id, x0, L) axial(x0) difference() {
     cylinder(d = od, h = L, $fn = 96);
@@ -18,25 +18,32 @@ module tube_x(od, id, x0, L) axial(x0) difference() {
 // seated placeholder: shrunk by FIT on every surface
 module seat_x(od, id, x0, L) tube_x(od - 2 * FIT, id + 2 * FIT, x0 + FIT, L - 2 * FIT);
 
-// ---- gears: the MADE gear (gear.scad: real involute teeth with backlash, bore Ø25, keyway), face = 4 layers = gear_face, no hub (a plain sleeve follows it), next to the collar.
-// Seated like the bought parts: FIT (0.01) off every face and the bore.  Tooth phase: A has a tooth centred on +y (toward B) at angle 0; B is turned half a pitch
-// (180 / z) so that its gap faces A (z is even): the teeth mesh at angle = 0.  (In the shop both gears are cut identically; shaft B is turned half a pitch
-// relative to A when its key goes in -- the blades of A and B run in different slots, so their relative angle does not matter.)
-function gear_phase(sh) = sh == "B" ? 180 / GEAR_z : 0;
-module gear_ph(sh = "A") axial(x_gear_out + FIT) gear_solid(GEAR_cut_extra, gear_phase(sh), 2 * FIT, gear_face - 2 * FIT);
-// gear spacer sleeve (made: Ø55 bar, OD GEAR_SPACER_D, bore Ø25.05, gear_spacer_L long) between the gear's outer face and the sprocket hub (A) / end cap (B): it keeps the old bought-gear
-// length, so the sprocket, chain plane, gearbox and shaft lengths do not move (x_gear_hub_out = outer face of the sleeve).  Seated with FIT like the other stand-ins.
-module gear_spacer_ph() seat_x(GEAR_SPACER_D, GEAR_bore, x_gear_hub_out, gear_spacer_L);
+// ---- gears: the BOUGHT m4 z15 gear (gear.scad: real involute teeth with backlash, bore Ø25, keyway) next to the collar, its hub outboard (x_gear_hub_out .. x_gear_out).
+// Seated like the other bought parts: FIT (0.01) off every face and the bore.  Tooth phase: A has a tooth centred on +y (toward B) at angle 0; for an ODD z, B's gap at
+// 180 deg already faces it (for an even z B would be turned half a pitch): the teeth mesh at angle = 0.  (In the shop: shaft B is turned until its gear meshes before its
+// key goes in: the blades of A and B run in different slots, so their relative angle does not matter.)
+function gear_phase(sh) = sh == "B" && GEAR_z % 2 == 0 ? 180 / GEAR_z : 0;
+module gear_ph(sh = "A") {
+    axial(x_gear_out + FIT) gear_solid(GEAR_cut_extra, gear_phase(sh), 2 * FIT, gear_face - 2 * FIT);
+    axial(x_gear_hub_out + FIT) gear_hub_solid(2 * FIT, GEAR_HUB_L - 2 * FIT);
+}
+// the two Ø30 sleeves (made, Ø55 bar, bore Ø25.05) either side of the OUTBOARD bearing's inner ring: gear hub -> ring (gear_spacer_L), ring -> the TL350 (A: ob_sleeve_A_L,
+// longer, so the TL350 passes outside B's end) / end cap (B: ob_sleeve_L)
+module gear_spacer_ph() seat_x(GEAR_SPACER_D, GEAR_bore, x_ob_ring_in, gear_spacer_L);
+module ob_sleeve_ph(sh) if (sh == "A") seat_x(GEAR_SPACER_D, GEAR_bore, x_spA_in, ob_sleeve_A_L); else seat_x(GEAR_SPACER_D, GEAR_bore, x_sprocket_in, ob_sleeve_L);
 // the same gear, un-shrunk (mesh checks)
 module gear_exact(sh = "A", extra = GEAR_cut_extra, ph = 0) axial(x_gear_out) gear_solid(extra, gear_phase(sh) + ph, 0, gear_face);
 
-// ---- sprocket on shaft A: hub Ø39 x 22.4 (x_sprocket_out .. x_sprocket_in), tooth plate (OD 67.3 x 7.2) at the OUTER end of the hub
-module sprocket_hub_ph()  seat_x(SPROCKET_A_hub_D, JOURNAL_D, x_sprocket_out, SPROCKET_A_hub_L);
-module sprocket_disc_ph() seat_x(SPA_OD, JOURNAL_D, x_sprocket_out, SPROCKET_T);
-module sprocket_ph()      { sprocket_hub_ph(); sprocket_disc_ph(); }
+// ---- the TL350 on shaft A, FLIPPED (2026-11-15, no chain): flange-end face at x_sprocket_out (outward), nut end at x_spA_in; its 30T sprocket (the centre member) is driven by
+// the pin flange's 4 pins through 4 holes drilled in its plate (PIN_HOLE_D on PIN_R; the pins at 45, 135, 225, 315 deg)
+module tl_on_a() translate([x_sprocket_out, 0, 0]) children();
+module tl_pin_holes() for (a = [45 : 360 / PIN_N : 359]) translate([x_sprocket_out + TL_CM_OFFSET - SPROCKET_T, PIN_R * cos(a), PIN_R * sin(a)]) rotate([0, 90, 0]) cylinder(d = PIN_HOLE_D, h = 2 * SPROCKET_T, $fn = 32);
+module sprocket_hub_ph()  tl_on_a() tl_hub_l();
+module sprocket_disc_ph() difference() { tl_on_a() tl_plate_l(); tl_pin_holes(); }
+module sprocket_ph()      { tl_on_a() tl350_body_l(); sprocket_disc_ph(); }
 
-// ---- NA4905 needle roller bearing (inner ring 25 x 30 x 17; Ø3 rollers 30..36; outer ring 36..42 = the INNER_HOLE_D shoulder).  end = "drive" | "free"
-function brg_x0(end) = end == "drive" ? x_inner_ring_out_drive : chamber_L + LAYER_T;       // outer-face-first: -27 / L+10
+// ---- NA4905 needle roller bearing (inner ring 25 x 30 x 17; Ø3 rollers 30..36; outer ring 36..42 = the INNER_HOLE_D shoulder).  end = "drive" | "free" | "ob" (outboard plate)
+function brg_x0(end) = end == "drive" ? x_inner_ring_out_drive : end == "ob" ? x_ob_ring_out : chamber_L + LAYER_T;       // lowest-x face: -27 / -106.5 / L+10
 module bearing_inner_ph(end)   seat_x(BEARING_F, BEARING_d, brg_x0(end), BEARING_B);
 module bearing_rollers_ph(end) seat_x(INNER_HOLE_D, BEARING_F, brg_x0(end), BEARING_B);
 module bearing_outer_ph(end)   seat_x(BEARING_D, INNER_HOLE_D, brg_x0(end), BEARING_B);
@@ -70,8 +77,8 @@ module end_screw_at(x_face, dir) {         // sits FIT (0.01) off the face it cl
     if (dir > 0) axial(x_face + FIT) end_screw_geom();
     else axial(x_face - FIT) rotate([180, 0, 0]) end_screw_geom();
 }
-// clamp points: A drive: sprocket hub outer face; B drive: gear outer face (x_gear_hub_out = x_gear_out: no hub); free ends: the collar's outer face
+// clamp points: A drive: the TL350 hub's outer face (x_sprocket_out); B drive: the outer sleeve's outer face (x_sprocket_in); free ends: the collar's outer face
 module end_screw_free()      end_screw_at(x_collar_out_free, 1);
-module end_screw_drive(sh)   end_screw_at(sh == "A" ? x_sprocket_out : x_gear_hub_out, -1);
+module end_screw_drive(sh)   end_screw_at(end_x_drive(sh), -1);
 // the end cap alone (without screw) at a clamp point (for envelopes)
-function end_x_drive(sh) = sh == "A" ? x_sprocket_out : x_gear_hub_out;
+function end_x_drive(sh) = sh == "A" ? x_sprocket_out : x_sprocket_in;
