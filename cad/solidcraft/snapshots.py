@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""snapshots.py -- renders cad/png/solidcraft_*.png from cad/shredder_assembly.sc with solidcraft-cli (iso at rest, rotors 60 deg, drawer 180 mm, lid 100 deg, sections)."""
+"""snapshots.py -- renders cad/png/solidcraft_*.png from cad/shredder_assembly.sc with solidcraft-cli (iso at rest, rotors 60 deg, drawer 180 mm, lid 100 deg, the drive end, sections)."""
 import json, os, subprocess, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +18,7 @@ SHOTS = [   # name, joint drives, camera, extra args
     ("drawer_180mm",     [("Drawer slide", 180)], cam([60, -100, -150], -0.8, 0.35, 1100), []),
     ("lid_open_100deg",  [("Lid hinge", 100)], cam([60, 0, 200], -0.8, 0.3, 900), []),
     ("section_x66",      [], cam([66, 0, -60], -1.9, 0.25, 1000), ["--section", "x=66.1"]),
+    ("drive_end",        [], cam([-200, -60, -60], -2.3, 0.35, 750), []),
     ("section_blades",   [("Shaft A", 60)], cam([66, 0, 0], -1.9, 0.2, 330), ["--section", "x=66.1"]),
 ]
 

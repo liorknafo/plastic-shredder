@@ -13,8 +13,8 @@ family); nothing is imported as a mesh.
     python3 build.py --check    exit with an error when a group does not match reference.json
     python3 build.py --freeze   make what was built the new reference.json (after a deliberate change of the design)
 
-reference.json holds each group of the old OpenSCAD mesh assembly, measured: the comparison is the proof that the
-native model is the same machine.  It stays valid until a parameter changes; then freeze the new numbers.
+reference.json holds each group of the OpenSCAD mesh assembly, measured (reference.py): the comparison is the proof
+that the native model is the same machine.  It stays valid until a parameter changes; then freeze the new numbers.
 
 Needs SolidCraft 0.40 (`solidcraft-cli` on PATH, or SOLIDCRAFT_CLI).  Standard library only.
 
@@ -42,8 +42,8 @@ OUT_SC = os.path.join(CAD, "shredder_assembly.sc")
 LID_MAX = 100.0                              # deg: the free range of the lid
 DRAWER_MAX = 180.0                           # mm
 WORM_RATIO = 50.0                            # worm turns per output turn
-A_T, TL_T = 15, 30                           # tooth counts: a chain's ratio is the teeth, not the pitch circles
-assert abs(c.CHAIN_RATIO - TL_T / A_T) < 1e-9 and abs(c.GEARBOX_PULLEY_D / c.MOTOR_PULLEY_D - 2.0) < 1e-9
+assert abs(g.YA - c.shaft_y("A")) < 1e-9 and abs(g.ZO) < 1e-9, "the gearbox output is coaxial with shaft A (pin coupling)"
+assert abs(g.XM - g.XG) < 1e-9 and abs(g.ZM - g.ZW) < 1e-9, "the motor is coaxial with the worm (jaw coupling)"
 
 
 def main():
@@ -80,26 +80,27 @@ def main():
     xc = c.chamber_L / 2
     ja = joint("revolute", "Shaft A", "Rotor A", [0, c.shaft_y("A"), 0], [-1, 0, 0], [0, 1, 0])
     jb = joint("revolute", "Shaft B", "Rotor B", [0, c.shaft_y("B"), 0], [1, 0, 0], [0, 1, 0])
-    jo = joint("revolute", "Output shaft", "Torque limiter + output shaft", [0, g.YA, g.ZO], [-1, 0, 0], [0, 1, 0])
-    jw = joint("revolute", "Worm", "Worm + gearbox pulley", [g.XG, g.GB_Y0, g.ZW], [0, -1, 0], [1, 0, 0])
-    jm = joint("revolute", "Motor", "Motor shaft + pulley", [g.XM, g.GB_Y0, g.ZM], [0, -1, 0], [1, 0, 0])
+    jo = joint("revolute", "Output shaft", "Output shaft + pin flange", [0, g.YA, g.ZO], [-1, 0, 0], [0, 1, 0])
+    jw = joint("revolute", "Worm", "Worm + jaw coupling", [g.XG, g.GB_Y0, g.ZW], [0, -1, 0], [1, 0, 0])
+    jm = joint("revolute", "Motor", "Motor shaft", [g.XM, g.GB_Y0, g.ZM], [0, -1, 0], [1, 0, 0])
     if "Lid" in comps:
         import hopper
         joint("revolute", "Lid hinge", "Lid", [xc, hopper.PIN_Y, hopper.PIN_Z], [-1, 0, 0], [0, 1, 0], [[0, LID_MAX]])
     joint("slider", "Drawer slide", "Drawer", [xc, -92, -250], [0, -1, 0], [1, 0, 0], [[0, DRAWER_MAX]])
 
     # ---- links.  A link is one-way (driver a -> driven b), so they all start at Shaft A, the one joint to drag:
-    #      Shaft A -> Shaft B (gear), Shaft A -> Output shaft (chain), Output shaft -> Worm (worm gear), Worm -> Motor (belt).
+    #      Shaft A -> Shaft B (gear), Shaft A -> Output shaft (pin coupling: same axis, 1:1), Output shaft -> Worm (worm
+    #      gear), Worm -> Motor (jaw coupling, 1:1).
     #      internal: true = both turn the same way in joint-value terms (A's axis is -x, B's +x, so equal values =
     #      counter-rotation in the world).
     if ja and jb:
         s.step("joint.gear", a="Shaft A", b="Shaft B", ra=c.GEAR_z, rb=c.GEAR_z, internal=True, name="Gear A-B")
     if ja and jo:
-        s.step("joint.gear", a="Shaft A", b="Output shaft", ra=A_T, rb=TL_T, internal=True, name="Chain 2:1")
+        s.step("joint.motion_link", a="Shaft A", b="Output shaft", ratio=1.0)              # pin coupling: same axis, same speed, same direction
     if jo and jw:
         s.step("joint.motion_link", a="Output shaft", b="Worm", ratio=WORM_RATIO)
     if jw and jm:
-        s.step("joint.gear", a="Worm", b="Motor", ra=c.GEARBOX_PULLEY_D / 2, rb=c.MOTOR_PULLEY_D / 2, internal=True, name="Belt 2:1")
+        s.step("joint.motion_link", a="Worm", b="Motor", ratio=1.0)                         # jaw coupling: the motor turns with the worm
 
     # ---- motion studies
     if ja:

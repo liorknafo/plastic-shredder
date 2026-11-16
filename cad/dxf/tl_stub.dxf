@@ -13,7 +13,7 @@ ANSI_1252
   9
 $HANDSEED
   5
-42
+43
   9
 $INSUNITS
  70
@@ -85,9 +85,9 @@ AcDbViewportTableRecord
  21
 1.0
  12
-103.5
+73.5
  22
--48.74675
+0.0
  13
 0.0
  23
@@ -113,7 +113,7 @@ AcDbViewportTableRecord
  37
 0.0
  40
-151.8
+107.8
  41
 1.5
  42
@@ -583,7 +583,7 @@ ENTITIES
   0
 LWPOLYLINE
   5
-3B
+3D
 330
 20
 100
@@ -647,7 +647,7 @@ AcDbPolyline
   0
 LWPOLYLINE
   5
-3C
+3E
 330
 20
 100
@@ -727,7 +727,7 @@ AcDbPolyline
   0
 LWPOLYLINE
   5
-3D
+3F
 330
 20
 100
@@ -759,7 +759,7 @@ AcDbPolyline
   0
 LWPOLYLINE
   5
-3E
+40
 330
 20
 100
@@ -795,7 +795,7 @@ AcDbPolyline
   0
 LWPOLYLINE
   5
-3F
+41
 330
 20
 100
@@ -837,7 +837,7 @@ AcDbPolyline
   0
 LWPOLYLINE
   5
-40
+42
 330
 20
 100
@@ -899,11 +899,11 @@ AcDbDictionary
   3
 ACAD_GROUP
 350
-41
+3C
   0
 DICTIONARY
   5
-41
+3C
 330
 22
 100

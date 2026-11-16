@@ -1,93 +1,81 @@
-// drive_geom.scad -- constants and small functions of the drive (gearbox, torque limiter, chain, idler tensioner, motor, belt, rails, deck, hold-down).
+// drive_geom.scad -- constants and small functions of the drive (gearbox, pin flange, motor, jaw coupling, rails, deck, hold-down).
 // `include` after common.scad.  Variables and functions only, no geometry.  World frame.
 //
-// LAYOUT (default CHAIN_CD = 150):
-//   chain plane  x = X_CHAIN = middle of sprocket A's tooth plate (the plate is at the OUTER end of the hub: x_sprocket_out .. +7.2)
-//   gearbox      housing face (output side) at GB_X1 = X_CHAIN - TL_CM_OFFSET - TL_GB_GAP; the housing is GB_HUB_L wide along x (hollow output hub), output axis y = -C/2 (shaft A's y),
-//                z = -CHAIN_CD; worm axis along y, 63 below it; foot flange on two slotted rails (50 x 10 flats) on spacer blocks on the deck
-//   TL350        flange end 3 mm (TL_GB_GAP, a spacer on the shaft) from the housing face, the sprocket (centre member) 12 mm (TL_CM_OFFSET) from the flange-end face = in the chain plane,
-//                then friction pack, pressure plate, disc springs and the adjusting nut on the outboard end; stop collar behind it, shaft end 3 mm beyond the collar
-//   overhang     GB_OHL_ARM = chain plane - housing face = TL_GB_GAP + TL_CM_OFFSET (15 mm)
-//   motor        on the deck, axis at the worm axis height (horizontal belt), BELT_CENTRE_DIST toward -x, pulley side = the side away from the machine (-y)
-//   tensioner    idler sprocket (#40 15T) INSIDE the loop on the slack (+y) side; 70 x 10 upright with its column OUTSIDE the rails (the TL350 body fills the machine side of the chain plane)
+// LAYOUT (2026-11-15: no belt, no chain):
+//   TL350        on shaft A's drive end, FLIPPED: nut end inward at x_spA_in (-135), flange end outward at x_sprocket_out (-197); its 30T sprocket plate at X_CM (-185)
+//   pin flange   (made, 6061) on the gearbox output shaft, COAXIAL with shaft A: its disc face PF_GAP outside the TL's flange-end face, a pocket over A's end cap + M10 head,
+//                4 dowel pins Ø8 pressed through the disc, reaching through 4 holes drilled in the TL's sprocket plate (the pins drive the plate; the teeth carry nothing)
+//   gearbox      output axis = shaft A's axis (y = YA, z = 0); housing face (output side) at GB_X1 = the flange hub's end - TL_GB_GAP (a Ø36 spacer); GB_HUB_L wide along x;
+//                worm axis along y, 63 below; foot flange on two slotted rails (50 x 10 flats) on spacer blocks on the deck
+//   motor        on the deck, COAXIAL with the worm's -y input shaft, joined to it by a jaw coupling; the +y stub has its own printed cap
 //   hold-down    rails -> deck -> 4 legs, each fixed to the deck by a top angle (outer-y face) and to the floor by a foot angle (inner-x face) with 2 x M8 anchors
 include <common.scad>
 
 HW_GAP = 0.01;                                      // hardware placeholders sit 0.01 off every contact face (so touching faces do not show as overlaps)
-YA = -C / 2;                                        // shaft A / chain plane / gearbox output axis y
-X_CHAIN = x_sprocket_out + SPROCKET_T / 2;          // chain plane (tooth plate centre)
-RA = sprocket_A_pd / 2;  RT = tl_sprocket_pd / 2;   // pitch radii: sprocket A (15T), TL sprocket (30T)
-SPA_OD_ = sprocket_A_pd + SPROCKET_OD_EXTRA;  TL_OD_ = tl_sprocket_pd + SPROCKET_OD_EXTRA;
-ZO = -CHAIN_CD;                                     // TL / gearbox output axis height
+YA = -C / 2;                                        // shaft A = gearbox output axis y
+X_CM = x_cm;                                        // the TL's sprocket plate (centre member) on A
+SPA_OD_ = sprocket_A_pd + SPROCKET_OD_EXTRA;        // its tooth-tip OD: 127.7
+ZO = 0;                                             // gearbox output axis height = shaft A's axis
 ZW = ZO - WORM_AXIS_DROP;                           // worm axis
-// ---- gearbox housing along x: its width = the hollow output hub (GB_HUB_L, measure), output face at GB_X1 (the +x side, toward the TL)
-GB_X1 = X_CHAIN - TL_CM_OFFSET - TL_GB_GAP;  GB_X0 = GB_X1 - GB_HUB_L;  GB_XC = (GB_X0 + GB_X1) / 2;
+// ---- pin flange along x (outward = -x): disc face PF_X0, disc back PF_X1, pocket bottom PF_PK_X, keyed bore to the hub end PF_HUB_X
+PF_X0 = x_sprocket_out - PF_GAP;  PF_X1 = PF_X0 - PF_T;
+PF_PK_X = x_sprocket_out - END_WASHER_T - 10 - PF_POCKET_CLEAR;               // pocket bottom: 2 beyond A's M10 head
+PF_HUB_X = PF_PK_X - PF_KEY_L;                                                // hub end (toward the gearbox)
+PIN_X0 = PF_X1;  PIN_X1 = PIN_X0 + PIN_L;                                     // the pins: flush with the disc's back, tips toward A
+PIN_PTS = [for (a = [45 : 360 / PIN_N : 359]) [PIN_R * cos(a), PIN_R * sin(a)]];   // (y, z) offsets from A's axis
+assert(PF_PK_X < PF_X1 && PF_HUB_X < PF_PK_X, "the pocket is deeper than the disc; the bore follows it");
+assert(PIN_X1 >= X_CM + SPROCKET_T / 2 + 1, "the pins reach >= 1 mm past the sprocket plate");
+assert(PIN_R - PIN_D / 2 - TL_D / 2 >= 1.5, "the pins pass >= 1.5 mm outside the TL350's Ø89 body");
+assert(PIN_R - PIN_HOLE_D / 2 - TL_D / 2 >= 1.5 && tl_sprocket_root_d / 2 - (PIN_R + PIN_HOLE_D / 2) >= 1.5, "the holes stay >= 1.5 mm inside the plate band (Ø89 body .. tooth root)");
+assert(PF_D / 2 - (PIN_R + PIN_D / 2) >= 5, "pin holes >= 5 mm inside the flange disc's edge");
+// ---- gearbox housing along x: its width = the hollow output hub (GB_HUB_L, measure), output face at GB_X1 (the +x side, toward A)
+GB_X1 = PF_HUB_X - TL_GB_GAP;  GB_X0 = GB_X1 - GB_HUB_L;  GB_XC = (GB_X0 + GB_X1) / 2;
 GB_Y0 = YA - GB_BOX[1] / 2;  GB_Y1 = YA + GB_BOX[1] / 2;
-GB_OHL_ARM = X_CHAIN - GB_X1;                       // overhang: housing face to the chain plane (15)
-// ---- TL350 along x (flange end toward the housing)
-TL_X0 = GB_X1 + TL_GB_GAP;  TL_X1 = TL_X0 + TL_L;                      // flange-end face .. outboard end of the hub (-116.8 .. -54.8)
-TL_PL0 = X_CHAIN - SPROCKET_T / 2;  TL_PL1 = X_CHAIN + SPROCKET_T / 2;  // tooth plate x range
-TL_COLLAR_X0 = TL_X1;  TL_COLLAR_X1 = TL_COLLAR_X0 + TL_COLLAR_T;      // stop collar on the outboard side
-// ---- output shaft Ø25 h6 (bought 4140 bar): far circlip groove .. end 3 mm beyond the collar
-OUT_X1 = TL_COLLAR_X1 + SHAFT_OUT_END;
+// ---- output shaft Ø25 h6 (bought 4140 bar): far circlip groove .. 1 mm short of the pin flange's pocket bottom
+OUT_X1 = PF_PK_X - PF_SHAFT_RECESS;
 OUT_X0 = GB_X0 - CIRCLIP_GROOVE_W - CIRCLIP_EDGE;
 GBKEY_X0 = GB_X0 + GB_KEY_END;  GBKEY_X1 = GB_X1 - GB_KEY_END;          // gearbox keyway 8 x 4 (along the hollow hub)
-TLKEY_X0 = TL_X0 + TL_KEY_END;  TLKEY_X1 = TL_X1 - TL_KEY_END;          // TL keyway 8 x 4 (under the TL hub)
-assert(abs(TL_X0 + TL_CM_OFFSET - X_CHAIN) < 1e-9, "TL centre member must be in the chain plane");
-assert(GBKEY_X1 > GBKEY_X0 && TLKEY_X1 > TLKEY_X0 && TLKEY_X1 < TL_X1 && GBKEY_X1 < GB_X1, "keyways inside the hubs");
-// ---- vertical stack: the motor stands on the deck (axis 70 above it) at the worm axis height (horizontal belt); rails stand on spacer blocks on the deck
+PFKEY_X0 = PF_HUB_X + TL_KEY_END;  PFKEY_X1 = OUT_X1 - TL_KEY_END;      // pin-flange keyway 8 x 4 (under the flange's bore)
+assert(GBKEY_X1 > GBKEY_X0 && PFKEY_X1 > PFKEY_X0 && GBKEY_X1 < GB_X1, "keyways inside the hubs");
+// ---- vertical stack: the motor stands on the deck (axis 70 above it) at the worm axis height (coaxial with the worm); rails stand on spacer blocks on the deck
 MOTOR_D = 120;  MOTOR_LEN = 160;  MOTOR_FOOT = [150, 110, 10];              // PLACEHOLDER: salvaged motor, measure it
-DECK_TOP = ZW - MOTOR_D / 2 - MOTOR_FOOT[2];                               // -283
+DECK_TOP = ZW - MOTOR_D / 2 - MOTOR_FOOT[2];                               // -133
 RAIL_SPACER_T = SUBPLATE_T - GB_RAIL_T;                                     // 10: rail + spacer = the old 20 mm sub-plate height
 RAIL_Z0 = DECK_TOP + RAIL_SPACER_T;  RAIL_Z1 = RAIL_Z0 + GB_RAIL_T;
 GB_FZ0 = RAIL_Z1;  GB_FZ1 = GB_FZ0 + GB_FLANGE[2];                          // foot flange
 GB_Z0 = GB_FZ1;  GB_Z1 = GB_Z0 + GB_BOX[2];                                 // housing box
-assert(abs((ZO - GB_FZ0) - GB_BELOW_OUT) < 1e-6, "GB_BELOW_OUT must equal the foot height that keeps the belt horizontal (motor on the deck)");
+assert(abs((ZO - GB_FZ0) - GB_BELOW_OUT) < 1e-6, "GB_BELOW_OUT must equal the foot height that puts the worm axis at the motor axis height (motor on the deck)");
 assert(GB_Z1 > ZO + 20 && GB_Z0 < ZW - 10, "the housing envelope must hold the output axis and the worm axis");
-// ---- worm input shafts, pulleys, motor, belt
+// ---- worm input shafts, jaw coupling, motor (coaxial with the worm's -y stub)
 XG = GB_XC;                                         // worm axis x = middle of the housing
-Y_HF = GB_Y0;                                       // housing face on the -y side (the pulley side, away from the machine)
-PUL_W = 2 * BELT_WIDTH;  PUL_Y0 = 8;                // pulley 26 wide, 8 mm in front of the housing face
-XM = XG - BELT_CENTRE_DIST;  ZM = ZW;               // motor axis (horizontal belt)
+Y_HF = GB_Y0;                                       // housing face on the -y side (the motor side, away from the machine)
+Y_HF2 = GB_Y1;                                      // housing face on the +y side (the second, unused stub: capped)
+Y_WS = Y_HF - GB_WORM_STUB;                         // end of the -y worm stub
+CPL_Y_W1 = Y_WS + CPL_hub_L;                        // coupling: worm-side hub Y_WS .. CPL_Y_W1 (on the stub's last 20.6 mm), spider Y_WS - gap .. Y_WS,
+CPL_Y_M0 = Y_WS - CPL_gap - CPL_hub_L;              //   motor-side hub CPL_Y_M0 .. Y_WS - gap
+Y_MF = Y_WS - CPL_gap - MOTOR_SHAFT_L;              // the motor's front face (its shaft end meets the spider)
+XM = XG;  ZM = ZW;                                  // motor axis: coaxial with the worm
 // ---- rails: two 50 x 10 flats under the foot rows (y = YA +- GB_FOOT[1]/2), slots along x, M8 deck bolts outside the flange, spacer blocks under the rail ends
 function gb_foot_pts() = [for (sx = [-1, 1], sy = [-1, 1]) [GB_XC + sx * GB_FOOT[0] / 2, YA + sy * GB_FOOT[1] / 2]];   // 4 x Ø9 feet = the slot centres
 RAIL_YC = [YA - GB_RAIL_W / 2, YA + GB_RAIL_W / 2];                           // rail centre lines: the two rails together cover exactly the flange's y footprint (YA +- 50), side by side
 RAIL_FOOT_DY = GB_FOOT[1] / 2 - GB_RAIL_W / 2;                                 // foot bolt row, measured from the rail's centre line toward its outer edge (13)
 RAIL_X0 = GB_XC - GB_RAIL_BOLT_DX - GB_RAIL_END;  RAIL_X1 = GB_XC + GB_RAIL_BOLT_DX + GB_RAIL_END;
 RAIL_Y_LO = RAIL_YC[0] - GB_RAIL_W / 2;  RAIL_Y_HI = RAIL_YC[1] + GB_RAIL_W / 2;
-RAIL_BOLT_PTS = [for (sx = [-1, 1], yc = RAIL_YC) [GB_XC + sx * GB_RAIL_BOLT_DX, yc]];    // 4 x M8 through rail + spacer + deck (the uplift path)
-// ---- chain: tangent line of the slack (+y) run and the idler
-TG_NZ = (RT - RA) / CHAIN_CD;  TG_NY = sqrt(1 - TG_NZ * TG_NZ);                 // normal of the +y external tangent (A above, TL below)
-function run_y(z) = YA + (RA - TG_NZ * z) / TG_NY;                              // y of the straight +y run at height z
-TENS_Z = ZO / 2;                                                                // idler height (middle of the run)
-TENS_R = RA;                                                                    // idler = #40 15T, same as sprocket A
-TENS_Y0 = run_y(TENS_Z) + TENS_DELTA - TENS_R;                                  // nominal idler centre y (inside the loop; pushes the slack run out by TENS_DELTA)
-// upright (70 x 10 flat on edge, head plate) on the machine side of the chain plane: back face 10 mm from the idler.  Its COLUMN stands outside the rails (y >= TENS_COL_Y0);
-// the head plate (TENS_HEAD_H high, under the top) carries the slot over the TL350 body.
-TENS_UP_X0 = TL_PL1 + 10;  TENS_UP_X1 = TENS_UP_X0 + TENS_T;
-TENS_GUARD_Y = TENS_Y0 + TENS_TRAVEL + TENS_R + CHAIN_ENV_H / 2 + GUARD_CLEAR + PRINT_WALL;       // outer face of the chain guard's +y wall at the idler (about 62)
-TENS_COL_W = 30;                                                                // column: 30 wide x 10 thick (ripped from the 50 x 10 flat)
-TENS_COL_Y0 = max(RAIL_Y_HI, TENS_GUARD_Y) + TENS_COL_GAP;  TENS_COL_Y1 = TENS_COL_Y0 + TENS_COL_W;       // column outside the chain guard
-TENS_HEAD_Y0 = TENS_Y0 - TENS_TRAVEL - 15;                                      // the head plate's -y end (slot end + 15)
-TENS_SLOT_L = 2 * TENS_TRAVEL + 10.5;  TENS_SLOT_W = 10.5;
-TENS_BASE_Z0 = DECK_TOP;  TENS_BASE_Z1 = DECK_TOP + 10;                         // base plate 10 thick on the deck
-TENS_UP_Z1 = TENS_Z + 20;                                                       // top of the upright
-TENS_HEAD_Z0 = TENS_UP_Z1 - TENS_HEAD_H;                                        // underside of the head plate (-95)
-TENS_BASE_X1 = TENS_UP_X1;  TENS_BASE_X0 = TENS_BASE_X1 - TENS_BASE[0];
-TENS_BASE_Y = 40;
-TENS_BASE_Y0 = (TENS_COL_Y0 + TENS_COL_Y1) / 2 - TENS_BASE_Y / 2;  TENS_BASE_Y1 = TENS_BASE_Y0 + TENS_BASE_Y;
-TENS_BOLT_PTS = [for (x = [8, 22], sy = [-1, 1]) [TENS_BASE_X0 + x, (TENS_COL_Y0 + TENS_COL_Y1) / 2 + sy * 14]];     // 4 x M8 down into the deck (nut + washer under it)
-assert(TENS_HEAD_Z0 > ZO + TL_D / 2 + GUARD_CLEAR + PRINT_WALL, "tensioner head plate must clear the TL guard tube");
-assert(TENS_BASE_Y0 > RAIL_Y_HI + 2, "tensioner base plate clear of the rails");
-// ---- deck: motor foot, rails, tensioner base + margins
-DECK_X0 = XM - MOTOR_FOOT[0] / 2 - DECK_MARGIN;
-DECK_X1 = max(RAIL_X1 + DECK_RAIL_MARGIN, TENS_BASE_X1 + DECK_MARGIN);
+RAIL_BOLT_PTS = [for (sx = [-1, 1], yc = RAIL_YC) [GB_XC + sx * GB_RAIL_BOLT_DX, yc]];    // 4 x M8 through rail + spacer + deck (the hold-down path)
+// ---- coupling guard (printed): a box over the coupling from the motor face to the housing face, end walls notched round the shafts; a cap box over the +y stub
+CG_IW = CPL_D / 2 + GUARD_CLEAR;                    // inner half-width (x) and inner height above the axis: 30
+CG_W = PRINT_WALL;
+CG_Y0 = Y_MF + CG_END_GAP;  CG_Y1 = Y_HF - CG_END_GAP;                    // the coupling guard's ends
+CG2_Y0 = Y_HF2 + CG_END_GAP;  CG2_Y1 = Y_HF2 + GB_WORM_STUB + GUARD_CLEAR + CG_W;   // the stub cap's ends (its far end wall is closed)
+CG_ZT = ZW + CG_IW + CG_W;                                                 // top of both boxes
+MOTOR_SHAFT_D = 12;                                                        // ESTIMATE from the photo: measure (the coupling hub is bored to it)
+// ---- deck: motor foot, rails, coupling guard + margins
+MFOOT_Y = [Y_MF - (MOTOR_LEN + MOTOR_FOOT[1]) / 2, Y_MF - (MOTOR_LEN - MOTOR_FOOT[1]) / 2];   // the motor's foot, centred under its body (y)
+DECK_X0 = min(XM - MOTOR_FOOT[0] / 2, RAIL_X0) - DECK_MARGIN;
+DECK_X1 = RAIL_X1 + DECK_RAIL_MARGIN;
 DECK_T = DECK_PLY_T;  DECK_Z1 = DECK_TOP;  DECK_Z0 = DECK_TOP - DECK_T;
-BG_BACK = 3;  BG_WALL = PRINT_WALL;  BG_W = PUL_Y0 + PUL_W + 15 + BG_WALL;     // belt guard depth in front of the housing: 52
-MFOOT_Y = [Y_HF + (MOTOR_LEN - MOTOR_FOOT[1]) / 2, Y_HF + (MOTOR_LEN + MOTOR_FOOT[1]) / 2];
-DECK_FEET_Y = Y_HF - (BG_W + BG_FOOT_REACH);
-DECK_Y0 = DECK_FEET_Y - 12;
-DECK_Y1 = max(MFOOT_Y[1], RAIL_Y_HI, TENS_BASE_Y1) + DECK_MARGIN + 8;      // + 8: the washers of the back legs' top-angle bolts must clear the tensioner base
+DECK_Y0 = min(MFOOT_Y[0], Y_MF - MOTOR_LEN) - DECK_MARGIN;
+DECK_Y1 = max(RAIL_Y_HI, CG2_Y1) + DECK_MARGIN + 8;      // + 8: room for the back legs' top-angle washers
 // ---- legs (45 x 45 timber), top angles on the OUTER-y faces (flange under the deck, bolts through the deck), foot angles on the INNER-x faces (flange on the floor, 2 anchors)
 LEG_INSET_X = 5;  LEG_INSET_Y = DECK_LEG_INSET_Y;
 DECK_LEG_C = [for (x = [DECK_X0 + LEG_INSET_X + LEG_SECTION / 2, DECK_X1 - LEG_INSET_X - LEG_SECTION / 2],
@@ -104,17 +92,4 @@ FOOTANG_LEG_Z = DRIVE_FLOOR_Z + HW_GAP + 22;
 FOOTANG_LEG_PTS = [for (c = DECK_LEG_C, dy = [-11, 11]) [c[0] + leg_sx(c) * LEG_SECTION / 2, c[1] + dy]];            // 8 x M8: foot angle <-> leg (along x), at FOOTANG_LEG_Z
 ANCHOR_PTS = [for (c = DECK_LEG_C, dy = [-11, 11]) [c[0] + leg_sx(c) * (LEG_SECTION / 2 + HW_GAP + 22), c[1] + dy]];          // 8 x M8 floor anchors
 FLOOR_T = 6;                                                // ghost floor / bench top slab under the drive (picture + anchor joint check)
-
-// ---- chain geometry helpers (2D, plane y-z): all three pitch circles are inside the loop, so the chain path is their convex hull
-function tens_y(ty) = TENS_Y0 + ty;                  // idler centre y at slot offset ty
-module chain_circles2d(ty) {
-    translate([YA, 0]) circle(r = RA, $fn = 96);
-    translate([YA, ZO]) circle(r = RT, $fn = 96);
-    translate([tens_y(ty), TENS_Z]) circle(r = TENS_R, $fn = 96);
-}
-// the area enclosed by the chain, grown by half the link plate height + grow; any idler position in its slot
-module chain_hull2d(grow = 0) offset(delta = CHAIN_ENV_H / 2 + grow) hull() { chain_circles2d(-TENS_TRAVEL); chain_circles2d(TENS_TRAVEL); }
-
-TENS_SPACER_D = 14;  TENS_WASHER_D = 20;  TENS_HEAD_D = 16;  TENS_HEAD_H_ = 6.4;  TENS_NUT_H = 8;  TENS_WASHER_T = 1.6;       // idler hardware: spacer tube, M10 washers / head / nut
-TENS_HEAD_X1 = TENS_UP_X1 + HW_GAP + TENS_WASHER_T + TENS_HEAD_H_;                  // outer face of the idler bolt head (-73.2 default)
 SUBBOLT_PTS = RAIL_BOLT_PTS;                          // old name used by joints.scad

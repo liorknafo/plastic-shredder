@@ -12,7 +12,7 @@ module keyway(xa, xb) {
 }
 
 // Shaft with its axis on the x axis (y = z = 0), in world x positions. Rotates cleanly about its own axis.
-// Keyways: the gear seat (the 4 layers, x_gear_out .. x_gear_in; the spacer sleeve after it is on the plain Ø25) on both shafts, the sprocket seat (x_sprocket_out .. x_sprocket_in) on A only.
+// Keyways: the gear seat (the bought gear's whole bore, hub + teeth: x_gear_hub_out .. x_gear_in) on both shafts, the sprocket seat (x_sprocket_out .. x_spA_in) on A only.
 module shaft_local(which) {
     $fn = FN;
     xs = shaft_x_start(which);
@@ -22,8 +22,8 @@ module shaft_local(which) {
             // hex prism across flats HEX_AF; circle($fn=6) has a vertex on +u = +y
             axial(hex_x0) linear_extrude(hex_x1 - hex_x0) circle(d = HEX_AF / cos(30), $fn = 6);
         }
-        keyway(x_gear_out, x_gear_in);
-        if (which == "A") keyway(x_sprocket_out, x_sprocket_in);
+        keyway(x_gear_hub_out, x_gear_in);
+        if (which == "A") keyway(x_sprocket_out, x_spA_in);
         axial(xs - 1) cylinder(d = END_HOLE_D, h = END_HOLE_L + 1);
         axial(shaft_end_free - END_HOLE_L) cylinder(d = END_HOLE_D, h = END_HOLE_L + 1);
     }

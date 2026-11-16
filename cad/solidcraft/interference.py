@@ -23,8 +23,7 @@ CAD = os.path.dirname(HERE)
 BUILD = os.path.join(HERE, "build")
 CLI = os.environ.get("SOLIDCRAFT_CLI", "solidcraft-cli")
 SC = os.path.join(CAD, "shredder_assembly.sc")
-COMPONENTS = ["Frame", "Rotor A", "Rotor B", "Lid", "Drawer", "Torque limiter + output shaft", "Worm + gearbox pulley",
-              "Motor shaft + pulley"]
+COMPONENTS = ["Frame", "Rotor A", "Rotor B", "Lid", "Drawer", "Output shaft + pin flange", "Worm + jaw coupling", "Motor shaft"]
 STUDIES = [("Shafts one turn", "Shaft A", 0.0, 360.0, "deg"), ("Drawer out", "Drawer slide", 0.0, 180.0, "mm"),
            ("Lid open", "Lid hinge", 0.0, 100.0, "deg")]
 MIN_VOLUME = 0.01            # mm3: less is contact

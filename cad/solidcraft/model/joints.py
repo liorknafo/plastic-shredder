@@ -3,10 +3,9 @@
 Every hole that receives a fastener from another part is placed from the function below, never from a number typed
 into the part: change the function and BOTH parts follow.
   foot_screw_xy()    8 x M6: base-plate foot slots  <->  end-plate layers
-  guard_hole_yz()    4 x M5: drive-end guard wings / free-end cover  <->  cap layers (tapped)
+  guard_hole_yz()    4 x M8: tie screws (pillars, outboard plate) / free-end cover  <->  cap + outer layers (tapped)
   gb_foot_pts()      4 x M8: gearbox foot flange  <->  rails (drive_geom)
   SUBBOLT_PTS        4 x M8: rails  <->  drive deck (drive_geom)
-  TENS_BOLT_PTS      4 x M8: tensioner base plate  <->  drive deck (drive_geom)
 """
 from common import *
 from drive_geom import *

@@ -6,6 +6,7 @@ SLOT_Y_END = comb_slot_bottom_y;         // 67: 3 mm past the blade tip (clears 
 COMB_END_HOLE_D = 5;   COMB_END_HOLE_L = 15;   // M6 tapped, both end faces
 COMB_THRU_D = 5.5;                                 // wall-screw through holes (vertical)
 COMB_THRU_X = [20, chamber_L / 2, chamber_L - 20];
+SCREEN_SCREW_XS = [chamber_L / 3, 2 * chamber_L / 3];   // the screen's 4 x M4 (base.scad SCREEN_SCREW_X: the same numbers)
 
 module comb(sh = "B") {
     $fn = 48;
@@ -27,8 +28,8 @@ module comb(sh = "B") {
         // M6 tapped holes into both end faces at |y| = COMB_SCREW_Y, z = 0
         translate([-1, s * COMB_SCREW_Y, 0]) rotate([0, 90, 0]) cylinder(d = COMB_END_HOLE_D, h = COMB_END_HOLE_L + 1);
         translate([chamber_L - COMB_END_HOLE_L, s * COMB_SCREW_Y, 0]) rotate([0, 90, 0]) cylinder(d = COMB_END_HOLE_D, h = COMB_END_HOLE_L + 1);
-        // M4 tapped holes up into the underside (lower side skirt), 8 deep
-        for (x = COMB_THRU_X) translate([x, s * SKIRT_HOLE_Y, -COMB_T / 2 - 1]) cylinder(d = 3.3, h = SKIRT_HOLE_DEPTH + 1);
+        // M4 tapped holes up into the underside for the SCREEN (2026-11-15), SCREEN_TAP_DEPTH deep (the wall covers them on top)
+        for (x = SCREEN_SCREW_XS) translate([x, s * SCREEN_SCREW_Y, -COMB_T / 2 - 1]) cylinder(d = 3.3, h = SCREEN_TAP_DEPTH + 1);
         // vertical wall-screw holes at |y| = 71
         for (x = COMB_THRU_X) translate([x, s * 71, -COMB_T / 2 - 1]) cylinder(d = COMB_THRU_D, h = COMB_T + 2);
     }

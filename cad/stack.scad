@@ -62,5 +62,5 @@ module rotating_set(sh, angle = 0) {
 }
 
 // ---- end plates: layers = [0 inner, 1 outer, 2 cap], ends = ["drive", "free"]
-module plates(layers = [0, 1, 2], ends = ["drive", "free"]) end_plates(layers, ends);
+module plates(layers = [0, 1, 2, 3, 4], ends = ["drive", "free"]) end_plates(layers, ends);   // 3, 4: the outboard bearing plate (drive end)
 module plate_one(end, i) end_plates([i], [end]);

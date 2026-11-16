@@ -7,6 +7,7 @@ COMB_END_HOLE_D = 5                      # M6 tapped, both end faces
 COMB_END_HOLE_L = 15
 COMB_THRU_D = 5.5                        # wall-screw through holes (vertical)
 COMB_THRU_X = [20, chamber_L / 2, chamber_L - 20]
+SCREEN_SCREW_XS = [chamber_L / 3, 2 * chamber_L / 3]   # the screen's 4 x M4 (base.py SCREEN_SCREW_X: the same numbers)
 
 
 def comb(sh="B"):
@@ -29,8 +30,8 @@ def comb(sh="B"):
         # M6 tapped holes into both end faces at |y| = COMB_SCREW_Y, z = 0
         translate([-1, s * COMB_SCREW_Y, 0], rotate([0, 90, 0], cylinder(d=COMB_END_HOLE_D, h=COMB_END_HOLE_L + 1))),
         translate([chamber_L - COMB_END_HOLE_L, s * COMB_SCREW_Y, 0], rotate([0, 90, 0], cylinder(d=COMB_END_HOLE_D, h=COMB_END_HOLE_L + 1))),
-        # M4 tapped holes up into the underside (lower side skirt), 8 deep
-        [translate([x, s * SKIRT_HOLE_Y, -COMB_T / 2 - 1], cylinder(d=3.3, h=SKIRT_HOLE_DEPTH + 1)) for x in COMB_THRU_X],
+        # M4 tapped holes up into the underside for the SCREEN, SCREEN_TAP_DEPTH deep (the wall covers them on top)
+        [translate([x, s * SCREEN_SCREW_Y, -COMB_T / 2 - 1], cylinder(d=3.3, h=SCREEN_TAP_DEPTH + 1)) for x in SCREEN_SCREW_XS],
         # vertical wall-screw holes at |y| = 71
         [translate([x, s * 71, -COMB_T / 2 - 1], cylinder(d=COMB_THRU_D, h=COMB_T + 2)) for x in COMB_THRU_X])
 

@@ -14,11 +14,13 @@ module sleeve(L) tube(SLEEVE_OD, SLEEVE_ID, L);
 // collar first (z 0 .. COLLAR_T), body after it
 module collared(Lb) { tube(COLLAR_OD, SLEEVE_ID, COLLAR_T); translate([0, 0, COLLAR_T - 0.01]) tube(SLEEVE_OD, SLEEVE_ID, Lb + 0.01); }
 
-// standalone render:  -D 'kind="drive"|"free_A"|"free_B"|"collar_drive"|"collar_free"|"gear_spacer"'
+// standalone render:  -D 'kind="drive"|"free_A"|"free_B"|"collar_drive"|"collar_free"|"gear_spacer"|"ob_sleeve"|"ob_sleeve_A"'
 kind = "drive";
 if (kind == "drive") sleeve(sleeve_L_drive);
 else if (kind == "free_A") sleeve(sleeve_L_free_A);
 else if (kind == "free_B") sleeve(sleeve_L_free_B);
 else if (kind == "collar_drive") collared(collar_body_L_drive);
-else if (kind == "gear_spacer") tube(GEAR_SPACER_D, SLEEVE_ID, gear_spacer_L);
+else if (kind == "gear_spacer") tube(GEAR_SPACER_D, SLEEVE_ID, gear_spacer_L);     // gear hub -> outboard bearing inner ring
+else if (kind == "ob_sleeve") tube(GEAR_SPACER_D, SLEEVE_ID, ob_sleeve_L);         // outboard bearing inner ring -> end cap (B)
+else if (kind == "ob_sleeve_A") tube(GEAR_SPACER_D, SLEEVE_ID, ob_sleeve_A_L);     // outboard bearing inner ring -> sprocket hub (A): longer, the 30T sprocket clears B's end
 else collared(collar_body_L_free);
