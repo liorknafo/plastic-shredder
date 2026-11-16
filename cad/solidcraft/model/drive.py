@@ -444,7 +444,6 @@ def holddown_hw_ph():
     return union(topang_deck_bolts_ph(), topang_leg_bolts_ph(), footang_leg_bolts_ph(), anchors_ph())
 
 
-# the old name used by the tensioner base bolts: M8 from above through the part at ztop and the deck
 # ---------------- swept envelopes of the moving parts (full cylinders: any angle), every dimension grown by g (radially, and along x at both ends)
 def cylx(r, x0, x1, y=0, z=0):
     return translate([x0, y, z], rotate([0, 90, 0], cylinder(r=r, h=x1 - x0)))

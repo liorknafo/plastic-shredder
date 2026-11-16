@@ -185,7 +185,7 @@ module screen_shanks() for (x = SCREEN_SCREW_X, s = [-1, 1]) translate([x, s * S
 // 2D drawing: the cross-section with the hole axes, and the plan with the hole pattern, the screws and the pockets
 module screen_2d() {
     screen_profile_2d();
-    translate([0, -80]) projection() screen();
+    translate([0, SC_ZMIN - SC_YW - 15]) projection() screen();     // plan below the section, 15 mm clear of it (it used to overlap the section)
 }
 module screen_plan_2d(d = SCREEN_HOLE_D) projection() difference() { screen_body(); screen_hole_cuts(d); }   // plan (z projection) of the screen with its holes (d: control)
 module screen_holes_plan_2d() for (h = screen_holes()) translate(h) circle(d = SCREEN_HOLE_D, $fn = 24);

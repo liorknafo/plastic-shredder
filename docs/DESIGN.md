@@ -176,7 +176,7 @@ Everything on a shaft is clamped between its two end caps (CALC §8).
 | 20b | **Gear rework** (bought m4 z15, A and B identical) | 2 | bought | Lathe, broach | re-bore **Ø25 H7**, broach the **8 mm keyway**, like the pin flange; §5.7 |
 | 21 | Printed parts | | PETG | MK3S | hopper (collar, funnel, lid + pads), drive-end **gear band** + **hood** (two halves), free-end cover, **coupling guard + stub cap**, drawer handle (`cad/stl`) |
 | 22 | Plywood | | 18 mm ply, 10 mm ply, 45x45 timber | saw / router | base plate (cut-out 132.2 x 166), bin cabinet (2 sides, back, floor), drawer (full-height front 192.2 x 314, bin 154 x 176 x 291 in 10 mm ply), drive deck + legs (`cad/dxf`) |
-| 24 | **Screen** | 1 | **aluminium block 6061 / 6082, about 136 x 165 x 45** (bought locally) | CNC4030 | finished 131.2 x 161 x 41: top two arcs R36, bottom two arcs R46 round the shaft axes, wings 80.5 from the centre; 216 x Ø5 holes on an 8 mm hex pattern; 4 counterbores + 6 pockets; `cad/stl/screen.stl`, `cad/dxf/screen.dxf`; §5.8 |
+| 24 | **Screen** | 1 | **aluminium block 6061 / 6082, about 136 x 165 x 45** (bought locally) | CNC4030 | finished 131.2 x 161 x 41: top two arcs R36 round the shaft axes, flat bottom, wings 80.5 from the centre; 216 x Ø5 holes on an 8 mm hex pattern, 154 relieved Ø6.5 from below; 4 counterbores + 6 pockets; `cad/stl/screen.stl`, `cad/dxf/screen.dxf`; §5.8 |
 
 The cut list is in CALC §10. **Cut the plate layers and blade strips from the 70x10 flats first,
 exactly to plan**: there are only 20 and 34 mm to spare. The outboard plate needs **400 mm of
@@ -350,7 +350,7 @@ induction or high-frequency hardened). The model is `cad/gear.scad`; the strengt
 
 ![Screen section](../cad/png/screen_section.png)
 
-The part is `cad/stl/screen.stl` (as machined, wings up); `cad/dxf/screen.dxf` has its cross-section and the plan with every hole.
+The part is `cad/stl/screen.stl` (as machined, wings up); `cad/dxf/screen.dxf` has its cross-section and, below it, the plan with every hole (216 x Ø5 + 4 x Ø4.5).
 1. **Stock:** a block of 6061 or 6082 about 136 x 165 x 45. Square it to **131.2** (along the shafts) x **161** x 41 high.
 2. **Top (wings up):** rough, then finish the two arcs (R36 round axes 60 apart, 30 each side of the centre) with a Ø6 ball end along the length, stepover ≤ 0.3.
    The flat wing tops are the reference: they bear on the combs.
@@ -358,7 +358,12 @@ The part is `cad/stl/screen.stl` (as machined, wings up); `cad/dxf/screen.dxf` h
 4. **The underside stays flat** (the block's own face, 41 below the wing tops). Only the top is 3D.
 5. **Holes, from the flat underside** (flip it, wing tops down on parallels): 216 x Ø5 on the 8 mm hex pattern from the DXF, drilled **straight up** through to the arcs
    (the drill starts on a flat face, so it does not wander). Then **relieve** each hole Ø6.5 from below so the Ø5 part is only 10 mm long: the depth is the same
-   for every hole in a row along the shafts (the rows right under the shaft axes need none; the DXF/STL has the depths).
+   for every hole in a row along the shafts. Relief depth, Ø6.5, measured up from the flat bottom (the DXF is a silhouette and does not show it):
+
+   | row, mm from the centre line (both sides) | 6.9 | 13.9 | 20.8 | 27.7 | 34.6 | 41.6 | 48.5 |
+   |---|---|---|---|---|---|---|---|
+   | relief depth, mm | 6.5 | 2.7 | 0.6 | none | none | 1.2 | 3.7 |
+
    Deburr both sides (a countersink, lightly): sharp burrs catch strings.
 6. **Screws:** 4 x Ø4.5 through the wings at x = 44.1 and 88.1, 74 from the centre, **counterbored Ø8.5 from the flat underside up to 8 mm below the wing top**.
 7. **Fit:** with the drawer out, hold the screen up under the combs from below (through the base plate's cut-out) and fit the 4 M4 x 16. Turn both shafts by hand:

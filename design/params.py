@@ -162,7 +162,7 @@ GEAR_SPACER_D = SLEEVE_OD   # the two sleeves either side of the outboard bearin
 # --- OUTBOARD BEARING PLATE (2026-11-13): a 2-layer steel plate outside the gears, on 4 standoffs from the drive cap layer, carries a 5th and 6th NA4905 ---
 OB_T = 10.0            # each of its 2 layers (from 100 x 10 flat, bought locally like the gear flat before)
 OB_H = 100.0           # z extent (taller than the 70 end plates: the drive-end guard's hood and the gear band butt fully against it)
-OB_ZC = 3.0            # its centre is this far ABOVE the shaft axes: bottom edge at z = -47, so the chain tube's top wall under it clears the tensioner's head plate (C24c)
+OB_ZC = 3.0            # its centre is this far ABOVE the shaft axes: bottom edge at z = -47 (set for the old chain tube; kept, the hood and gear band are built round it)
 OB_L = 180.0           # y extent (10 more than the end plates: edge margin round the M8 tie holes at |y| = 80)
 OB_GAP = 2.0           # rotating part to the plate face (gear hub inboard; sprocket hub / B end cap outboard)
 OB_STEP = 1.5          # Ø32 step at each outer face holds the bearing's outer ring: pocket 17 = 8.5 + 8.5 bored from the joint face of each layer

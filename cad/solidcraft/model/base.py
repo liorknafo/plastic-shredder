@@ -12,7 +12,7 @@ SCREEN (replaces the vibrating screen, the wire-mesh grid, the fixed upper front
             WINGS against the combs out to the combs' outer edge (|y| = 80.5);
     bottom  FLAT at z = -(R_TIP + SCREEN_GAP + SCREEN_T) = -46 (inside the base plate's cut-out); each hole relieved
             Ø SCREEN_RELIEF_D from below so its Ø5 land is SCREEN_T.
-  Holes Ø5 (SCREEN_HOLE_D) on a hex pattern, drilled straight down (z) where the top is no steeper than
+  Holes Ø5 (SCREEN_HOLE_D) on an 8 mm hex pattern, drilled vertically (z, up from the flat bottom) where the top is no steeper than
   SCREEN_HOLE_SLOPE (50 deg): two bands under the shafts.  Held by 4 x M4 x 16 socket screws from BELOW (counterbores in
   the wings) into tapped holes in the combs' underside (|y| = SCREEN_SCREW_Y, x = L/3, 2L/3).  Pockets in the wing tops
   clear the M5 heads of the wall screws (|y| = 71, x = 20, L/2, L-20).
@@ -353,8 +353,8 @@ def screen_plan_proj_2d():
 
 
 def screen_2d():
-    """2D drawing: the cross-section, and below it the plan (projection) with the hole pattern and the screws' holes."""
-    return union(screen_profile_2d(), translate([0, -80], screen_plan_proj_2d()))
+    """2D drawing: the cross-section, and 15 mm below it (not overlapping) the plan (projection) with the hole pattern and the screws' holes."""
+    return union(screen_profile_2d(), translate([0, SC_ZMIN - SC_YW - 15], screen_plan_proj_2d()))     # plan below the section, 15 mm clear of it
 
 
 def screen_holes_plan_2d():
