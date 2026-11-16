@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check.py -- build bodies of the assembly natively and compare them with the old mesh assembly (reference.json).
+"""check.py -- build bodies of the assembly natively and compare them with the OpenSCAD mesh assembly (reference.json).
 
     python3 check.py                 every body
     python3 check.py Blades "Shaft A"   groups whose name contains one of the words
@@ -34,8 +34,8 @@ CLI = os.environ.get("SOLIDCRAFT_CLI", "solidcraft-cli")
 BUILD = os.path.join(HERE, "build")
 VOL_TOL, BOX_TOL, COM_TOL = 0.015, 0.5, 0.5          # relative volume, mm, mm
 # Round hardware that the old meshes drew with $fn 12 to 24: a 12-gon has 95.5 % of the circle's area, a 16-gon 97.4 %.
-FACET_TOL = {"Grid screws": 0.05, "Safety grid mesh": 0.03, "grid_mesh": 0.03,
-             "Handle + actuator screws": 0.02, "Lid screws (pad, actuator)": 0.02, "Belt guard hardware": 0.03}
+FACET_TOL = {"Lid screws (pad, actuator)": 0.02, "Handle screws": 0.02, "Screen + wall screws": 0.03,
+             "Coupling guard screws": 0.03}
 # Parts that overlap in the design itself.  The old mesh was their union, so its volume is short by the overlap.
 # Cabinet: the floor panel (192.2 x 202 x 18) lies in the bottom 18 mm of both side panels (65448.0 mm3 each) and of
 # the back panel (50608.8 mm3).  Here every panel is a body of its own; the design is left as it is.

@@ -20,7 +20,7 @@ CUT_GROW = 1.0          # a hole that comes from a 2D difference is cut this muc
 POLY_FN = 12            # fn up to this means "a polygon", above it "a circle"
 
 
-__all__ = ["cube", "cylinder", "sphere", "linear_extrude", "prismoid", "circle", "square", "polygon", "hull", "offset",
+__all__ = ["cube", "cylinder", "sphere", "linear_extrude", "prismoid", "split_faces", "circle", "square", "polygon", "hull", "offset",
            "translate", "rotate", "mirror", "multmatrix", "union", "difference", "intersection", "color", "part", "Script", "Node",
            "sin", "cos", "tan", "asin", "acos", "atan", "atan2", "sqrt", "floor", "ceil", "norm", "PI"]
 
@@ -264,6 +264,13 @@ def prismoid(bottom, top, height):
     assert len(bottom) == len(top) >= 3
     return Node("prismoid", 3, bottom=[(float(p[0]), float(p[1])) for p in bottom],
                 top=[(float(p[0]), float(p[1])) for p in top], h=float(height))
+
+
+def split_faces(child, cuts):
+    """`child` unchanged as a solid, with faces split by planes: cuts = [(point on the face, plane origin, plane normal)],
+    in the child's frame, applied in order.  Only edges are added.  SolidCraft 0.40 cannot mesh a curved face with
+    more than about 60 holes in it (STL export and inspect.compare cover the holes); split, each piece meshes."""
+    return Node("split", 3, [child], cuts=[tuple(tuple(float(c) for c in v) for v in cut) for cut in cuts]) if child else None
 
 
 def circle(r=None, d=None, fn=None):
@@ -603,9 +610,12 @@ class Script:
             if op != "new":
                 return self._combine(tgt, self._emit(n, M, "new", None), op)
             body = self._emit(n.ch[0], M, "new", None)
+            if k == "difference" and body is not None:
+                self._cut_all(n.ch[1:], M, body)
+                return body
             for c in n.ch[1:]:
                 if body is not None:
-                    self._emit(c, M, "cut" if k == "difference" else "intersect", body)
+                    self._emit(c, M, "intersect", body)
             return body
         if k == "cube":
             return self._cube(n, M, op, tgt)
@@ -616,10 +626,75 @@ class Script:
         if k == "extrude":
             h = n.a["h"]
             return self._ext_many(n.ch, I4, M, h, -h / 2 if n.a["center"] else 0.0, op, tgt)
+        if k == "split":
+            if op != "new":
+                return self._combine(tgt, self._emit(n, M, "new", None), op)
+            body = self._emit(n.ch[0], M, "new", None)
+            for p, o, nrm in n.a["cuts"]:
+                self.step("solid.split_face", faces=[_nums(pt(M, p))], body=body,
+                          plane={"origin": _nums(pt(M, o)), "normal": _nums(_unit(vec(M, nrm)))})
+            return body
         if k == "prismoid":
             names = [self._sketch([_poly_loop(pts)], M, z) for pts, z in ((n.a["bottom"], 0.0), (n.a["top"], n.a["h"]))]
             return self._prim("solid.loft", dict(sections=[{"sketch": s} for s in names]), op, tgt)
         raise NotImplementedError(k)
+
+    def _cut_all(self, tools, M, body):
+        """Cut every tool from `body`.  Round cylinders (not cones, not polygons) that start in the same plane, run the
+        same length the same way and keep apart are cut as ONE sketch of their circles and one extrude: the same solid
+        as cutting them one by one, but one boolean instead of hundreds (a plate full of holes).  The order of the cuts
+        does not change the solid; the biggest group goes last, when the body is otherwise finished."""
+        leaves = []
+
+        def walk(n, A):
+            if n.kind == "T":
+                for c in n.ch:
+                    walk(c, mmul(A, n.a["m"]))
+            elif n.kind == "union":
+                for c in n.ch:
+                    walk(c, A)
+            else:
+                leaves.append((n, A))
+
+        for t in _flat(tools):
+            walk(t, M)
+        groups, rest = {}, []
+        for n, A in leaves:
+            if (n.kind == "cylinder" and n.a["r1"] == n.a["r2"] > 0 and n.a["h"] > 0
+                    and not (n.a["fn"] and n.a["fn"] <= POLY_FN)):
+                z0 = -n.a["h"] / 2 if n.a["center"] else 0.0
+                axis = _unit(vec(A, [0, 0, 1]))
+                base = pt(A, [0, 0, z0])
+                key = (tuple(round(c, 6) for c in axis), round(_dot(axis, base), 6), round(n.a["h"], 6))
+                groups.setdefault(key, []).append((base, n.a["r1"], n, A))
+            else:
+                rest.append((n, A))
+        for n, A in rest:                                      # the other tools first, then the groups, smallest first: each
+            self._emit(n, A, "cut", body)                      # boolean is cheapest while the body has few faces
+        plans = []
+        for key, items in groups.items():
+            axis = list(key[0])
+            ref = [1.0, 0.0, 0.0] if abs(axis[0]) < 0.9 else [0.0, 1.0, 0.0]
+            xd = _unit(_cross(ref, axis))
+            yd = _cross(axis, xd)
+            o = items[0][0]
+            frame = [[xd[0], yd[0], axis[0], o[0]], [xd[1], yd[1], axis[1], o[1]], [xd[2], yd[2], axis[2], o[2]], [0.0, 0.0, 0.0, 1.0]]
+            sets = []                                          # circles that keep apart share one sketch
+            for base, r, n, A in items:
+                d = [b - c for b, c in zip(base, o)]
+                lp = Loop(circle=((_dot(d, xd), _dot(d, yd)), r))
+                for st in sets:
+                    if all(_apart(lp, q[0]) for q in st):
+                        st.append((lp, n, A))
+                        break
+                else:
+                    sets.append([(lp, n, A)])
+            plans += [(st, frame, key[2]) for st in sets]
+        for st, frame, h in sorted(plans, key=lambda pl: len(pl[0])):
+            if len(st) == 1:
+                self._emit(st[0][1], st[0][2], "cut", body)
+            else:
+                self._sketch_extrude([q[0] for q in st], frame, h, 0.0, "cut", body)
 
     def _prim(self, command, params, op, tgt):
         params["name"] = self._name()

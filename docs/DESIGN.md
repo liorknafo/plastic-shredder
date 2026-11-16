@@ -565,9 +565,8 @@ Mains → fuse → **contactor starter** with a thermal overload (~1.9 A) → mo
    The strength check assumes a cheap gear (ISO grade 9, `GEAR_ISO_GRADE`); a better grade only adds margin.
 4. **Buy locally:** 400 mm of 100x10 flat (outboard plate), 150 mm of 60x15 (pillars), the aluminium block for the screen (CALC §10, §13).
 5. **Gear life:** pitting is rated as a life: about 280 hours of cutting with all of the motor's torque through the gears (CALC §6), if the teeth are **HRC 50 or harder with a case of 0.5 mm or more** and greased with VG 220+. Watch the flanks (§8.3), keep 2 spares.
-6. `cad/shredder_assembly.sc` (SolidCraft) is out of date: run `make solidcraft` on the Mac.
-7. **Choose** the jaw coupling (bore 19 + your motor shaft) and the Ø8 x 32 hardened dowels (Amazon, ships to Israel).
-8. **The screen on a twin-shaft machine is untried here** (§2 item 7): test it with your own waste before relying on it. The hole size is `SCREEN_HOLE_D` (5 mm).
+6. **Choose** the jaw coupling (bore 19 + your motor shaft) and the Ø8 x 32 hardened dowels (Amazon, ships to Israel).
+7. **The screen on a twin-shaft machine is untried here** (§2 item 7): test it with your own waste before relying on it. The hole size is `SCREEN_HOLE_D` (5 mm).
 
 ## 10. Files
 

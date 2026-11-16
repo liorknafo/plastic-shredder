@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """parts.py -- the made parts one by one, each in its own part frame, as native SolidCraft bodies.
 
-    python3 parts.py                  build every part and compare it with the old OpenSCAD STL (parts_reference.json)
+    python3 parts.py                  build every part and compare it with its OpenSCAD STL (parts_reference.json)
     python3 parts.py blade shaft      only parts whose name contains a word
     python3 parts.py -m gear          only the parts model/gear.py defines (its PARTS)
-    python3 parts.py --compare        also lay each old STL over its native part and compare the two surfaces
-                                      (SolidCraft's inspect.compare, 0.05 mm): the old STLs are read from git
+    python3 parts.py --compare        also lay each OpenSCAD STL over its native part and compare the two surfaces
+                                      (SolidCraft's inspect.compare, 0.05 mm): the STLs are read from git (OLD_COMMIT)
     python3 parts.py --dxf            also build the flat parts' outlines as DXF (into build/, not cad/dxf)
     python3 parts.py --check          exit with an error when a part does not match parts_reference.json
     python3 parts.py --freeze         make what was built the new parts_reference.json (after a deliberate change)
@@ -29,14 +29,15 @@ sys.path[:0] = [HERE, os.path.join(HERE, "model")]
 from scq import Script, linear_extrude # noqa: E402
 from check import BUILD, CLI, compare, freeze  # noqa: E402
 
-OLD_COMMIT = "27662be"               # the last commit whose cad/stl/*.stl came from OpenSCAD
+OLD_COMMIT = "727b848"               # the last commit whose cad/stl/*.stl and cad/dxf came from OpenSCAD (reference.py measures it)
 COMPARE_TOL = 0.05                   # mm: the old meshes are polygons inside the true circles (0.013 mm at R25, $fn 96)
-# The welded wire mesh is a bought part: nobody prints it, and round Ø2 wires make a 20 MB STL.  Its STEP is 0.6 MB.
-NOT_EXPORTED = {("stl", "grid_mesh")}
-# A difference the surface comparison finds that is known and is not a difference of shape.
-KNOWN = {"grid_mesh": "SolidCraft 0.40 leaves 13 of the 56 wire crossings unfused when it joins the wires (they graze "
-                      "0.1 mm deep), in any order of joining: both wires' surfaces stay inside the weld there, 0.031 mm3 "
-                      "each.  Volume, box and centre of mass are right."}
+NOT_EXPORTED = set()                 # (format, part) pairs not written to cad/<format>
+# A difference the surface comparison finds that is known and is not a difference of shape:
+# {part: (the largest deviation accepted, mm; why)}.  A larger one still fails.
+KNOWN = {"screen": (0.2, "the 6 wall-screw pockets (Ø11, $fn 32 in base.scad) cut the steep end of the R36 top arcs "
+                         "($fn 192) at a grazing angle near |y| = 65.6, which magnifies the old mesh's facets there to "
+                         "0.145 mm.  Against the same OpenSCAD part rendered with $fn 512 pockets and $fn 1536 arcs the "
+                         "native screen is identical within 0.05 mm (0.027 mm).")}
 
 
 def compare_surfaces(names, build):
@@ -67,10 +68,11 @@ def compare_surfaces(names, build):
         c = (res.get("results", res) if isinstance(res, dict) else res)[-1]
         dev = max(c["deviation"]["a_to_b"]["max_mm"], c["deviation"]["b_to_a"]["max_mm"])
         mean = max(c["deviation"]["a_to_b"]["mean_mm"], c["deviation"]["b_to_a"]["mean_mm"])
-        bad += not c["identical"] and name not in KNOWN
+        known = name in KNOWN and dev <= KNOWN[name][0]
+        bad += not c["identical"] and not known
         print(f"{name:24s} {dev:10.4f} {mean:8.4f}  {c['verdict']}")
-        if not c["identical"] and name in KNOWN:
-            print(f"{'':24s} known: {KNOWN[name]}")
+        if not c["identical"] and known:
+            print(f"{'':24s} known: {KNOWN[name][1]}")
     return bad
 
 
@@ -124,6 +126,49 @@ def dxf_entities(text):
     return ents, ([min(p[0] for p in pts), min(p[1] for p in pts), max(p[0] for p in pts), max(p[1] for p in pts)] if pts else [0, 0, 0, 0])
 
 
+def merge_dxf(paths, out):
+    """One DXF from several that SolidCraft wrote (same header and tables): the entities of all of them, with fresh
+    handles, and the extent of all of them."""
+    def pairs(path):                                            # [(group code line as written, value)]
+        lines = open(path).read().splitlines()
+        return [(lines[i], lines[i + 1]) for i in range(0, len(lines) - 1, 2)]
+
+    def find(ps, code, val, start=0):
+        return next(i for i in range(start, len(ps)) if ps[i][0].strip() == code and ps[i][1].strip() == val)
+
+    base = pairs(paths[0])
+    start = find(base, "2", "ENTITIES") + 1
+    end = find(base, "0", "ENDSEC", start)
+    seed = int(base[find(base, "9", "$HANDSEED") + 1][1].strip(), 16)
+    ents = []
+    for path in paths:
+        ps = pairs(path)
+        a = find(ps, "2", "ENTITIES") + 1
+        for code, val in ps[a:find(ps, "0", "ENDSEC", a)]:
+            if code.strip() == "5":                             # an entity's own handle
+                val = f"{seed:X}"
+                seed += 1
+            ents.append((code, val))
+    merged = base[:start] + ents + base[end:]
+    _, ext = dxf_entities("\n".join(f"{c}\n{v}" for c, v in merged))
+    out_pairs, var = [], None
+    for code, val in merged:
+        c = code.strip()
+        if c == "9":
+            var = val.strip()
+        elif c == "0":
+            var = None
+        elif var == "$HANDSEED" and c == "5":
+            val = f"{seed:X}"
+        elif var in ("$EXTMIN", "$EXTMAX") and c in ("10", "20"):
+            val = repr(round(ext[(0 if c == "10" else 1) + (0 if var == "$EXTMIN" else 2)], 6))
+        out_pairs.append((code, val))
+    with open(out, "w") as f:
+        f.write("".join(f"{c}\n{v}\n" for c, v in out_pairs))
+    for path in paths:
+        os.remove(path)
+
+
 def export_dxf(outlines, build, write):
     """The outline of each flat part as DXF: its body's faces in the plane z = 0, projected into a sketch (true arcs,
     closed loops; the outside on layer OUTLINE, the holes on CUT).  `outlines`: name -> builder of a 2D tree (the part is
@@ -154,17 +199,22 @@ def export_dxf(outlines, build, write):
         z = 0.0 if tree.dim == 2 else max(p[2] for p in flat)       # a solid: seen from above (blind holes underneath stay out)
         under = [p for p in flat if abs(p[2] - z) < 1e-6]
         path = os.path.join(out_dir, name + ".dxf")
-        steps = s.steps[:n_model] + [
-            {"command": "sketch.create", "params": {"plane": "XY", "offset": z, "name": name + " outline"}},
-            {"command": "sketch.project", "params": {"refs": [{"face": p, "body": body} for p in under], "construction": False}},
-            {"command": "sketch.export_dxf", "params": {"path": path, "join": True, "layers": "roles"}},
-            {"command": "sketch.finish", "params": {}}]
+        # One sketch and one DXF per face, merged afterwards: SolidCraft 0.40's joined DXF export keeps a region's outline
+        # and its holes but drops islands inside a hole (the concentric rings of sprocket_drill).
+        tmp = [os.path.join(build, f"dxf_{name}_{i}.dxf") for i in range(len(under))]
+        steps = list(s.steps[:n_model])
+        for i, p in enumerate(under):
+            steps += [{"command": "sketch.create", "params": {"plane": "XY", "offset": z, "name": f"{name} outline {i + 1}"}},
+                      {"command": "sketch.project", "params": {"refs": [{"face": p, "body": body}], "construction": False}},
+                      {"command": "sketch.export_dxf", "params": {"path": tmp[i], "join": True, "layers": "roles"}},
+                      {"command": "sketch.finish", "params": {}}]
         json.dump(steps, open(script, "w"))
         r = subprocess.run([CLI, "run", script, "--quiet"], capture_output=True, text=True)
         if r.returncode != 0:
             print(f"{name:20s}  FAILED: {r.stderr.strip()[-200:]}")
             bad += 1
             continue
+        merge_dxf(tmp, path)
         ents, ext = dxf_entities(open(path).read())
         loops = ents.count("LWPOLYLINE") + ents.count("CIRCLE")
         r = subprocess.run(["git", "show", f"{OLD_COMMIT}:cad/dxf/{name}.dxf"], cwd=root, capture_output=True, text=True)

@@ -15,15 +15,16 @@ def keyway(xa, xb):
 def shaft_local(which):
     """Shaft with its axis on the x axis (y = z = 0), in world x positions.
 
-    Keyways: the gear seat (the 4 layers, x_gear_out .. x_gear_in) on both shafts, the sprocket seat on A only.
+    Keyways: the gear seat (the bought gear's whole bore, hub + teeth: x_gear_hub_out .. x_gear_in) on both shafts,
+    the sprocket seat (x_sprocket_out .. x_spA_in: the TL350) on A only.
     """
     xs = shaft_x_start(which)
     return difference(
         union(axial(xs, cylinder(d=JOURNAL_D, h=shaft_end_free - xs)),
               # hex prism across flats HEX_AF, with a vertex on +u = +y
               axial(hex_x0, linear_extrude(hex_x1 - hex_x0, circle(d=HEX_AF / cos(30), fn=6)))),
-        keyway(x_gear_out, x_gear_in),
-        keyway(x_sprocket_out, x_sprocket_in) if which == "A" else None,
+        keyway(x_gear_hub_out, x_gear_in),
+        keyway(x_sprocket_out, x_spA_in) if which == "A" else None,
         axial(xs - 1, cylinder(d=END_HOLE_D, h=END_HOLE_L + 1)),
         axial(shaft_end_free - END_HOLE_L, cylinder(d=END_HOLE_D, h=END_HOLE_L + 1)))
 

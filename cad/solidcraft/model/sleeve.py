@@ -26,4 +26,6 @@ PARTS = {"sleeve_drive": lambda: sleeve(sleeve_L_drive),
          "sleeve_free_B": lambda: sleeve(sleeve_L_free_B),
          "collar_sleeve_drive": lambda: collared(collar_body_L_drive),
          "collar_sleeve_free": lambda: collared(collar_body_L_free),
-         "gear_spacer": lambda: tube(GEAR_SPACER_D, SLEEVE_ID, gear_spacer_L)}
+         "gear_spacer": lambda: tube(GEAR_SPACER_D, SLEEVE_ID, gear_spacer_L),       # gear hub -> outboard bearing inner ring
+         "ob_sleeve": lambda: tube(GEAR_SPACER_D, SLEEVE_ID, ob_sleeve_L),           # outboard bearing inner ring -> end cap (B)
+         "ob_sleeve_A": lambda: tube(GEAR_SPACER_D, SLEEVE_ID, ob_sleeve_A_L)}       # outboard bearing inner ring -> the TL350 (A)
