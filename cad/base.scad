@@ -9,8 +9,8 @@
 //     top     two arcs R_TIP + SCREEN_GAP (36) round the shaft axes, meeting in a ridge between the shafts (y = 0, z = -19.9) and rising on the outer sides to the
 //             combs' underside (z = -5) at |y| = 65.6; from there flat WINGS against the combs out to the combs' outer edge (|y| = 80.5);
 //     bottom  FLAT at z = -(R_TIP + SCREEN_GAP + SCREEN_T) = -46 (inside the base plate's cut-out); each hole relieved Ø SCREEN_RELIEF_D from below so its Ø5 land is SCREEN_T.
-//   Holes Ø5 (SCREEN_HOLE_D) on a 7 mm hex pattern, drilled straight down (z) where the top is no steeper than SCREEN_HOLE_SLOPE (50 deg): two bands under the
-//   shafts, |y| 2.4 .. 57.6.  Fines fall through into the drawer bin; oversize stays and the teeth drag it round to the combs and back into the bite.
+//   Holes Ø5 (SCREEN_HOLE_D) on an 8 mm hex pattern (SCREEN_HOLE_PITCH), drilled vertically (z, up from the flat bottom) where the top is no steeper than
+//   SCREEN_HOLE_SLOPE (50 deg): 14 rows, hole centres |y| 6.9 .. 48.5.  Fines fall through into the drawer bin; oversize stays and the teeth drag it round to the combs and back into the bite.
 //   Held by 4 x M4 x 16 socket screws from BELOW (counterbores in the wings) into tapped holes in the combs' underside (|y| = SCREEN_SCREW_Y, x = L/3, 2L/3).
 //   Pockets in the wing tops clear the M5 heads of the wall screws (|y| = 71, x = 20, L/2, L-20).  The base plate's cut-out is |y| <= BASE_CUT_Y (83), so with the
 //   drawer out the 4 screws are reached from below and the screen drops out for cleaning.

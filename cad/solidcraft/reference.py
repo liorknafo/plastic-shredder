@@ -24,6 +24,7 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+RENAMED = {"Circlip, spacer, stop collar": "Circlip and spacer"}     # old mesh-exporter group names -> the native model's
 CLI = os.environ.get("SOLIDCRAFT_CLI", "solidcraft-cli")
 OPENSCAD_COMMIT = "727b848"          # shredder-design: bought gears, outboard plate, fixed screen, pin-flange drive
 
@@ -60,7 +61,7 @@ def main():
         bodies = measure(os.path.join(wt, "cad", "shredder_assembly.sc"), os.path.join(tmp, "reference_eval.json"))
         ref = {}
         for b in bodies:
-            ref[b["name"]] = dict(volume_mm3=round(b["volume_mm3"], 1) if b["closed"] else None,
+            ref[RENAMED.get(b["name"], b["name"])] = dict(volume_mm3=round(b["volume_mm3"], 1) if b["closed"] else None,
                                   area_mm2=round(b["area_mm2"], 1),
                                   bbox_min=[round(v, 3) for v in b["bbox"]["min"]],
                                   bbox_max=[round(v, 3) for v in b["bbox"]["max"]],

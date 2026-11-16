@@ -626,7 +626,7 @@ BODIES = {
     "Output shaft + pin flange": [
         Body("Output shaft 4140", lambda: output_shaft_ph(), "#2b6cb0"),
         Body("Pin flange + 4 pins", lambda: pin_coupling_ph(), "#9aa5b1"),
-        Body("Circlip, spacer, stop collar", lambda: shaft_hw_ph(), YELLOW),
+        Body("Circlip and spacer", lambda: shaft_hw_ph(), YELLOW),
     ],
     "Worm + jaw coupling": [
         Body("Worm", lambda: worm_ph(), DARK),

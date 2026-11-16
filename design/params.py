@@ -463,8 +463,8 @@ HSW_PAD_W = 48.0                 # width (across) of the printed switch pad on t
 # --- FIXED SCREEN (2026-11-15, user: "machine ... the shape of the bottom of the blades with holes so only small enough pieces will pass and the
 # others will have to keep shredding").  It REPLACES the vibrating screen, the wire-mesh safety grid, the fixed upper front panel, the drawer switch and the
 # printed side skirts.  One aluminium block (6061 / 6082, CNC4030), its top a "W": two arcs SCREEN_GAP under the blade-tip circles of A and B, meeting in a
-# ridge between the shafts and rising on the outer sides to the combs' underside, then flat WINGS that are screwed up against the combs (6 x M4 into the comb's
-# tapped holes at |y| = SKIRT_HOLE_Y).  Ø5 holes drilled straight down (z) where the top is no steeper than SCREEN_HOLE_SLOPE.  Oversize stays on the
+# ridge between the shafts and rising on the outer sides to the combs' underside, then flat WINGS that are screwed up against the combs (4 x M4 into the comb's
+# tapped holes at |y| = SCREEN_SCREW_Y).  Ø5 holes drilled vertically (z, up from the flat bottom) where the top is no steeper than SCREEN_HOLE_SLOPE.  Oversize stays on the
 # screen and the teeth drag it round to the combs and back into the bite until it passes.  The screen is also the guard from below: ISO 13857 Table 4,
 # round openings 4 < e <= 6 need >= 5 mm to the hazard; here hole length + gap >= 8.
 SCREEN_GAP = 2.0           # blade-tip circle (R_TIP) to the screen's top surface, radial

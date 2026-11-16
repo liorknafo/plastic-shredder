@@ -1005,7 +1005,7 @@
    "closed": true,
    "mesh_faces": 2664
   },
-  "Circlip, spacer, stop collar": {
+  "Circlip and spacer": {
    "volume_mm3": 1945.7,
    "area_mm2": 2472.9,
    "bbox_min": [

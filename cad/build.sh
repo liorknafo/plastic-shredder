@@ -165,7 +165,7 @@ shot shaft_A          previews.scad "0,0,0,55,0,340,900" 'scene="shaft_A"'
 shot shaft_B          previews.scad "0,0,0,55,0,340,900" 'scene="shaft_B"'
 shot plate_layers     previews.scad "0,0,0,0,0,0,900" 'scene="plate_layers"'
 shot comb_B           previews.scad "0,0,0,0,0,0,400" 'scene="comb_B"'
-# the made gears: close-up of the mesh (view along the shafts, +y on the viewer's left) and one CNC layer with the finished tooth profile over it
+# the bought m4 z15 gears: close-up of the mesh (view along the shafts, +y on the viewer's left)
 shotfix gears_mesh    previews.scad "0,0,0,90,0,270,130" 'scene="gears_mesh"'
 shot interlock_hopper previews.scad "0,0,0,80,0,115,350" 'scene="interlock_hopper"'
 # blade torque test: fixed camera (the billboarded labels would otherwise shrink the --viewall fit); cam= must match the camera rotation
