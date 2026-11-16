@@ -66,7 +66,7 @@ def compare(groups, names, got, ref, counts=None):
         note = ""
         if v is None or m["volume_mm3"] is None:
             dv, com = float("nan"), float("nan")
-            ok = box <= BOX_TOL and v is not None      # an open native body fails: no reference group is open (the old fallback hid regressions)
+            ok = box <= BOX_TOL and v is not None      # native bodies must be closed; an open REFERENCE (the hopper collar + funnel) only limits the comparison to the bounding box
         else:
             com = math.dist([sum(g["volume_mm3"] * g["center_of_mass"][i] for g in gs) / v for i in range(3)], m["com"])
             if name in OVERLAP:                           # compare the union, as the mesh was; its centre is not checked
