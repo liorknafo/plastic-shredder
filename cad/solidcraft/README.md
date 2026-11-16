@@ -105,20 +105,27 @@ fixed screen, pin-flange drive); the first conversion's were from 27662be. `make
   amount the meshes lose by drawing circles as polygons (under 0.3 %; up to 1.8 % for screws drawn with 16 to 24 sides,
   `FACET_TOL` in `check.py`). The hopper collar's mesh is open, so only its box is compared.
 - **Parts:** each of the 52 made parts against its OpenSCAD STL (volume, box, centre of mass), and with
-  `inspect.compare` surface to surface: 51 are identical within 0.05 mm (largest deviation 0.038 mm, the meshes'
-  facets). The 52nd is the screen (below).
-- **Outlines:** each of the 17 DXF files has the same number of closed loops and the same extent as the OpenSCAD one
-  (the screen drawing: 210 loops; the sprocket drilling template: 27). They hold true arcs and circles instead of
+  `inspect.compare` surface to surface: all 52 are identical within 0.05 mm (largest deviation 0.038 mm, the meshes'
+  facets). The screen is compared with a fresh render instead of its old STL (below).
+- **Outlines:** 16 of the 17 DXF files have the same number of closed loops and the same extent as the OpenSCAD one
+  (the sprocket drilling template: 27 loops). The old screen drawing was broken (its plan overlapped the cross-section
+  and erased 11 holes), so `screen.dxf` is checked on its own (`check_screen_dxf` in `parts.py`): exactly one
+  cross-section loop and one plan outline with the right extents, 216 circles Ø5 (±0.01 mm) whose centres are the
+  hole centres worked out from `design/params.py` in `parts.py` itself (not from `model/base.py`; within 0.001 mm),
+  the 4 screws' Ø4.5 at x = L/3, 2L/3, |y| = 74, and nothing else. The DXFs hold true arcs and circles instead of
   polylines, the outside on layer `OUTLINE`, the holes on `CUT`. Each face of an outline is exported on its own and
   the files are merged: SolidCraft 0.40's DXF export drops islands that lie inside a hole (the template's rings).
 
 Differences that are known:
 
-- `screen`: the surface comparison finds 6 places, 0.145 mm deep, where only the OpenSCAD mesh has material: the 6
-  wall-screw pockets (Ø11, `$fn = 32`) cut the steep end of the R36 top arcs (`$fn = 192`) at a grazing angle near
-  |y| = 65.6, which magnifies the mesh's facets there. Rendered with `$fn = 512` pockets and `$fn = 1536` arcs, the
-  same OpenSCAD part is identical to the native one within 0.05 mm (0.027 mm). `parts.py` accepts it up to 0.2 mm
-  (`KNOWN`). Volume, box and centre of mass match (the native part is 0.23 % smaller: its 216 holes are round).
+- `screen`: against its old STL the surface comparison would find 6 places, 0.145 mm deep: the 6 wall-screw pockets
+  (Ø11, `$fn = 32`) cut the steep end of the R36 top arcs (`$fn = 192`) at a grazing angle near |y| = 65.6, which
+  magnifies the mesh's facets there. So `parts.py --compare` renders the screen of `cad/base.scad` afresh with
+  OpenSCAD (`FINE`: a patched copy in `build/` with `$fn` 1536 on the arcs, 512 on the pockets and 128 on the holes,
+  deleted afterwards) and compares the native screen with that, with no exception: surface within the normal 0.05 mm
+  (0.012 mm), and volume within 0.03 % (-0.008 %; Ø5.05 holes would be -0.26 %, which the surface comparison alone
+  does not see) and centre of mass within 0.05 mm. Against the old STL's numbers (`parts_reference.json`) the native
+  screen is 0.23 % smaller (its 216 holes are round).
 - The cabinet's floor panel overlaps the bottom 18 mm of both side panels and of the back panel (181 505 mm³). The
   mesh was the union of the panels, which hid it; here each panel is a body.
 - OpenSCAD's 0.01 mm "weld" overlaps between pieces of one part are gone (the pieces are flush or one feature).
@@ -148,5 +155,6 @@ next to it, the chamber walls and the hopper collar).
 ## What still uses OpenSCAD
 
 The design checks (`cad/checks.scad`, `make checks`), `make variants`, and the preview pictures `cad/png/*.png` other
-than `solidcraft_*.png` (`cad/build.sh`) have not been converted: they run on the OpenSCAD sources in `cad/`. A change
+than `solidcraft_*.png` (`cad/build.sh`) have not been converted: they run on the OpenSCAD sources in `cad/`.
+`make verify` needs OpenSCAD too: it renders the screen of `cad/base.scad` to compare it with the native one. A change
 to a part therefore goes into its `model/*.py` module and, for those checks to see it, into its `.scad` file.
